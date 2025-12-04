@@ -3,6 +3,8 @@ package software.ulpgc.aoc.day01.a;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public final class Dial {
     private final List<Order> orders;
@@ -15,8 +17,8 @@ public final class Dial {
         return new Dial();
     }
 
-    private int sumAll(List<Order> orders) {
-        return orders.stream().mapToInt(Order::step).sum() + 50;
+    private int sumAll() {
+        return sum(orders.stream());
     }
 
     public Dial add(String... orders) {
@@ -47,7 +49,7 @@ public final class Dial {
     }
 
     public int position() {
-        return normalize(sumAll(orders));
+        return normalize(sumAll());
     }
 
     public Dial execute(String orders) {
@@ -55,15 +57,21 @@ public final class Dial {
     }
 
     public int count() {
-        int pos = 50;
-        int zeros = 0;
-
-        for (Order order : orders) {
-            pos = normalize(pos + order.step());
-            if (pos == 0) zeros++;
-        }
-
-        return zeros;
+        return (int) iterate()
+                .map(this::sumPartial)
+                .filter(s -> s == 0)
+                .count();
     }
 
+    private IntStream iterate() {
+        return IntStream.rangeClosed(1, orders.size()).parallel();
+    }
+
+    private int sumPartial(int size) {
+        return normalize(sum(orders.stream().limit(size)));
+    }
+
+    private static int sum(Stream<Order> orders) {
+        return orders.mapToInt(Order::step).sum() + 50;
+    }
 }

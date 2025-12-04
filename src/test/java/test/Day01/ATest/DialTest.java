@@ -1,4 +1,4 @@
-package test.Day01ATest;
+package test.Day01.ATest;
 
 import org.junit.Test;
 import software.ulpgc.aoc.day01.a.Dial;

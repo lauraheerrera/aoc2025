@@ -1,20 +1,24 @@
 package software.ulpgc.aoc.day01.b;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import software.ulpgc.aoc.day01.io.OrderDeserializer;
+import software.ulpgc.aoc.day01.io.TxtOrderDeserializer;
+import software.ulpgc.aoc.day01.io.TxtOrderLoader;
+import software.ulpgc.aoc.day01.model.Dial;
+import software.ulpgc.aoc.day01.model.Order;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        String input = new BufferedReader(
-                new InputStreamReader(
-                        Objects.requireNonNull(Main.class.getResourceAsStream("/day01/input.txt"))
-                )
-        ).lines().collect(Collectors.joining("\n"));
+        File file = new File("src/main/resources/day01/input.txt");
+        OrderDeserializer deserializer = new TxtOrderDeserializer();
+        TxtOrderLoader loader = new TxtOrderLoader(file, deserializer);
+        List<Order> orders = loader.load();
 
-        Dial dial = Dial.create().execute(input);
+        Dial dial = Dial.create().execute(orders);
 
         System.out.println("Posición final: " + dial.position());
         System.out.println("Veces que pasa por 0: " + dial.countTotalZeros());

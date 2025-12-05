@@ -1,11 +1,10 @@
-package software.ulpgc.aoc.day01.b;
-
-import software.ulpgc.aoc.day01.a.Order;
+package software.ulpgc.aoc.day01.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public final class Dial {
     private final List<Order> orders;
@@ -22,14 +21,12 @@ public final class Dial {
         return orders.stream().mapToInt(Order::step).sum() + 50;
     }
 
-    public Dial add(String... orders) {
-        Arrays.stream(orders).
-                map(this::parse).
-                forEach(this::add);
+    public Dial add(Order... orders) {
+        this.orders.addAll(Arrays.asList(orders));
         return this;
     }
 
-    public void add(Order order) {
+    private void add(Order order) {
         orders.add(order);
     }
 
@@ -53,8 +50,28 @@ public final class Dial {
         return normalize(sumAll(orders));
     }
 
-    public Dial execute(String orders) {
-        return add(orders.split("\n"));
+    public Dial execute(List<Order> orders) {
+        orders.forEach(this::add);
+        return this;
+    }
+
+    public int count() {
+        return (int) iterate()
+                .map(this::sumPartial)
+                .filter(s -> s == 0)
+                .count();
+    }
+
+    private IntStream iterate() {
+        return IntStream.rangeClosed(1, orders.size()).parallel();
+    }
+
+    private int sumPartial(int size) {
+        return normalize(sum(orders.stream().limit(size)));
+    }
+
+    private static int sum(Stream<Order> orders) {
+        return orders.mapToInt(Order::step).sum() + 50;
     }
 
     private int previousPosition(int index) {
@@ -73,7 +90,6 @@ public final class Dial {
                 Math.floorDiv(nextPosition(index) , 100) - Math.floorDiv(previousPosition(index) , 100)
                 : Math.floorDiv(previousPosition(index)  - 1, 100) - Math.floorDiv(nextPosition(index)  - 1, 100);
     }
-
 
     public int countTotalZeros() {
         return IntStream.range(0, orders.size())

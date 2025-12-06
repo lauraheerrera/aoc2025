@@ -1,4 +1,4 @@
-package software.ulpgc.aoc.day02.model;
+package software.ulpgc.aoc.day02.a.model;
 
 public record Id(long id) {
 
@@ -14,8 +14,8 @@ public record Id(long id) {
         return String.valueOf(Math.abs(id)).length();
     }
 
-    public boolean isValid() {
-        return getDigitCount() % 2 != 0 || getLeftHalf() != getRightHalf();
+    public boolean isInvalid() {
+        return getDigitCount() % 2 == 0 && getLeftHalf() == getRightHalf();
     }
 
     public long getLeftHalf() {

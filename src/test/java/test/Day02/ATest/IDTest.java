@@ -2,7 +2,7 @@ package test.Day02.ATest;
 
 import org.junit.Test;
 import software.ulpgc.aoc.day02.model.GiftShop;
-import software.ulpgc.aoc.day02.model.Id;
+import software.ulpgc.aoc.day02.a.model.Id;
 import software.ulpgc.aoc.day02.model.IdRange;
 import software.ulpgc.aoc.day02.io.TxtRangeDeserializer;
 
@@ -29,11 +29,11 @@ public class IDTest {
 
     @Test
     public void should_validate_ids() {
-        assertThat((Id.create(123).isValid())).isTrue();
-        assertThat((Id.create(1234).isValid())).isTrue();
-        assertThat((Id.create(1122).isValid())).isTrue();
-        assertThat((Id.create(1212).isValid())).isFalse();
-        assertThat((Id.create(446446).isValid())).isFalse();
+        assertThat((Id.create(123).isInvalid())).isFalse();
+        assertThat((Id.create(1234).isInvalid())).isFalse();
+        assertThat((Id.create(1122).isInvalid())).isFalse();
+        assertThat((Id.create(1212).isInvalid())).isTrue();
+        assertThat((Id.create(446446).isInvalid())).isTrue();
     }
 
     @Test

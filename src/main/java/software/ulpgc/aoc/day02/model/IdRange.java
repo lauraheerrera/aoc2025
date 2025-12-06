@@ -1,5 +1,7 @@
 package software.ulpgc.aoc.day02.model;
 
+import software.ulpgc.aoc.day02.a.model.Id;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +17,7 @@ public class IdRange {
 
     public long sumInvalidIDs() {
         return ids.stream()
-                .filter(id -> !id.isValid())
+                .filter(Id::isInvalid)
                 .mapToLong(Id::id)
                 .sum();
     }

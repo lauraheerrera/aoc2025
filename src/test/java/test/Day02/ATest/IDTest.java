@@ -1,6 +1,8 @@
 package test.Day02.ATest;
 
 import org.junit.Test;
+import software.ulpgc.aoc.day02.io.RangeDeserializer;
+import software.ulpgc.aoc.day02.io.TxtRangeLoader;
 import software.ulpgc.aoc.day02.model.GiftShop;
 import software.ulpgc.aoc.day02.a.model.Id;
 import software.ulpgc.aoc.day02.model.IdRange;
@@ -15,8 +17,8 @@ public class IDTest {
             11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862
             """;
 
-    TxtRangeDeserializer deserializer = new TxtRangeDeserializer();
-    List<IdRange> ranges = deserializer.deserialize(rangesText);
+    RangeDeserializer<Id> deserializer = new TxtRangeDeserializer<>();
+    List<IdRange<Id>> ranges = deserializer.deserialize(rangesText, Id::create);
 
 
     @Test
@@ -38,7 +40,7 @@ public class IDTest {
 
     @Test
     public void should_count_validate_ids_correctly() {
-        GiftShop giftShop = new GiftShop(ranges);
+        GiftShop<Id> giftShop = new GiftShop<>(ranges);
         assertThat(giftShop.sumAllInvalidIds()).isEqualTo(1227775554);
     }
 }

@@ -2,10 +2,10 @@ package software.ulpgc.aoc.day02.model;
 
 import java.util.List;
 
-public class GiftShop {
-    private final List<IdRange> ranges;
+public class GiftShop<T extends InvalidatableId> {
+    private final List<IdRange<T>> ranges;
 
-    public GiftShop(List<IdRange> ranges) {
+    public GiftShop(List<IdRange<T>> ranges) {
         this.ranges = ranges;
     }
 

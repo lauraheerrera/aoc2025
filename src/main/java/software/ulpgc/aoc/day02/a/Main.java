@@ -14,10 +14,13 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         File file = new File("src/main/resources/day02/input.txt");
-        RangeDeserializer deserializer = new TxtRangeDeserializer();
-        TxtRangeLoader loader = new TxtRangeLoader(file, deserializer);
-        List<IdRange> ranges = loader.load();
-        GiftShop giftShop = new GiftShop(ranges);
+        RangeDeserializer<software.ulpgc.aoc.day02.a.model.Id> deserializer = new TxtRangeDeserializer<>();
+        TxtRangeLoader<software.ulpgc.aoc.day02.a.model.Id> loader =
+                new TxtRangeLoader<>(file, deserializer, software.ulpgc.aoc.day02.a.model.Id::create);
+
+        List<IdRange<software.ulpgc.aoc.day02.a.model.Id>> ranges = loader.load();
+
+        GiftShop<software.ulpgc.aoc.day02.a.model.Id> giftShop = new GiftShop<>(ranges);
         System.out.println("Total ranges: " + ranges.size());
         System.out.println("Suma IDs invalidos: " + giftShop.sumAllInvalidIds());
     }

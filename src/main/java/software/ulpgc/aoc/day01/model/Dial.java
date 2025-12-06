@@ -30,18 +30,6 @@ public final class Dial {
         orders.add(order);
     }
 
-    private Order parse(String order) {
-        return new Order(signOf(order) * valueOf(order));
-    }
-
-    private int signOf(String order) {
-        return order.charAt(0) == 'L' ? -1 : 1;
-    }
-
-    private int valueOf(String order) {
-        return Integer.parseInt(order.substring(1));
-    }
-
     private int normalize(int value) {
         return ((value % 100) + 100) % 100;
     }

@@ -1,4 +1,4 @@
-package software.ulpgc.aoc.day02.a;
+package software.ulpgc.aoc.day02.b;
 
 import software.ulpgc.aoc.day02.io.RangeDeserializer;
 import software.ulpgc.aoc.day02.io.TxtRangeDeserializer;

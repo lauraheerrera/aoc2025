@@ -3,17 +3,13 @@ package software.ulpgc.aoc.day02.io;
 import software.ulpgc.aoc.day02.model.IdRange;
 import software.ulpgc.aoc.day02.model.InvalidatableId;
 
-import java.util.*;
 import java.util.function.LongFunction;
-import java.util.stream.Collectors;
 
 public class TxtRangeDeserializer<T extends InvalidatableId> implements RangeDeserializer<T> {
 
     @Override
-    public List<IdRange<T>> deserialize(String input, LongFunction<T> idFactory) {
-        return Arrays.stream(input.split(","))
-                .map(rangeStr -> toRange(rangeStr, idFactory))
-                .collect(Collectors.toList());
+    public IdRange<T> deserialize(String input, LongFunction<T> idFactory) {
+        return toRange(input.trim(), idFactory);
     }
 
     private IdRange<T> toRange(String range, LongFunction<T> idFactory) {

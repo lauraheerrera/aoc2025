@@ -4,7 +4,7 @@ import software.ulpgc.aoc.day02.model.IdRange;
 import software.ulpgc.aoc.day02.model.InvalidatableId;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.LongFunction;
 
@@ -21,13 +21,14 @@ public class TxtRangeLoader<T extends InvalidatableId> implements RangeLoader<T>
 
     @Override
     public List<IdRange<T>> load() throws IOException {
-        List<IdRange<T>> ranges = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                ranges.addAll(deserializer.deserialize(line, idFactory));
-            }
+            String content = reader.readLine();
+            if (content == null || content.isBlank()) return List.of();
+
+            return Arrays.stream(content.split(","))
+                    .map(String::trim)
+                    .map(range -> deserializer.deserialize(range, idFactory))
+                    .toList();
         }
-        return ranges;
     }
 }

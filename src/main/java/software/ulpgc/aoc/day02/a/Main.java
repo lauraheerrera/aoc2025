@@ -1,13 +1,15 @@
 package software.ulpgc.aoc.day02.a;
 
+import software.ulpgc.aoc.common.io.LoaderFactory;
+import software.ulpgc.aoc.common.io.TxtLoader;
 import software.ulpgc.aoc.day02.io.RangeDeserializer;
 import software.ulpgc.aoc.day02.io.TxtRangeDeserializer;
-import software.ulpgc.aoc.day02.io.TxtRangeLoader;
 import software.ulpgc.aoc.day02.model.GiftShop;
 import software.ulpgc.aoc.day02.model.IdRange;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -15,10 +17,16 @@ public class Main {
 
         File file = new File("src/main/resources/day02/input.txt");
         RangeDeserializer<software.ulpgc.aoc.day02.a.model.Id> deserializer = new TxtRangeDeserializer<>();
-        TxtRangeLoader<software.ulpgc.aoc.day02.a.model.Id> loader =
-                new TxtRangeLoader<>(file, deserializer, software.ulpgc.aoc.day02.a.model.Id::create);
 
-        List<IdRange<software.ulpgc.aoc.day02.a.model.Id>> ranges = loader.load();
+        TxtLoader<String> loader = LoaderFactory.txt(file, line -> line);
+        List<String> lines = loader.load();
+
+        List<IdRange<software.ulpgc.aoc.day02.a.model.Id>> ranges =
+                Arrays.stream(lines.getFirst().split(","))
+                        .map(String::trim)
+                        .map(line -> deserializer.deserialize(line, software.ulpgc.aoc.day02.a.model.Id::create))
+                        .toList();
+
 
         GiftShop<software.ulpgc.aoc.day02.a.model.Id> giftShop = new GiftShop<>(ranges);
         System.out.println("Total ranges: " + ranges.size());

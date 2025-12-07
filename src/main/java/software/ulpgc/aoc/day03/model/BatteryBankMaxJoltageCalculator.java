@@ -6,13 +6,15 @@ import java.util.List;
 
 public class BatteryBankMaxJoltageCalculator {
     private final List<BatteryBank> batteryBankList;
+    private final int length;
 
-    public BatteryBankMaxJoltageCalculator() {
+    public BatteryBankMaxJoltageCalculator(int length) {
+        this.length = length;
         this.batteryBankList = new ArrayList<>();
     }
 
-    public static BatteryBankMaxJoltageCalculator create() {
-        return new BatteryBankMaxJoltageCalculator();
+    public static BatteryBankMaxJoltageCalculator create(int length) {
+        return new BatteryBankMaxJoltageCalculator(length);
     }
 
     public BatteryBankMaxJoltageCalculator addAll(List<BatteryBank> batteryBanks) {
@@ -35,14 +37,14 @@ public class BatteryBankMaxJoltageCalculator {
         batteryBankList.add(batteryBank);
     }
 
-    public int sumAll() {
+    public long sumAll() {
         return batteryBankList.stream()
-                .mapToInt(this::maxJoltage)
+                .mapToLong(this::maxJoltage)
                 .sum();
     }
 
-    private int maxJoltage(BatteryBank b) {
-        return b.maxJoltage();
+    private long maxJoltage(BatteryBank b) {
+        return b.maxJoltageOfLength(length);
     }
 
 }

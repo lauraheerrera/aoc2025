@@ -1,4 +1,4 @@
-package software.ulpgc.aoc.day03.a;
+package software.ulpgc.aoc.day03.b;
 
 import software.ulpgc.aoc.common.io.LoaderFactory;
 import software.ulpgc.aoc.day03.io.BatteryBankDeserializer;
@@ -21,7 +21,7 @@ public class Main {
                 .load();
 
         List<BatteryBank> batteryBanks = loader.load();
-        BatteryBankMaxJoltageCalculator maxJoltageCalculator = BatteryBankMaxJoltageCalculator.create(2).addAll(batteryBanks);
+        BatteryBankMaxJoltageCalculator maxJoltageCalculator = BatteryBankMaxJoltageCalculator.create(12).addAll(batteryBanks);
         System.out.println("El total de voltaje máximo es: " + maxJoltageCalculator.sumAll());
     }
 }

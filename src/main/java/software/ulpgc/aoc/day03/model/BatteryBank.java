@@ -4,31 +4,26 @@ import java.util.stream.IntStream;
 
 public record BatteryBank(String digits) {
 
-    public int maxJoltage() {
-        return generateNumbers(digits)
-                .max()
-                .orElse(-1);
-    }
-
     public static BatteryBank create(String digits) {
         return new BatteryBank(digits);
     }
 
-    private IntStream generateNumbers(String digits) {
-        return IntStream.range(0, digits.length() - 1)
-                .flatMap(i -> numbersFromIndex(digits, i));
+    public long maxJoltageOfLength(int length) {
+        return Long.parseLong(buildMaxNumber(0, length));
     }
 
-    private IntStream numbersFromIndex(String digits, int i) {
-        return IntStream.range(i + 1, digits.length())
-                .map(j -> pairToNumber(digits.charAt(i), digits.charAt(j)));
+    private String buildMaxNumber(int start, int digitsNeeded) {
+        return (digitsNeeded == 0) ? "" :
+                selectDigitAndRecurse(findMaxIndex(start, digits.length() - digitsNeeded), digitsNeeded);
     }
 
-    private int pairToNumber(char first, char second) {
-        return charToInt(first) * 10 + charToInt(second);
+    private String selectDigitAndRecurse(int index, int digitsNeeded) {
+        return digits.charAt(index) + buildMaxNumber(index + 1, digitsNeeded - 1);
     }
 
-    private int charToInt(char character) {
-        return character - '0';
+    private int findMaxIndex(int start, int digitsNeeded) {
+        return IntStream.rangeClosed(start, digitsNeeded)
+                .reduce((i, j) -> digits.charAt(i) >= digits.charAt(j) ? i : j)
+                .orElse(start);
     }
 }

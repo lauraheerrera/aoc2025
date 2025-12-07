@@ -1,16 +1,12 @@
 package test.Day01.BTest;
 
 import org.junit.Test;
-import software.ulpgc.aoc.day01.io.TxtOrderDeserializer;
 import software.ulpgc.aoc.day01.model.Dial;
-import software.ulpgc.aoc.day01.model.Order;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DialTest {
-    private static final String ordersText = """
+    private static final String orders = """
             L68
             L30
             R48
@@ -23,16 +19,6 @@ public class DialTest {
             L82
             """;
 
-    private final TxtOrderDeserializer deserializer = new TxtOrderDeserializer();
-
-    private Order o(String line) {
-        return deserializer.deserialize(line);
-    }
-
-    List<Order> orders = ordersText.lines()
-            .map(deserializer::deserialize)
-            .toList();
-
     @Test
     public void initial_position_should_be_50_using_create() {
         assertThat(Dial.create().position()).isEqualTo(50);
@@ -40,20 +26,18 @@ public class DialTest {
 
     @Test
     public void given_orders_should_account_the_final_position() {
-        assertThat(Dial.create().add(o("L1")).position()).isEqualTo(49);
-        assertThat(Dial.create().add(o("L1"), o("R1"), o("R50")).position()).isEqualTo(0);
-        assertThat(Dial.create().add(o("L68")).position()).isEqualTo(82);
-        assertThat(Dial.create().add(o("R68"), o("L68")).position()).isEqualTo(50);
-        assertThat(Dial.create().add(o("L51"), o("L500")).position()).isEqualTo(99);
-        assertThat(Dial.create().execute(orders).countTotalZeros()).isEqualTo(6);
+        assertThat(Dial.create().add("L1").position()).isEqualTo(49);
+        assertThat(Dial.create().add("L1","R1","R50").position()).isEqualTo(0);
+        assertThat(Dial.create().add("L68").position()).isEqualTo(82);
+        assertThat(Dial.create().add("R68", "L68").position()).isEqualTo(50);
+        assertThat(Dial.create().add("L51","L500").position()).isEqualTo(99);
     }
 
     @Test
     public void given_orders_should_account_the_times_that_position_is_zero() {
         assertThat(Dial.create().execute(orders).count()).isEqualTo(3);
-        assertThat(Dial.create().add(o("R1000")).countTotalZeros()).isEqualTo(10);
-        assertThat(Dial.create().add(o("L68"), o("L30"), o("R48"), o("L5")).countTotalZeros()).isEqualTo(2);
-        assertThat(Dial.create().add(o("L51"), o("L500")).count()).isEqualTo(0);
+        assertThat(Dial.create().add("R1000").countTotalZeros()).isEqualTo(10);
+        assertThat(Dial.create().add("L68", "L30", "R48", "L5").countTotalZeros()).isEqualTo(2);
         assertThat(Dial.create().execute(orders).countTotalZeros()).isEqualTo(6);
     }
 }

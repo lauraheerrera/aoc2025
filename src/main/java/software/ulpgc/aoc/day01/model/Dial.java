@@ -21,13 +21,27 @@ public final class Dial {
         return orders.stream().mapToInt(Order::step).sum() + 50;
     }
 
-    public Dial add(Order... orders) {
-        this.orders.addAll(Arrays.asList(orders));
+    public Dial add(String... orders) {
+        Arrays.stream(orders)
+                .map(this::parse)
+                .forEach(this::add);
         return this;
     }
 
     private void add(Order order) {
         orders.add(order);
+    }
+
+    private Order parse(String order) {
+        return new Order(signOf(order) * valueOf(order));
+    }
+
+    private int signOf(String order) {
+        return order.charAt(0) == 'L' ? -1 : 1;
+    }
+
+    private int valueOf(String order) {
+        return Integer.parseInt(order.substring(1));
     }
 
     private int normalize(int value) {
@@ -41,6 +55,10 @@ public final class Dial {
     public Dial execute(List<Order> orders) {
         orders.forEach(this::add);
         return this;
+    }
+
+    public Dial execute(String orders) {
+        return add(orders.split("\n"));
     }
 
     public int count() {

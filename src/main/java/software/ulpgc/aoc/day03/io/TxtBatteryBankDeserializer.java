@@ -6,6 +6,6 @@ public class TxtBatteryBankDeserializer implements BatteryBankDeserializer {
 
     @Override
     public BatteryBank deserialize(String line) {
-        return new BatteryBank(line.trim());
+        return BatteryBank.create(line.trim());
     }
 }

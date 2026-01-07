@@ -1,12 +1,15 @@
 package software.ulpgc.aoc.day01.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public final class Dial {
+public class Dial {
+    private static final int INITIAL_POSITION = 50;
+    private static final int DIAL_SIZE = 100;
+
     private final List<Order> orders;
 
     private Dial() {
@@ -17,91 +20,56 @@ public final class Dial {
         return new Dial();
     }
 
-    private int sumAll(List<Order> orders) {
-        return orders.stream().mapToInt(Order::step).sum() + 50;
-    }
-
-    public Dial add(String... orders) {
-        Arrays.stream(orders)
-                .map(this::parse)
-                .forEach(this::add);
+    public Dial execute(List<Order> newOrders) {
+        this.orders.addAll(newOrders);
         return this;
-    }
-
-    private void add(Order order) {
-        orders.add(order);
-    }
-
-    private Order parse(String order) {
-        return new Order(signOf(order) * valueOf(order));
-    }
-
-    private int signOf(String order) {
-        return order.charAt(0) == 'L' ? -1 : 1;
-    }
-
-    private int valueOf(String order) {
-        return Integer.parseInt(order.substring(1));
-    }
-
-    private int normalize(int value) {
-        return ((value % 100) + 100) % 100;
     }
 
     public int position() {
-        return normalize(sumAll(orders));
-    }
-
-    public Dial execute(List<Order> orders) {
-        orders.forEach(this::add);
-        return this;
-    }
-
-    public Dial execute(String orders) {
-        return add(orders.split("\n"));
+        return normalize(calculateSum(orders));
     }
 
     public int count() {
-        return (int) iterate()
-                .map(this::sumPartial)
+        return (int) IntStream.rangeClosed(1, orders.size())
+                .parallel()
+                .map(this::calculatePartialSum)
                 .filter(s -> s == 0)
                 .count();
     }
 
-    private IntStream iterate() {
-        return IntStream.rangeClosed(1, orders.size()).parallel();
+    public int countTotalZeros() {
+        return IntStream.range(0, orders.size())
+                .map(this::calculateZerosCrossed)
+                .sum();
     }
 
-    private int sumPartial(int size) {
-        return normalize(sum(orders.stream().limit(size)));
+    private int calculatePartialSum(int size) {
+        return normalize(calculateSum(orders.stream().limit(size)));
     }
 
-    private static int sum(Stream<Order> orders) {
-        return orders.mapToInt(Order::step).sum() + 50;
+    private int calculateSum(Stream<Order> orderStream) {
+        return orderStream.mapToInt(Order::step).sum() + INITIAL_POSITION;
+    }
+
+    private int calculateSum(List<Order> orderList) {
+        return orderList.stream().mapToInt(Order::step).sum() + INITIAL_POSITION;
+    }
+
+    private int normalize(int value) {
+        return ((value % DIAL_SIZE) + DIAL_SIZE) % DIAL_SIZE;
     }
 
     private int previousPosition(int index) {
-        return orders.subList(0, index)
-                .stream()
-                .mapToInt(Order::step)
-                .sum() + 50;
+        return calculateSum(orders.subList(0, index));
     }
 
     private int nextPosition(int index) {
         return previousPosition(index) + orders.get(index).step();
     }
 
-    private int zerosCrossed(int index) {
-        return nextPosition(index) > previousPosition(index) ?
-                Math.floorDiv(nextPosition(index) , 100) - Math.floorDiv(previousPosition(index) , 100)
-                : Math.floorDiv(previousPosition(index)  - 1, 100) - Math.floorDiv(nextPosition(index)  - 1, 100);
+    private int calculateZerosCrossed(int index) {
+        return nextPosition(index) > previousPosition(index)
+                ? Math.floorDiv(nextPosition(index), 100) - Math.floorDiv(previousPosition(index), 100)
+                : Math.floorDiv(previousPosition(index) - 1, 100) - Math.floorDiv(nextPosition(index) - 1, 100);
     }
-
-    public int countTotalZeros() {
-        return IntStream.range(0, orders.size())
-                .map(this::zerosCrossed)
-                .sum();
-    }
-
-
 }

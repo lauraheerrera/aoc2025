@@ -2,7 +2,12 @@ package software.ulpgc.aoc.day03.model;
 
 import java.util.stream.IntStream;
 
-public record BatteryBank(String digits) {
+public class BatteryBank {
+    private final String digits;
+
+    private BatteryBank(String digits) {
+        this.digits = digits;
+    }
 
     public static BatteryBank create(String digits) {
         return new BatteryBank(digits);
@@ -13,8 +18,8 @@ public record BatteryBank(String digits) {
     }
 
     private String buildMaxNumber(int start, int digitsNeeded) {
-        return (digitsNeeded == 0) ? "" :
-                selectDigitAndRecurse(findMaxIndex(start, digits.length() - digitsNeeded), digitsNeeded);
+        return (digitsNeeded == 0) ? ""
+                : selectDigitAndRecurse(findMaxIndex(start, digits.length() - digitsNeeded), digitsNeeded);
     }
 
     private String selectDigitAndRecurse(int index, int digitsNeeded) {

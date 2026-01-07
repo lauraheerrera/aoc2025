@@ -28,12 +28,12 @@ public class BatteryBankMaxJoltageCalculator {
 
     public BatteryBankMaxJoltageCalculator add(String... batteryBanks) {
         Arrays.stream(batteryBanks)
-                .map(BatteryBank::new)
+                .map(BatteryBank::create)
                 .forEach(this::add);
         return this;
     }
 
-    private void add(BatteryBank batteryBank){
+    private void add(BatteryBank batteryBank) {
         batteryBankList.add(batteryBank);
     }
 

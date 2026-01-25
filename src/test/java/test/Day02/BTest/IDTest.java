@@ -2,7 +2,7 @@ package test.Day02.BTest;
 
 import org.junit.Test;
 import software.ulpgc.aoc.day02.b.model.Id;
-import software.ulpgc.aoc.day02.io.RangeDeserializer;
+import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.day02.io.TxtRangeDeserializer;
 import software.ulpgc.aoc.day02.model.GiftShop;
 import software.ulpgc.aoc.day02.model.IdRange;
@@ -14,15 +14,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class IDTest {
     private static final String rangesText = """
-        11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124
-        """;
-    RangeDeserializer<software.ulpgc.aoc.day02.b.model.Id> deserializer = new TxtRangeDeserializer<>();
-    List<IdRange<software.ulpgc.aoc.day02.b.model.Id>> ranges =
-            Arrays.stream(rangesText.split(","))
-                    .map(String::trim)
-                    .map(line -> deserializer.deserialize(line, software.ulpgc.aoc.day02.b.model.Id::create))
-                    .toList();
-
+            11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124
+            """;
+    software.ulpgc.aoc.common.io.Deserializer<IdRange<software.ulpgc.aoc.day02.b.model.Id>> deserializer = new TxtRangeDeserializer<>(
+            software.ulpgc.aoc.day02.b.model.Id::create);
+    List<IdRange<software.ulpgc.aoc.day02.b.model.Id>> ranges = Arrays.stream(rangesText.split(","))
+            .map(String::trim)
+            .map(deserializer::deserialize)
+            .toList();
 
     @Test
     public void should_count_digits_correctly() {

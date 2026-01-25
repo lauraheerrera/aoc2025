@@ -43,7 +43,7 @@ public class DialTest {
     }
 
     private java.util.List<software.ulpgc.aoc.day01.model.Order> toOrders(String... lines) {
-        software.ulpgc.aoc.day01.io.OrderDeserializer deserializer = new software.ulpgc.aoc.day01.io.TxtOrderDeserializer();
+        software.ulpgc.aoc.common.io.Deserializer<software.ulpgc.aoc.day01.model.Order> deserializer = new software.ulpgc.aoc.day01.io.TxtOrderDeserializer();
         return java.util.Arrays.stream(lines)
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())

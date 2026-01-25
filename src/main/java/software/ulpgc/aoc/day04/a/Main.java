@@ -1,7 +1,7 @@
 package software.ulpgc.aoc.day04.a;
 
 import software.ulpgc.aoc.common.io.LoaderFactory;
-import software.ulpgc.aoc.day04.io.DiagramDeserializer;
+import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.day04.io.DiagramLoader;
 import software.ulpgc.aoc.day04.io.TxtDiagramDeserializer;
 import software.ulpgc.aoc.day04.model.Diagram;
@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         File file = new File("src/main/resources/day04/input.txt");
 
-        DiagramDeserializer deserializer = new TxtDiagramDeserializer();
+        Deserializer<DiagramLine> deserializer = new TxtDiagramDeserializer();
         DiagramLoader loader = () -> LoaderFactory
                 .txt(file, deserializer::deserialize)
                 .load();

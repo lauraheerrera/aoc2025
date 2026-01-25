@@ -2,17 +2,29 @@ package software.ulpgc.aoc.day02.io;
 
 import software.ulpgc.aoc.day02.model.IdRange;
 import software.ulpgc.aoc.day02.model.InvalidatableId;
+import software.ulpgc.aoc.common.io.Deserializer;
 
 import java.util.function.LongFunction;
 
-public class TxtRangeDeserializer<T extends InvalidatableId> implements RangeDeserializer<T> {
+public class TxtRangeDeserializer<T extends InvalidatableId>
+        implements Deserializer<IdRange<T>> {
 
-    @Override
-    public IdRange<T> deserialize(String input, LongFunction<T> idFactory) {
-        return toRange(input.trim(), idFactory);
+    private final LongFunction<T> idFactory;
+
+    public TxtRangeDeserializer(LongFunction<T> idFactory) {
+        this.idFactory = idFactory;
     }
 
-    private IdRange<T> toRange(String range, LongFunction<T> idFactory) {
+    public TxtRangeDeserializer() {
+        this.idFactory = null; // Or throw detailed exception if default constructor is used incorrectly
+    }
+
+    @Override
+    public IdRange<T> deserialize(String input) {
+        return toRange(input.trim());
+    }
+
+    private IdRange<T> toRange(String range) {
         String[] parts = range.split("-");
         return new IdRange<>(toLong(parts[0]), toLong(parts[1]), idFactory);
     }

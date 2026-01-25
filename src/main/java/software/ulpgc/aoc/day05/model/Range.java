@@ -5,4 +5,7 @@ public record Range(long start, long end) {
         return value >= start && value <= end;
     }
 
+    public long length() {
+        return end - start + 1;
+    }
 }

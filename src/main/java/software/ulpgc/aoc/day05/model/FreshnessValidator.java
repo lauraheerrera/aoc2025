@@ -24,4 +24,25 @@ public class FreshnessValidator {
                 .count();
     }
 
+    private List<Range> sortedRanges() {
+        return validRanges.stream()
+                .sorted((a, b) -> Long.compare(a.start(), b.start()))
+                .toList();
+    }
+
+    public long countTotalFresh() {
+        long total = 0, end = -1;
+
+        for (Range r : sortedRanges()) {
+            if (r.start() > end + 1) {
+                total += Math.max(0, end + 1 - r.start() + r.length());
+                end = r.end();
+            } else {
+                end = Math.max(end, r.end());
+            }
+        }
+
+        return total;
+    }
+
 }

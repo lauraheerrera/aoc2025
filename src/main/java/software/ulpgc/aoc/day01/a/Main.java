@@ -1,7 +1,7 @@
 package software.ulpgc.aoc.day01.a;
 
 import software.ulpgc.aoc.common.io.LoaderFactory;
-import software.ulpgc.aoc.day01.io.OrderDeserializer;
+import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.day01.io.OrderLoader;
 import software.ulpgc.aoc.day01.io.TxtOrderDeserializer;
 import software.ulpgc.aoc.day01.model.Dial;
@@ -15,7 +15,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         File file = new File("src/main/resources/day01/input.txt");
-        OrderDeserializer deserializer = new TxtOrderDeserializer();
+        Deserializer<Order> deserializer = new TxtOrderDeserializer();
         OrderLoader loader = () -> LoaderFactory
                 .txt(file, deserializer::deserialize)
                 .load();

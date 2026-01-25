@@ -22,6 +22,10 @@ La solución sigue los principios de **Clean Architecture**, modelando el proble
 
 ### Decisiones Técnicas
 
+*   **Código Expresivo (Clean Code)**:
+    *   Se ha sustituido el uso de matrices de enteros (`int[][]`) para las direcciones por un **Enum** `Direction` (`NORTH`, `SOUTH_EAST`, etc.).
+    *   Esto elimina los "números mágicos" y hace que la lógica de vecindad se lea en lenguaje natural, mejorando drásticamente la mantenibilidad.
+
 *   **Separación de Estado y Comportamiento**:
     *   A diferencia de un enfoque orientado a objetos clásico donde la celda podría saber si es accesible, aquí se desacopla el estado (`Diagram`) del análisis (`DiagramAnalyzer`). Esto permite cambiar las reglas de accesibilidad (ej: "menos de 4 vecinos" vs "menos de 2") sin tocar la estructura de datos subyacente.
 

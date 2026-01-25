@@ -1,8 +1,9 @@
 package software.ulpgc.aoc.day01.io;
 
 import software.ulpgc.aoc.day01.model.Order;
+import software.ulpgc.aoc.common.io.Deserializer;
 
-public class TxtOrderDeserializer implements OrderDeserializer {
+public class TxtOrderDeserializer implements Deserializer<Order> {
     @Override
     public Order deserialize(String line) {
         if (line == null || line.isBlank()) {

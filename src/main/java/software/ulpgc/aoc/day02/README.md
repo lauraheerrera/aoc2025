@@ -10,38 +10,41 @@ El objetivo final es sumar todos los IDs inválidos encontrados en los rangos pr
 
 ## Arquitectura y Diseño
 
-La solución profundiza en el uso de **Generics** para maximizar la reutilización del código entre ambas partes del problema, manteniendo una arquitectura limpia y modular.
+La solución utiliza **Generics** para permitir la reutilización total del código de procesamiento de rangos, independientemente de la regla de validación específica.
 
-### Principios SOLID Aplicados
+### Fundamentos de Diseño
+*   **Abstracción**: `InvalidatableId` define el contrato esencial de un identificador, ocultando si la validación es aritmética o por patrones de texto. `GiftShop` opera exclusivamente sobre esta abstracción.
+*   **Modularidad**: La lógica de validación concreta está encapsulada en paquetes separados (`a.model`, `b.model`). Esto permite mantener el núcleo del sistema limpio y agnóstico a las reglas específicas de cada variante del problema.
 
-*   **Open/Closed Principle (OCP)**:
-    *   La infraestructura principal (`GiftShop`, `IdRange`, `TxtRangeDeserializer`) se ha diseñado utilizando genéricos (`<T extends InvalidatableId>`).
-    *   Para implementar la "Parte 2", no fue necesario modificar ni una sola línea de la lógica de rangos o de la tienda. Simplemente se creó una nueva implementación del record `Id` (en el paquete `b`) con la nueva regla de validación. El sistema está cerrado a modificaciones pero abierto a nuevas reglas de validación.
+### Principios de Diseño
+*   **Principio Abierto/Cerrado (OCP)**:
+    *   *Definición*: El software debe permitir añadir nueva funcionalidad sin cambiar código existente.
+    *   *Implementación*: La infraestructura de `GiftShop` e `IdRange` es genérica. Para soportar nuevas reglas de validación (como las de la Parte 2), el diseño permite simplemente crear una nueva clase que implemente `Id`, sin necesidad de modificar la lógica de procesamiento existente.
+*   **Principio de Sustitución de Liskov (LSP)**:
+    *   *Definición*: Subtipos deben ser sustituibles por sus tipos base.
+    *   *Implementación*: Las clases `software.ulpgc.aoc.day02.a.model.Id` y `b.model.Id` son intercambiables bajo la interfaz `InvalidatableId`. EL sistema funciona correctamente inyectando cualquiera de ellas, garantizando una correcta jerarquía de tipos.
+*   **Principio de Responsabilidad Única (SRP)**:
+    *   *Definición*: Una clase debe tener una única responsabilidad.
+    *   *Implementación*: `GiftShop` es responsable de la agregación; `IdRange` de la generación de secuencias; `Id` de la validación unitaria.
 
-*   **Single Responsibility Principle (SRP)**:
-    *   `GiftShop`: Agrega los resultados de múltiples rangos.
-    *   `IdRange`: Genera el flujo de números dentro de un rango y aplica el filtrado.
-    *   `InvalidatableId`: Define *únicamente* el contrato de validación, delegando la regla específica a las implementaciones concretas.
-    *   `TxtRangeDeserializer`: Se encarga exclusivamente del parsing de la entrada de texto.
-
-*   **Liskov Substitution Principle (LSP)**:
-    *   Gracias al diseño genérico, caulquier clase que implemente `InvalidatableId` puede ser utilizada por `GiftShop` y `IdRange` sin alterar el comportamiento correcto del programa.
+### Patrones de Diseño
+*   **Patrón Factory Method**:
+    *   *Implementación*: Se inyecta una referencia a método (`Id::create`) en el deserializador. Esto actúa como una factoría dinámica que permite instanciar el tipo concreto de ID necesario en tiempo de ejecución, manteniendo el deserializador genérico.
+*   **Patrón Iterator**:
+    *   *Implementación*: Se utiliza `LongStream` para la iteración sobre rangos. Esto abstrae la complejidad de manejar bucles sobre conjuntos de datos potencialmente masivos de forma eficiente y "lazy".
 
 ### Decisiones Técnicas
 
-*   **Uso de Generics**:
-    *   Clases como `GiftShop<T>` y `IdRange<T>` permiten que la lógica de iteración y acumulación sea agnóstica al tipo específico de ID. Esto reduce drásticamente la duplicación de código.
-    *   El `Deserializer` acepta una `LongFactory<T>`, permitiendo inyectar dinámicamente el constructor del tipo de ID deseado (`Id::create`).
+*   **Generics**: El uso de `GiftShop<T>` permite una arquitectura fuertemente tipada pero flexible.
+*   **Polimorfismo**: La solución aprovecha el polimorfismo para elegir la estrategia de validación más adecuada para cada caso (Aritmética para eficiencia en Parte 1, Strings para flexibilidad en Parte 2).
 
-*   **Estrategias de Validación (Polimorfismo)**:
-    *   **Parte 1 (Aritmética)**: Para la regla simple (mitad izquierda == mitad derecha), se utilizaron operaciones matemáticas (`/` y `%`) sobre potencias de 10. Esto es generalmente más eficiente que la manipulación de cadenas para operaciones numéricas simples.
-    *   **Parte 2 (Patrones)**: Para la regla compleja (secuencias repetidas N veces), se optó por convertir el número a `String`. Esto facilita la búsqueda de patrones repetitivos mediante iteración y subdivisión de cadenas, lo cual sería muy complejo de implementar puramente con matemáticas.
+## Pruebas Realizadas
 
-*   **Streams Primitivos**:
-    *   Se utiliza `LongStream` en `IdRange`. Esto es crucial para el rendimiento al trabajar con rangos numéricos grandes, evitando el coste del "boxing" (convertir `long` a `Long`) que ocurriría con un `Stream<Long>` estándar.
+Se han implementado tests exhaustivos en `IDTest` para validar tanto la lógica individual de cada ID como la agregación correcta en la tienda:
 
-### Estructura del Código
-
-*   `model`: Contiene la lógica de negocio genérica (`GiftShop`, `IdRange`) y la interfaz base (`InvalidatableId`).
-*   `io`: Manejo de entrada/salida genérico.
-*   `a.model` / `b.model`: Implementaciones concretas de la lógica de validación específica para cada parte del problema.
+*   **Validación de IDs (Unitario)**:
+    *   Tests para confirmar que IDs válidos (`1234`) pasan y que IDs inválidos (`1212`, `446446`) son detectados correctamente según las reglas vigentes.
+    *   Verificación de conteo de dígitos para asegurar robustez en el parsing.
+*   **Cálculo de Totales (Integración)**:
+    *   Validación con el conjunto de datos de ejemplo, asegurando que `GiftShop` suma correctamente todos los IDs inválidos encontrados.
+*   **Deserialización Genérica**: Confirmación de que el deserializador construye correctamente los objetos `IdRange` tipados dinámicamente.

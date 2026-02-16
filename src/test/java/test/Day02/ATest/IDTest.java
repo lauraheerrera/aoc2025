@@ -17,7 +17,7 @@ public class IDTest {
             11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862
             """;
 
-    software.ulpgc.aoc.common.io.Deserializer<IdRange<software.ulpgc.aoc.day02.a.model.Id>> deserializer = new TxtRangeDeserializer<>(
+    Deserializer<IdRange<software.ulpgc.aoc.day02.a.model.Id>> deserializer = new TxtRangeDeserializer<>(
             software.ulpgc.aoc.day02.a.model.Id::create);
     List<IdRange<software.ulpgc.aoc.day02.a.model.Id>> ranges = Arrays.stream(rangesText.split(","))
             .map(String::trim)

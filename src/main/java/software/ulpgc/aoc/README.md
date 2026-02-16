@@ -1,31 +1,24 @@
 # Advent Of Code - Arquitectura General
 
-Este repositorio contiene las soluciones a los retos del Advent Of Code, diseñadas siguiendo estrictos principios de **Ingeniería de Software**: Clean Code, SOLID y Abstracciones Reutilizables.
+Este repositorio contiene las soluciones a los retos del Advent Of Code, diseñadas siguiendo estrictos principios de **Ingeniería de Software**. A continuación se detalla cómo se aplican los conceptos teóricos de la asignatura.
 
-## Arquitectura Modular
+## Fundamentos de Diseño
 
-El proyecto está estructurado para maximizar la cohesión y minimizar el acoplamiento.
+La arquitectura global del proyecto se cimienta en:
 
-### Módulo `common` (Core Compartido)
+*   **Modularidad**: El sistema está claramente dividido en un módulo núcleo (`common`) y módulos específicos para cada problema (`dayXX`). Esto facilita la navegación y el mantenimiento.
+*   **Abstracción**: Se utiliza la interfaz genérica `Deserializer<T>` en el paquete `common` para ocultar la complejidad del parseo de datos. El resto del sistema interactúa con esta abstracción, desconociendo los detalles de implementación (textos, arrays, etc.).
+*   **Bajo Acoplamiento**: Los módulos de alto nivel (los `Main` de cada día) no dependen de implementaciones concretas de lectura de archivos, sino de abstracciones (`Loader`, `Deserializer`). Esto permite cambiar la fuente de datos sin afectar a la lógica de negocio.
+*   **Alta Cohesión**: El paquete `common` contiene exclusivamente clases relacionadas con la infraestructura transversal (IO genérico), mientras que cada paquete `dayXX` contiene solo la lógica de ese dominio específico.
 
-Para evitar la duplicación de código y establecer contratos estándar en toda la aplicación, se ha creado el paquete `software.ulpgc.aoc.common`.
+## Principios de Diseño
 
-*   **Abstracción de Entrada/Salida**:
-    *   `Deserializer<T>`: Interfaz genérica que estandariza cómo se transforman las líneas de texto en objetos de dominio.
-    *   `LoaderFactory` / `TxtLoader`: Implementación genérica del patrón Strategy/Factory para la carga de archivos, permitiendo que `Main` se centre en *qué* cargar y no en *cómo* leer del disco.
+*   **Principio de No Repetir Código (DRY)**:
+    *   Se identificó que la lectura de archivos de texto era idéntica en todos los días. En lugar de copiar y pegar el código del `BufferedReader`, se centralizó esta lógica en la clase `TxtLoader` del paquete `common`.
+*   **Principio de Inversión de Dependencias (DIP)**:
+    *   El código de carga de datos (`TxtLoader`) no depende de una clase concreta como `Order` o `BatteryBank`, sino de un genérico `<T>` y una función de deserialización.
 
-Esto permite que, si en el futuro se decide cambiar la forma de leer archivos (ej. de red, base de datos), solo haya que tocar este módulo común, y todos los días heredarán la mejora automáticamente.
+## Patrones de Diseño
 
-## Estructura por Día
-
-Cada día (`day01`, `day02`, etc.) es un módulo autocontenido que sigue la misma estructura interna:
-
-*   `model`: **Capa de Dominio**. Objetos de Negocio (POJOs/Records) y lógica pura. Inmutables donde sea posible.
-*   `io`: **Capa de Infraestructura**. Implementaciones concretas de los contratos definidos en `common` (ej. `TxtOrderDeserializer` implementa `Deserializer<Order>`).
-*   `a` / `b`: **Capa de Aplicación**. Puntos de entrada (`Main`) que orquestan las dependencias (Inyección de Dependencias manual) y ejecutan la solución específica para la Parte 1 y Parte 2.
-
-## Principios Transversales
-
-1.  **Uniformidad**: Todos los días resuelven problemas distintos usando los mismos patrones de diseño.
-2.  **Testabilidad**: La lógica de negocio está desacoplada de la entrada/salida, lo que facilita los tests unitarios.
-3.  **Extensibilidad**: El uso de Generics y Interfaces permite añadir nuevas funcionalidades (como nuevas reglas de validación en el Día 2) sin modificar el código base.
+*   **Patrón Factory Method**:
+    *   La clase `LoaderFactory` provee métodos estáticos (`txt(...)`) que encapsulan la creación compleja de objetos `TxtLoader`. Esto simplifica la creación de objetos desde el cliente.

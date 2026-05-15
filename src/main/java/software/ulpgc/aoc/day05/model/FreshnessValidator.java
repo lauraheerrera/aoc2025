@@ -13,36 +13,30 @@ public class FreshnessValidator {
         return new FreshnessValidator(validRanges);
     }
 
-    private boolean isFresh(ID id) {
-        return validRanges.stream()
-                .anyMatch(range -> range.contains(id.value()));
-    }
-
     public int countFresh(List<ID> ids) {
         return (int) ids.stream()
-                .filter(this::isFresh)
+                .filter(id -> validRanges.stream()
+                        .anyMatch(r -> r.contains(id.value())))
                 .count();
     }
 
-    private List<Range> sortedRanges() {
-        return validRanges.stream()
-                .sorted((a, b) -> Long.compare(a.start(), b.start()))
-                .toList();
-    }
-
     public long countTotalFresh() {
-        long total = 0, end = -1;
-
-        for (Range r : sortedRanges()) {
-            if (r.start() > end + 1) {
-                total += Math.max(0, end + 1 - r.start() + r.length());
-                end = r.end();
-            } else {
-                end = Math.max(end, r.end());
-            }
-        }
-
-        return total;
+        return mergedRanges().stream()
+                .mapToLong(Range::length)
+                .sum();
     }
 
+    private List<Range> mergedRanges() {
+        return validRanges.stream()
+                .sorted()
+                .collect(java.util.ArrayList::new, this::accumulate, java.util.List::addAll);
+    }
+
+    private void accumulate(List<Range> list, Range range) {
+        if (!list.isEmpty() && list.getLast().mergeableWith(range)) {
+            list.add(list.removeLast().merge(range));
+        } else {
+            list.add(range);
+        }
+    }
 }

@@ -12,17 +12,18 @@ public class Dial {
 
     private final List<Order> orders;
 
-    private Dial() {
-        this.orders = new ArrayList<>();
+    private Dial(List<Order> orders) {
+        this.orders = List.copyOf(orders);
     }
 
     public static Dial create() {
-        return new Dial();
+        return new Dial(List.of());
     }
 
     public Dial execute(List<Order> newOrders) {
-        this.orders.addAll(newOrders);
-        return this;
+        List<Order> combined = new ArrayList<>(this.orders);
+        combined.addAll(newOrders);
+        return new Dial(combined);
     }
 
     public int position() {

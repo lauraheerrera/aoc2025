@@ -1,6 +1,7 @@
 # Day 02 (Parte B)
 
 ```mermaid
+%%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
 classDiagram
     direction TB
     class GiftShop~T~ {

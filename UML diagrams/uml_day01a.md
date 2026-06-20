@@ -1,6 +1,7 @@
 # Day 01 (Parte A)
 
 ```mermaid
+%%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
 classDiagram
     direction TB
     class Dial {

@@ -3,10 +3,7 @@ package test.Day07.BTest;
 import org.junit.Test;
 import software.ulpgc.aoc.day07.io.TxtManifoldDeserializer;
 import software.ulpgc.aoc.day07.model.*;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 

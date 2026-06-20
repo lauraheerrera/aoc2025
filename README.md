@@ -25,7 +25,15 @@ La arquitectura global se cimienta sobre cuatro pilares fundamentales:
 
 ### Principios aplicados
 
-- **SOLID**: Especialmente el principio de responsabilidad única (SRP) y el de inversión de dependencias (DIP).
+- **SOLID**:
+    *   **Principio de Responsabilidad Única (SRP)**: Cada módulo o clase tiene una sola razón para cambiar, separando la lógica del dominio de la infraestructura de entrada/salida.
+    *   **Principio de Inversión de Dependencias (DIP)**: Se depende siempre de abstracciones (interfaces como `Loader` o `Deserializer`), no de concreciones.
+    *   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
+        *   *Definición*: Los objetos de un programa deberían ser reemplazables por instancias de sus subtipos sin alterar el correcto funcionamiento del programa.
+        *   *Implementación*: Cualquier implementación concreta de las interfaces `Deserializer<Order>` o `OrderLoader` puede sustituir a la actual (por ejemplo, deserializadores para otros formatos de archivo) sin alterar el comportamiento esperado por las clases consumidoras como `Main`.
+    *   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
+        *   *Definición*: Los objetos de una subclase deben poder reemplazar a los de su superclase sin alterar el funcionamiento del programa, garantizando consistencia, modularidad e interoperabilidad y la sustitución segura de componentes. 
+        *   *Implementación*: Las interfaces del sistema son altamente específicas y cohesivas. Por ejemplo, `OrderLoader` y `Deserializer` definen un único método preciso (`load()` y `deserialize()` respectivamente), evitando forzar a las clases implementadoras a arrastrar métodos innecesarios.
 - **DRY (Don't Repeat Yourself)**: La lógica de lectura de archivos se ha centralizado en [TxtLoader.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/TxtLoader.java), evitando duplicidad de código en el manejo de `BufferedReader`.
 - **YAGNI (You Aren't Gonna Need It)**: Se han implementado las soluciones de forma sencilla, sin añadir complejidad innecesaria más allá de lo requerido por el problema.
 

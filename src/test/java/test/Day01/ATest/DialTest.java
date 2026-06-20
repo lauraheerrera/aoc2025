@@ -42,6 +42,35 @@ public class DialTest {
         assertThat(Dial.create().execute(toOrders("L51", "L500")).count()).isEqualTo(0);
     }
 
+    @Test
+    public void given_empty_orders_should_remain_at_50_and_count_zero_zeros() {
+        Dial dial = Dial.create().execute(toOrders());
+        assertThat(dial.position()).isEqualTo(50);
+        assertThat(dial.count()).isEqualTo(0);
+    }
+
+    @Test
+    public void given_exact_rotations_should_work_on_boundaries() {
+        // From 50, L50 -> 0. Lands exactly on 0.
+        Dial dialToZero = Dial.create().execute(toOrders("L50"));
+        assertThat(dialToZero.position()).isEqualTo(0);
+        assertThat(dialToZero.count()).isEqualTo(1);
+
+        // From 50, L150 -> 00. Lands exactly on 0 (after wrapping around).
+        Dial dialWrapToZero = Dial.create().execute(toOrders("L150"));
+        assertThat(dialWrapToZero.position()).isEqualTo(0);
+        assertThat(dialWrapToZero.count()).isEqualTo(1); // count() only measures final positions of steps
+    }
+
+    @Test
+    public void given_exact_full_turnaround_should_return_to_50() {
+        Dial dialFullRight = Dial.create().execute(toOrders("R100"));
+        assertThat(dialFullRight.position()).isEqualTo(50);
+
+        Dial dialFullLeft = Dial.create().execute(toOrders("L100"));
+        assertThat(dialFullLeft.position()).isEqualTo(50);
+    }
+
     private java.util.List<software.ulpgc.aoc.day01.model.Order> toOrders(String... lines) {
         software.ulpgc.aoc.common.io.Deserializer<software.ulpgc.aoc.day01.model.Order> deserializer = new software.ulpgc.aoc.day01.io.TxtOrderDeserializer();
         return java.util.Arrays.stream(lines)

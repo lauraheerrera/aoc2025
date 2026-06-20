@@ -13,33 +13,51 @@ El proyecto está estructurado como un proyecto Maven estándar de Java 21, orga
 
 ## Arquitectura y diseño
 
-Este proyecto ha sido diseñado siguiendo estándares de ingeniería de software, priorizando la mantenibilidad, extensibilidad y claridad del código. La estructura se divide en módulos que separan la infraestructura técnica de la lógica de negocio de cada día.
+Este proyecto ha sido diseñado siguiendo estándares de ingeniería de software, priorizando la mantenibilidad, extensibilidad y claridad del código. La estructura se divide en módulos que separan la infraestructura técnica de la lógica de negocio.
 
 ### Fundamentos de diseño
 
-La arquitectura global se cimienta sobre cuatro pilares fundamentales:
+La arquitectura global se cimienta sobre pilares fundamentales:
 - **Modularidad**: El sistema se organiza en un núcleo común ([common](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/common)) y módulos independientes para cada reto (`dayXX`). Esto permite que el crecimiento del proyecto no aumente la complejidad de navegación.
 - **Abstracción**: Se utiliza la interfaz genérica [Deserializer.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java) para ocultar los detalles del parseo de datos. El resto del sistema interactúa con esta abstracción, desacoplándose del formato de entrada (texto, binario, etc.).
 - **Bajo acoplamiento**: Los puntos de entrada (`Main`) no dependen de implementaciones concretas de lectura de archivos, sino de interfaces (como `Loader`), lo que facilita el intercambio de fuentes de datos.
 - **Alta cohesión**: Cada componente tiene una única responsabilidad bien definida: los modelos gestionan la lógica, los deserializadores el parseo y los cargadores el acceso a datos.
+- **Diseño por contrato**: Se formalizan los acuerdos de comportamiento entre los componentes mediante interfaces claras y acotadas (como `Deserializer` y `Loader`), lo que asegura contratos de entrada/salida limpios.
+- **Inmutabilidad del modelo**: Las clases de dominio (records de Java como `Order` e `Id`) se diseñan con inmutabilidad estructural para evitar efectos secundarios y asegurar la predictibilidad del flujo de datos.
 
 ### Principios aplicados
 
 - **SOLID**:
-    *   **Principio de Responsabilidad Única (SRP)**: Cada módulo o clase tiene una sola razón para cambiar, separando la lógica del dominio de la infraestructura de entrada/salida.
-    *   **Principio de Inversión de Dependencias (DIP)**: Se depende siempre de abstracciones (interfaces como `Loader` o `Deserializer`), no de concreciones.
+    *   **Principio de Responsabilidad Única (SRP - Single Responsibility Principle)**:
+        *   *Definición*: Cada clase o módulo debe tener una única razón para cambiar.
+        *   *Implementación*: Se divide claramente la lógica de negocio (los modelos del dominio), la lectura de archivos de entrada (cargadores) y el análisis de cadenas (deserializadores).
+    *   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
+        *   *Definición*: Las entidades de software deben estar abiertas para la extensión, pero cerradas para la modificación.
+        *   *Implementación*: A través del uso de tipos genéricos e interfaces, podemos crear e inyectar nuevas variantes de IDs o lógicas sin alterar la infraestructura de procesamiento genérica del núcleo.
     *   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
         *   *Definición*: Los objetos de un programa deberían ser reemplazables por instancias de sus subtipos sin alterar el correcto funcionamiento del programa.
-        *   *Implementación*: Cualquier implementación concreta de las interfaces `Deserializer<Order>` o `OrderLoader` puede sustituir a la actual (por ejemplo, deserializadores para otros formatos de archivo) sin alterar el comportamiento esperado por las clases consumidoras como `Main`.
+        *   *Implementación*: Cualquier implementación concreta de las interfaces `Deserializer` o `Loader` puede sustituir a la actual sin alterar el comportamiento esperado por las clases consumidoras como `Main`.
     *   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
-        *   *Definición*: Los objetos de una subclase deben poder reemplazar a los de su superclase sin alterar el funcionamiento del programa, garantizando consistencia, modularidad e interoperabilidad y la sustitución segura de componentes. 
-        *   *Implementación*: Las interfaces del sistema son altamente específicas y cohesivas. Por ejemplo, `OrderLoader` y `Deserializer` definen un único método preciso (`load()` y `deserialize()` respectivamente), evitando forzar a las clases implementadoras a arrastrar métodos innecesarios.
+        *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza, reduciendo el acoplamiento y favoreciendo la especialización.
+        *   *Implementación*: Las interfaces del sistema son altamente específicas y cohesivas. Por ejemplo, `Loader` y `Deserializer` definen un único método preciso (`load()` y `deserialize()` respectivamente), evitando forzar a las clases implementadoras a arrastrar métodos innecesarios.
+    *   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
+        *   *Definición*: Depender de abstracciones, no de concreciones.
+        *   *Implementación*: Las clases consumidoras y los cargadores dependen de abstracciones (interfaces como `Loader` o `Deserializer`), reduciendo las dependencias directas entre componentes.
 - **DRY (Don't Repeat Yourself)**: La lógica de lectura de archivos se ha centralizado en [TxtLoader.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/TxtLoader.java), evitando duplicidad de código en el manejo de `BufferedReader`.
 - **YAGNI (You Aren't Gonna Need It)**: Se han implementado las soluciones de forma sencilla, sin añadir complejidad innecesaria más allá de lo requerido por el problema.
 
+### Técnicas de diseño aplicadas
+
+*   **Inyección de dependencias**: La creación y provisión de dependencias se desacopla de su uso, pasándolas dinámicamente a través de constructores (por ejemplo, inyectando la factoría de IDs o cargadores en tiempo de ejecución).
+*   **Genéricos**: La infraestructura de entrada/salida está parametrizada con tipos genéricos para promover la reutilización de código libre de castings manuales.
+*   **Good Naming**: Se priorizan nombres de clases y métodos autoexplicativos que actúan como documentación viva del código.
+
 ### Patrones de diseño
 
-1. **Factory method**: La clase [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java) encapsula la creación compleja de cargadores, simplificando la vida del desarrollador cliente.
+*   **Patrón Factory Method**:
+    *   *Implementación*: La clase [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java) encapsula la creación compleja de cargadores, simplificando la creación de objetos desde el cliente.
+*   **Patrón Iterator**:
+    *   *Implementación*: Uso sistemático de **Java Streams** para recorrer secuencialmente las colecciones de datos abstrayendo los mecanismos de control de bucles.
 
 ---
 

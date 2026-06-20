@@ -21,6 +21,8 @@ La solución está construida siguiendo los fundamentos de la ingeniería del so
 *   **Alta cohesión**: Cada componente tiene una única responsabilidad bien enfocada. `TxtOrderDeserializer` se encarga únicamente de parsear cadenas de texto a `Order`, el record `Order` solo contiene el dato del paso, y `Dial` procesa de forma exclusiva el comportamiento y posicionamiento físico del dial.
 *   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (`Main`) depende de interfaces, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de dominio.
 *   **Código expresivo**: El código es autoexplicativo y legible. El uso de **Records** inmutables y la programación funcional con **Java Streams** permiten que los algoritmos se lean de forma declarativa (evitando variables mutables e instrucciones anidadas), haciendo innecesarios los comentarios aclaratorios.
+*   **Diseño por contrato**: Las interfaces `Deserializer<Order>` y `OrderLoader` formalizan los límites del sistema. El cargador y deserializador garantizan proveer y procesar tipos estructurados de datos bajo contratos de signatura definidos.
+*   **Inmutabilidad del modelo**: El record `Order` es inmutable. Asimismo, la clase `Dial` es inmutable por diseño: cuando se ejecuta una nueva lista de órdenes mediante `execute()`, este método no modifica el estado interno sino que devuelve una nueva instancia combinada de `Dial`, evitando efectos secundarios.
 
 ## Principios SOLID
 
@@ -35,6 +37,14 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 *   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
     *   *Definición*: Depender de abstracciones, no de concreciones.
     *   *Implementación*: La clase `Main` y el flujo principal no dependen directamente de una lectura concreta de archivos, sino de abstracciones como la interfaz `OrderLoader` y `Deserializer<Order>`, facilitando la inyección de dependencias y el desacoplamiento.
+
+## Técnicas de diseño aplicadas
+
+Se han utilizado diversas técnicas de ingeniería de software para asegurar la robustez y limpieza del proyecto:
+
+*   **Inyección de dependencias**: La clase `Main` inyecta las dependencias del cargador y del deserializador para orquestar la ejecución, evitando la creación interna directa de recursos.
+*   **Good Naming**: Nombres de variables y métodos descriptivos como `INITIAL_POSITION`, `calculateZerosCrossed()`, o `countTotalZeros()` aseguran que el código sea autodocumentado.
+
 
 ## Patrones de diseño
 *   **Patrón Factory Method**:

@@ -16,16 +16,22 @@ public class TxtRangeDeserializer<T extends InvalidatableId>
     }
 
     public TxtRangeDeserializer() {
-        this.idFactory = null; // Or throw detailed exception if default constructor is used incorrectly
+        this.idFactory = null;
     }
 
     @Override
     public IdRange<T> deserialize(String input) {
+        if (input == null || input.isBlank()) {
+            throw new IllegalArgumentException("Input cannot be null or empty");
+        }
         return toRange(input.trim());
     }
 
     private IdRange<T> toRange(String range) {
         String[] parts = range.split("-");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid range format: " + range);
+        }
         return new IdRange<>(toLong(parts[0]), toLong(parts[1]), idFactory);
     }
 

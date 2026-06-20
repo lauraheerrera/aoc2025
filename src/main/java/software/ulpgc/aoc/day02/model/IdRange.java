@@ -22,4 +22,12 @@ public class IdRange<T extends InvalidatableId> {
                 .mapToLong(InvalidatableId::id)
                 .sum();
     }
+
+    public long start() {
+        return start;
+    }
+
+    public long end() {
+        return end;
+    }
 }

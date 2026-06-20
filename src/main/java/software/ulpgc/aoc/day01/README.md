@@ -6,23 +6,23 @@ El desafío consiste en simular un dial de seguridad que gira en base a una seri
 1.  **Parte 1**: Calcular cuántas veces el dial termina exactamente en la posición `0` al finalizar una rotación.
 2.  **Parte 2**: Calcular cuántas veces el dial pasa por la posición `0` en cualquier momento del movimiento.
 
-## Arquitectura y diseño
-
-La solución implementa los principios de **Clean Architecture** y **SOLID**, priorizando la legibilidad, mantenibilidad y la separación de responsabilidades.
-
-### Fundamentos de diseño
-*   **Alta cohesión**: La clase `Dial` se centra exclusivamente en la lógica del dominio (estado y matemática del movimiento), delegando cualquier tarea de lectura o parseo. Esto facilita su comprensión y testeo aislado.
-*   **Bajo acoplamiento**: El flujo principal (`Main`) depende de la abstracción `Deserializer`, no de implementaciones concretas. Esto permite intercambiar la fuente o formato de los datos sin afectar al orquestador.
-*   **Código expresivo**: El uso de **Records** (`Order`) define estructuras de datos inmutables de forma concisa. La utilización de **Streams** en los cálculos permite una lectura declarativa del algoritmo.
-
-### Diagramas UML
-
-A continuación se muestran los diagramas de clases UML que modelan la solución:
+## Diagramas UML
 
 | Parte A | Parte B |
 | :---: | :---: |
 | ![Diagrama UML Parte A](../../../../../../../UML%20diagrams/uml_day01a.png) | ![Diagrama UML Parte B](../../../../../../../UML%20diagrams/uml_day01b.png) |
-### Principios SOLID
+
+## Fundamentos de diseño
+
+La solución está construida siguiendo los fundamentos de la ingeniería del software:
+
+*   **Abstracción**: Oculta los detalles del parseo y la carga de datos tras las interfaces `Deserializer<Order>` y `OrderLoader`. Asimismo, la clase `Dial` encapsula la lógica matemática modular y de desbordamientos tras una interfaz pública simple (`position()`, `count()`, `countTotalZeros()`).
+*   **Modularidad**: Estructura el reto en paquetes independientes (`model`, `io`, `a`, `b`). Esto permite que los componentes se desarrollen y prueben por separado (mediante pruebas unitarias aisladas para deserializadores y modelos) y facilita su evolución o reutilización futura.
+*   **Alta cohesión**: Cada componente tiene una única responsabilidad bien enfocada. `TxtOrderDeserializer` se encarga únicamente de parsear cadenas de texto a `Order`, el record `Order` solo contiene el dato del paso, y `Dial` procesa de forma exclusiva el comportamiento y posicionamiento físico del dial.
+*   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (`Main`) depende de interfaces, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de dominio.
+*   **Código expresivo**: El código es autoexplicativo y legible. El uso de **Records** inmutables y la programación funcional con **Java Streams** permiten que los algoritmos se lean de forma declarativa (evitando variables mutables e instrucciones anidadas), haciendo innecesarios los comentarios aclaratorios.
+
+## Principios SOLID
 
 El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 
@@ -36,18 +36,20 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
     *   *Definición*: Depender de abstracciones, no de concreciones.
     *   *Implementación*: La clase `Main` y el flujo principal no dependen directamente de una lectura concreta de archivos, sino de abstracciones como la interfaz `OrderLoader` y `Deserializer<Order>`, facilitando la inyección de dependencias y el desacoplamiento.
 
-### Patrones de diseño
+## Patrones de diseño
 *   **Patrón Factory Method**:
     *   *Implementación*: Se utiliza `Dial.create()` y `LoaderFactory.txt(...)`. Estos métodos estáticos encapsulan la complejidad de la creación de objetos, ofreciendo una API limpia y expresiva en el punto de uso.
 *   **Patrón Iterator**:
     *   *Implementación*: Mediante **Java Streams**, el sistema recorre y procesa las secuencias de órdenes abstrayendo el mecanismo de iteración subyacente.
+
+---
 
 ## Pruebas realizadas
 
 Se han desarrollado tests unitarios automatizados utilizando **JUnit** y **AssertJ** para validar tanto el parseo de datos como la lógica de negocio en diversos escenarios, incluyendo casos límite.
 
 ### Rutas de las pruebas
-*   **Tests de Deserialización (Parte A)**: [`src/test/java/test/Day01/ATest/TxtOrderDeserializerTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day01/ATest/TxtOrderDeserializerTest.java)
+*   **Tests de Deserialización**: [`src/test/java/test/Day01/ATest/TxtOrderDeserializerTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day01/ATest/TxtOrderDeserializerTest.java)
 *   **Tests de Lógica de la Parte A**: [`src/test/java/test/Day01/ATest/DialTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day01/ATest/DialTest.java)
 *   **Tests de Lógica de la Parte B**: [`src/test/java/test/Day01/BTest/DialTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day01/BTest/DialTest.java)
 

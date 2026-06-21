@@ -15,10 +15,6 @@ public class TxtRangeDeserializer<T extends InvalidatableId>
         this.idFactory = idFactory;
     }
 
-    public TxtRangeDeserializer() {
-        this.idFactory = null;
-    }
-
     @Override
     public IdRange<T> deserialize(String input) {
         if (input == null || input.isBlank()) {

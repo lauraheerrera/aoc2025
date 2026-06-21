@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import java.util.List;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Dial {
     private static final int INITIAL_POSITION = 50;
@@ -45,11 +44,7 @@ public class Dial {
     }
 
     private int calculatePartialSum(int size) {
-        return normalize(calculateSum(orders.stream().limit(size)));
-    }
-
-    private int calculateSum(Stream<Order> orderStream) {
-        return orderStream.mapToInt(Order::step).sum() + INITIAL_POSITION;
+        return normalize(calculateSum(orders.subList(0, size)));
     }
 
     private int calculateSum(List<Order> orderList) {

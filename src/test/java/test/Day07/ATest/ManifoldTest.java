@@ -31,6 +31,7 @@ public class ManifoldTest {
     public void solve_example() {
         Manifold manifold = new TxtManifoldDeserializer().deserialize(example);
         assertThat(manifold.countSplits()).isEqualTo(21L);
+        assertThat(manifold.countPaths()).isEqualTo(new java.math.BigInteger("40"));
     }
 
     @Test

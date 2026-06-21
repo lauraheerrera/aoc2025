@@ -1,11 +1,9 @@
 package software.ulpgc.aoc.day04.model;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class DiagramAnalyzer {
-    private static final char TARGET = '@';
     private static final int MAX_ADJACENT = 4;
 
     private enum Direction {
@@ -22,42 +20,45 @@ public class DiagramAnalyzer {
         }
     }
 
-    public int sumAllAccessibleRolls(Diagram diagram) {
-        return findAccessibleCoordinates(diagram).size();
+    public RollsCount sumAllAccessibleRolls(Diagram diagram) {
+        return new RollsCount(findAccessibleCoordinates(diagram).size());
     }
 
     public List<Coordinate> findAccessibleCoordinates(Diagram diagram) {
-        List<Coordinate> accessible = new ArrayList<>();
-        for (int row = 0; row < diagram.rows(); row++) {
-            for (int col = 0; col < diagram.cols(); col++) {
-                if (isAccessible(diagram, row, col)) {
-                    accessible.add(new Coordinate(row, col));
-                }
-            }
-        }
-        return accessible;
+        return diagram.coordinates()
+                .filter(c -> isAccessible(diagram, c))
+                .toList();
     }
 
-    private boolean isAccessible(Diagram diagram, int row, int col) {
-        if (!diagram.isInBounds(row, col))
-            return false;
-        return isTarget(diagram, row, col) &&
-                countAdjacentTargets(diagram, row, col) < MAX_ADJACENT;
+    public RollsCount totalAccessibleRollsClearCycle(Diagram diagram) {
+        return clearCycle(diagram, new RollsCount(0));
     }
 
-    private boolean isTarget(Diagram diagram, int row, int col) {
-        return diagram.get(row, col) == TARGET;
+    private RollsCount clearCycle(Diagram diagram, RollsCount accumulated) {
+        List<Coordinate> toRemove = findAccessibleCoordinates(diagram);
+        return toRemove.isEmpty()
+                ? accumulated
+                : clearCycle(diagram.withClearedCoordinates(toRemove), new RollsCount(accumulated.value() + toRemove.size()));
     }
 
-    private int countAdjacentTargets(Diagram diagram, int row, int col) {
+    private boolean isAccessible(Diagram diagram, Coordinate coordinate) {
+        return diagram.isInBounds(coordinate)
+                && isTarget(diagram, coordinate)
+                && countAdjacentTargets(diagram, coordinate) < MAX_ADJACENT;
+    }
+
+    private boolean isTarget(Diagram diagram, Coordinate coordinate) {
+        return diagram.get(coordinate) == Tile.ROLL;
+    }
+
+    private int countAdjacentTargets(Diagram diagram, Coordinate coordinate) {
         return (int) Arrays.stream(Direction.values())
-                .filter(dir -> isTargetAtOffset(diagram, row, col, dir))
+                .filter(dir -> isTargetAtOffset(diagram, coordinate, dir))
                 .count();
     }
 
-    private boolean isTargetAtOffset(Diagram diagram, int row, int col, Direction dir) {
-        int nr = row + dir.rowOffset;
-        int nc = col + dir.colOffset;
-        return diagram.isInBounds(nr, nc) && isTarget(diagram, nr, nc);
+    private boolean isTargetAtOffset(Diagram diagram, Coordinate coordinate, Direction dir) {
+        Coordinate offsetCoord = coordinate.offset(dir.rowOffset, dir.colOffset);
+        return diagram.isInBounds(offsetCoord) && isTarget(diagram, offsetCoord);
     }
 }

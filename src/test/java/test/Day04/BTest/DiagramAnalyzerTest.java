@@ -4,43 +4,53 @@ import org.junit.Test;
 import software.ulpgc.aoc.day04.model.Coordinate;
 import software.ulpgc.aoc.day04.model.Diagram;
 import software.ulpgc.aoc.day04.model.DiagramAnalyzer;
-import software.ulpgc.aoc.day04.model.DiagramLine;
+import software.ulpgc.aoc.day04.model.Tile;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DiagramAnalyzerTest {
 
+    private Diagram createDiagram(String... lines) {
+        Tile[][] tiles = Arrays.stream(lines)
+                .map(line -> line.chars().mapToObj(c -> Tile.from((char) c)).toArray(Tile[]::new))
+                .toArray(Tile[][]::new);
+        return Diagram.create(tiles);
+    }
+
     @Test
     public void should_clear_coordinates_correctly() {
-        Diagram diagram = Diagram.create(List.of(
-                new DiagramLine("@@"),
-                new DiagramLine("@@")));
+        Diagram diagram = createDiagram(
+                "@@",
+                "@@");
 
         List<Coordinate> toClear = List.of(new Coordinate(0, 0));
         Diagram newDiagram = diagram.withClearedCoordinates(toClear);
 
-        assertThat(newDiagram.get(0, 0)).isEqualTo('x');
-        assertThat(newDiagram.get(0, 1)).isEqualTo('@');
-        assertThat(newDiagram.get(1, 0)).isEqualTo('@');
-        assertThat(newDiagram.get(1, 1)).isEqualTo('@');
-        assertThat(diagram.get(0, 0)).isEqualTo('@');
+        assertThat(newDiagram.get(new Coordinate(0, 0))).isEqualTo(Tile.CLEARED);
+        assertThat(newDiagram.get(new Coordinate(0, 1))).isEqualTo(Tile.ROLL);
+        assertThat(newDiagram.get(new Coordinate(1, 0))).isEqualTo(Tile.ROLL);
+        assertThat(newDiagram.get(new Coordinate(1, 1))).isEqualTo(Tile.ROLL);
+        assertThat(diagram.get(new Coordinate(0, 0))).isEqualTo(Tile.ROLL);
     }
 
     @Test
     public void should_correctly_solve_part_b_example() {
-        Diagram diagram = Diagram.create(List.of(
-                new DiagramLine("..@@.@@@@."),
-                new DiagramLine("@@@.@.@.@@"),
-                new DiagramLine("@@@@@.@.@@"),
-                new DiagramLine("@.@@@@..@."),
-                new DiagramLine("@@.@@@@.@@"),
-                new DiagramLine(".@@@@@@@.@"),
-                new DiagramLine(".@.@.@.@@@"),
-                new DiagramLine("@.@@@.@@@@"),
-                new DiagramLine(".@@@@@@@@."),
-                new DiagramLine("@.@.@@@.@.")));
+        String[] lines = {
+                "..@@.@@@@.",
+                "@@@.@.@.@@",
+                "@@@@@.@.@@",
+                "@.@@@@..@.",
+                "@@.@@@@.@@",
+                ".@@@@@@@.@",
+                ".@.@.@.@@@",
+                "@.@@@.@@@@",
+                ".@@@@@@@@.",
+                "@.@.@@@.@."
+        };
+        Diagram diagram = createDiagram(lines);
 
         DiagramAnalyzer analyzer = new DiagramAnalyzer();
 
@@ -67,5 +77,8 @@ public class DiagramAnalyzerTest {
         }
 
         assertThat(totalRemoved).isEqualTo(43);
+
+        Diagram initialDiagram = createDiagram(lines);
+        assertThat(analyzer.totalAccessibleRollsClearCycle(initialDiagram).value()).isEqualTo(43);
     }
 }

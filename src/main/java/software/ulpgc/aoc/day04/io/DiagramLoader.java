@@ -1,10 +1,10 @@
 package software.ulpgc.aoc.day04.io;
 
-import software.ulpgc.aoc.day04.model.DiagramLine;
+import software.ulpgc.aoc.day04.model.Tile;
 
 import java.io.IOException;
 import java.util.List;
 
 public interface DiagramLoader {
-    List<DiagramLine> load() throws IOException;
+    List<Tile[]> load() throws IOException;
 }

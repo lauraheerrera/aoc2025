@@ -1,50 +1,26 @@
 package software.ulpgc.aoc.day03.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.stream.IntStream;
 
 public class BatteryBankMaxJoltageCalculator {
-    private final List<BatteryBank> batteryBankList;
-    private final int length;
 
-    public BatteryBankMaxJoltageCalculator(int length) {
-        this.length = length;
-        this.batteryBankList = new ArrayList<>();
+    public Joltage calculate(BatteryBank batteryBank, Length length) {
+        String digits = batteryBank.digits();
+        return new Joltage(Long.parseLong(buildMaxNumber(digits, 0, length.value())));
     }
 
-    public static BatteryBankMaxJoltageCalculator create(int length) {
-        return new BatteryBankMaxJoltageCalculator(length);
+    private String buildMaxNumber(String digits, int start, int digitsNeeded) {
+        return (digitsNeeded == 0) ? ""
+                : selectDigitAndRecurse(digits, findMaxIndex(digits, start, digits.length() - digitsNeeded), digitsNeeded);
     }
 
-    public BatteryBankMaxJoltageCalculator addAll(List<BatteryBank> batteryBanks) {
-        batteryBanks.forEach(this::add);
-        return this;
+    private String selectDigitAndRecurse(String digits, int index, int digitsNeeded) {
+        return digits.charAt(index) + buildMaxNumber(digits, index + 1, digitsNeeded - 1);
     }
 
-    public BatteryBankMaxJoltageCalculator addAll(String batteryBanks) {
-        return add(batteryBanks.split("\n"));
+    private int findMaxIndex(String digits, int start, int digitsNeeded) {
+        return IntStream.rangeClosed(start, digitsNeeded)
+                .reduce((i, j) -> digits.charAt(i) >= digits.charAt(j) ? i : j)
+                .orElse(start);
     }
-
-    public BatteryBankMaxJoltageCalculator add(String... batteryBanks) {
-        Arrays.stream(batteryBanks)
-                .map(BatteryBank::create)
-                .forEach(this::add);
-        return this;
-    }
-
-    private void add(BatteryBank batteryBank) {
-        batteryBankList.add(batteryBank);
-    }
-
-    public long sumAll() {
-        return batteryBankList.stream()
-                .mapToLong(this::maxJoltage)
-                .sum();
-    }
-
-    private long maxJoltage(BatteryBank b) {
-        return b.maxJoltageOfLength(length);
-    }
-
 }

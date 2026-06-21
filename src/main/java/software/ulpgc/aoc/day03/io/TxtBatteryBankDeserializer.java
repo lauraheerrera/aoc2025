@@ -7,6 +7,9 @@ public class TxtBatteryBankDeserializer implements Deserializer<BatteryBank> {
 
     @Override
     public BatteryBank deserialize(String line) {
+        if (line == null || line.isBlank()) {
+            throw new IllegalArgumentException("Line cannot be null or empty");
+        }
         return BatteryBank.create(line.trim());
     }
 }

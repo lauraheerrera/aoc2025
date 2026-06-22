@@ -1,4 +1,4 @@
-package test.Day07.ATest;
+package test.Day07.IOTest;
 
 import org.junit.Test;
 import software.ulpgc.aoc.day07.io.TxtManifoldDeserializer;

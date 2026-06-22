@@ -1,5 +1,6 @@
 package software.ulpgc.aoc.day05.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FreshnessValidator {
@@ -16,7 +17,7 @@ public class FreshnessValidator {
     public int countFresh(List<ID> ids) {
         return (int) ids.stream()
                 .filter(id -> validRanges.stream()
-                        .anyMatch(r -> r.contains(id.value())))
+                        .anyMatch(r -> r.contains(id)))
                 .count();
     }
 
@@ -29,14 +30,12 @@ public class FreshnessValidator {
     private List<Range> mergedRanges() {
         return validRanges.stream()
                 .sorted()
-                .collect(java.util.ArrayList::new, this::accumulate, java.util.List::addAll);
+                .collect(ArrayList::new, this::accumulate, List::addAll);
     }
 
     private void accumulate(List<Range> list, Range range) {
-        if (!list.isEmpty() && list.getLast().mergeableWith(range)) {
-            list.add(list.removeLast().merge(range));
-        } else {
-            list.add(range);
-        }
+        list.add((!list.isEmpty() && list.getLast().mergeableWith(range))
+                ? list.removeLast().merge(range)
+                : range);
     }
 }

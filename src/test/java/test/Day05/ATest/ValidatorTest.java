@@ -38,6 +38,41 @@ public class ValidatorTest {
     List<ID> ids = loader.loadIds();
 
     @Test
+    public void should_validate_id_value() {
+        ID id = new ID(100L);
+        assertThat(id.value()).isEqualTo(100L);
+    }
+
+    @Test
+    public void should_validate_range_methods() {
+        Range r1 = new Range(new ID(10), new ID(15));
+        Range r2 = new Range(new ID(16), new ID(20));
+        Range r3 = new Range(new ID(25), new ID(30));
+
+        assertThat(r1.length()).isEqualTo(6);
+        assertThat(r1.contains(new ID(12))).isTrue();
+        assertThat(r1.contains(new ID(9))).isFalse();
+        assertThat(r1.contains(new ID(16))).isFalse();
+
+        assertThat(r1.mergeableWith(r2)).isTrue();
+        assertThat(r1.mergeableWith(r3)).isFalse();
+
+        Range merged = r1.merge(r2);
+        assertThat(merged.start()).isEqualTo(new ID(10));
+        assertThat(merged.end()).isEqualTo(new ID(20));
+
+        assertThat(r1.compareTo(r2)).isLessThan(0);
+        assertThat(r2.compareTo(r1)).isGreaterThan(0);
+    }
+
+    @Test
+    public void should_handle_database_loader_empty_or_missing_sections() {
+        TxtDatabaseLoader emptyLoader = new TxtDatabaseLoader("", rangeDeserializer, idDeserializer);
+        assertThat(emptyLoader.loadRanges()).isEmpty();
+        assertThat(emptyLoader.loadIds()).isEmpty();
+    }
+
+    @Test
     public void count_fresh_ids() {
         assertThat(FreshnessValidator.fromRanges(ranges).countFresh(ids)).isEqualTo(3);
         assertThat(FreshnessValidator.fromRanges(toRanges("1-5", "8-10"))
@@ -58,5 +93,4 @@ public class ValidatorTest {
                 .map(idDeserializer::deserialize)
                 .toList();
     }
-
 }

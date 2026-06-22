@@ -1,26 +1,29 @@
 package software.ulpgc.aoc.day05.model;
 
-public record Range(long start, long end) implements Comparable<Range> {
-    public static final Range Null = new Range(-1, -1);
+public record Range(ID start, ID end) implements Comparable<Range> {
+    public static final Range Null = new Range(new ID(-1), new ID(-1));
 
-    public boolean contains(long value) {
-        return value >= start && value <= end;
+    public boolean contains(ID id) {
+        return id.compareTo(start) >= 0 && id.compareTo(end) <= 0;
     }
 
     public long length() {
-        return end - start + 1;
+        return end.value() - start.value() + 1;
     }
 
     public boolean mergeableWith(Range other) {
-        return this.end >= other.start - 1;
+        return this.end.value() >= other.start.value() - 1;
     }
 
     public Range merge(Range other) {
-        return new Range(Math.min(this.start, other.start), Math.max(this.end, other.end));
+        return new Range(
+                new ID(Math.min(this.start.value(), other.start.value())),
+                new ID(Math.max(this.end.value(), other.end.value()))
+        );
     }
 
     @Override
     public int compareTo(Range other) {
-        return Long.compare(this.start, other.start);
+        return this.start.compareTo(other.start);
     }
 }

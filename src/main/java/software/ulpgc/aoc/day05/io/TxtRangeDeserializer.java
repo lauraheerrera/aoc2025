@@ -1,5 +1,6 @@
 package software.ulpgc.aoc.day05.io;
 
+import software.ulpgc.aoc.day05.model.ID;
 import software.ulpgc.aoc.day05.model.Range;
 
 public class TxtRangeDeserializer implements RangeDeserializer {
@@ -7,7 +8,11 @@ public class TxtRangeDeserializer implements RangeDeserializer {
 
     @Override
     public Range deserialize(String line) {
+        if (line == null || line.isBlank())
+            throw new IllegalArgumentException("Line cannot be null or empty");
         String[] parts = line.split(SEPARATOR);
-        return new Range(Long.parseLong(parts[0]), Long.parseLong(parts[1]));
+        if (parts.length != 2)
+            throw new IllegalArgumentException("Invalid range format: " + line);
+        return new Range(new ID(Long.parseLong(parts[0].trim())), new ID(Long.parseLong(parts[1].trim())));
     }
 }

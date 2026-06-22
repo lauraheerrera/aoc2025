@@ -1,4 +1,4 @@
-package test.Day04.ATest;
+package test.Day04.IOTest;
 
 import org.junit.Test;
 import software.ulpgc.aoc.day04.io.TxtDiagramDeserializer;

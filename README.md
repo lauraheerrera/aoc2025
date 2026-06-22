@@ -33,7 +33,7 @@ La arquitectura global se cimienta sobre pilares fundamentales:
         *   *Implementación*: Se divide claramente la lógica de negocio (los modelos del dominio), la lectura de archivos de entrada (cargadores) y el análisis de cadenas (deserializadores).
     *   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
         *   *Definición*: Las entidades de software deben estar abiertas para la extensión, pero cerradas para la modificación.
-        *   *Implementación*: A través del uso de tipos genéricos e interfaces, podemos crear e inyectar nuevas variantes de IDs o lógicas sin alterar la infraestructura de procesamiento genérica del núcleo.
+        *   *Implementación*: A través del uso de tipos genéricos e interfaces, podemos crear e inyectar nuevas variantes de `Loader` o `Deserializer` sin alterar la infraestructura de procesamiento genérica del núcleo.
     *   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
         *   *Definición*: Los objetos de un programa deberían ser reemplazables por instancias de sus subtipos sin alterar el correcto funcionamiento del programa.
         *   *Implementación*: Cualquier implementación concreta de las interfaces `Deserializer` o `Loader` puede sustituir a la actual sin alterar el comportamiento esperado por las clases consumidoras como `Main`.
@@ -48,7 +48,9 @@ La arquitectura global se cimienta sobre pilares fundamentales:
 
 ### Técnicas de diseño aplicadas
 
-*   **Inyección de dependencias**: La creación y provisión de dependencias se desacopla de su uso, pasándolas dinámicamente a través de constructores (por ejemplo, inyectando la factoría de IDs o cargadores en tiempo de ejecución).
+*   **Inyección de dependencias**: 
+    * *Definición*: Técnica de diseño que consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código.
+    * *Implementación*: La creación y provisión de dependencias se desacopla de su uso, pasándolas dinámicamente a través de constructores (por ejemplo, inyectando la factoría de IDs o cargadores en tiempo de ejecución).
 *   **Genéricos**: La infraestructura de entrada/salida está parametrizada con tipos genéricos para promover la reutilización de código libre de castings manuales.
 *   **Good Naming**: Se priorizan nombres de clases y métodos autoexplicativos que actúan como documentación viva del código.
 
@@ -58,6 +60,29 @@ La arquitectura global se cimienta sobre pilares fundamentales:
     *   *Implementación*: La clase [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java) encapsula la creación compleja de cargadores, simplificando la creación de objetos desde el cliente.
 *   **Patrón Iterator**:
     *   *Implementación*: Uso sistemático de **Java Streams** para recorrer secuencialmente las colecciones de datos abstrayendo los mecanismos de control de bucles.
+
+---
+
+## Arquitectura de Entrada/Salida (I/O)
+
+La entrada/salida de datos en este proyecto se ha unificado y abstraído en el paquete común `common.io`, permitiendo desacoplar por completo la infraestructura técnica de almacenamiento físico de la lógica de negocio de los retos.
+
+### Componentes genéricos (`common.io`)
+*   **[Deserializer.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java)**: Interfaz genérica que define el contrato `T deserialize(String line)` para transformar una línea de texto plano en un objeto estructurado del dominio.
+*   **[TxtLoader.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/TxtLoader.java)**: Implementación genérica que utiliza un `BufferedReader` para leer secuencialmente las líneas de un archivo físico y delegar su deserialización mediante una función (`Function<String, T>`).
+*   **[LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java)**: Factoría que centraliza y simplifica la creación de cargadores de ficheros de texto.
+
+### Implementación específica por reto
+Cada día cuenta con un paquete `io` específico para aislar el parseo correspondiente:
+1.  **Día 1**: Define `OrderLoader` (interfaz) y `TxtOrderDeserializer` que implementa `Deserializer<Order>`, parseando entradas como `L5` o `R10`.
+2.  **Día 2**: Define `RangeLoader` y `TxtRangeDeserializer` que implementa `Deserializer<IdRange>`, procesando rangos de tipo `start-end`.
+3.  **Día 3**: Define `BatteryBankLoader` y `TxtBatteryBankDeserializer` que implementa `Deserializer<BatteryBank>`, deserializando bancos de baterías a partir de secuencias de dígitos.
+4.  **Día 4**: Define `DiagramLoader` y `TxtDiagramDeserializer` que implementa `Deserializer<Tile[]>`, convirtiendo mapas bidimensionales de caracteres (`.`, `@`) a un array estructurado de casillas.
+
+### Pruebas de deserialización
+Todos los deserializadores específicos se validan de forma independiente mediante tests unitarios dedicados:
+*   Se verifica el parseo correcto de cadenas válidas y la correcta inicialización de los tipos del dominio.
+*   Se comprueba la robustez del sistema y el control de errores mediante el lanzamiento de excepciones esperadas (como `IllegalArgumentException` o `NumberFormatException`) ante entradas vacías, nulas, con espacios en blanco o mal formateadas.
 
 ---
 

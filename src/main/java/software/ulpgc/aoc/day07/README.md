@@ -17,11 +17,10 @@ El desafío consiste en simular la división de flujos (splits) y el recuento de
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
 *   **Abstracción**: Toda la lógica matemática y de propagación de caminos está encapsulada en las clases del modelo `Manifold` y `Paths`, ocultando al exterior la forma en la que se calculan las transiciones.
-*   **Modularidad**: Organización limpia en paquetes específicos de lógica de entrada/salida (`io`) y lógica de negocio (`model`), permitiendo testear de forma aislada cada una de las partes.
+*   **Modularidad**: Organización limpia en paquetes específicos de lógica de negocio (`model`), permitiendo testear de forma aislada cada una de las partes.
 *   **Alta cohesión**: Las clases y registros representan conceptos atómicos del problema: `Column` (coordenada horizontal), `Row` (fila con celdas), `Tile` (tipo de celda), `Grid` (matriz de celdas), `Paths` (caminos acumulados) y `Manifold` (orquestador del cálculo).
-*   **Bajo acoplamiento**: La lectura de datos se realiza a través de interfaces (`ManifoldLoader`), haciendo que el flujo principal de ejecución no dependa directamente de la lectura física del archivo.
+*   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (`Main`) depende de interfaces, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de modelo.
 *   **Código expresivo**: Se resuelven las propagaciones por filas mediante acumulaciones declarativas usando el método `reduce` sobre los flujos de filas (`grid.rows().stream().reduce(...)`), lo que evita la necesidad de bucles de control anidados complejos y variables globales mutables.
-*   **Diseño por contrato**: Definición de interfaces limpias y cohesivas para la carga y deserialización de datos.
 *   **Inmutabilidad del modelo**: Las estructuras de datos principales (`Column`, `Row`, `Grid`, `Paths`, `Manifold`) se implementan como **Records** inmutables. Las transiciones de estado por cada fila devuelven nuevas instancias de `Paths` o de los estados intermedios, protegiendo al sistema contra efectos secundarios.
 
 ## Principios SOLID
@@ -34,27 +33,26 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 *   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
     *   *Definición*: Las entidades de software deben estar abiertas para la extensión, pero cerradas para la modificación.
     *   *Implementación*: La rejilla `Grid` y las estructuras espaciales son reutilizables, lo que permitió añadir el cálculo de caminos de la Parte B simplemente extendiendo el modelo con la clase `Paths` y agregando un método a `Manifold` sin modificar la estructura del tablero.
-*   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
-    *   *Definición*: Los subtipos deben poder reemplazar a sus tipos base sin alterar el comportamiento correcto del programa.
-    *   *Implementación*: El flujo de carga es transparente ante cualquier subtipo o implementación de la interfaz `ManifoldLoader`.
-*   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
-    *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
-    *   *Implementación*: `ManifoldLoader` contiene únicamente la firma necesaria para la lectura del manifold.
-*   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
-    *   *Definición*: Depender de abstracciones, no de concreciones.
-    *   *Implementación*: `TxtManifoldLoader` depende de la interfaz `Deserializer<Manifold>` para procesar la entrada de datos.
 
 ## Técnicas de diseño aplicadas
 
-*   **Inyección de dependencias**: La factoría y cargador reciben el deserializador por constructor.
-*   **Genéricos**: Uso de la interfaz común `Deserializer<T>` parametrizada para la entidad `Manifold`.
+Se han utilizado diversas técnicas de ingeniería de software para asegurar la robustez y limpieza del proyecto:
+
+*   **Programación funcional (con Java Streams)**:
+    *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
+    *   *Implementación*: Empleado en `Manifold` para realizar búsquedas, reducciones (`reduce`) y acumulaciones sobre los flujos de forma declarativa e inmutable.
 *   **Good Naming**: Nombres de variables y métodos autodescriptivos como `countSplits()`, `countPaths()`, `isSplitterAt()`, `findStartColumn()`.
 
 ## Patrones de diseño
 *   **Patrón Factory Method**:
-    *   *Implementación*: Uso de métodos de creación estáticos como `Grid.from()` y `Row.from()`.
+    *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
+    *   *Implementación*: Uso de métodos de creación estáticos como `Grid.from()`, `Row.from()` y `Paths.initial()`.
 *   **Patrón Iterator**:
-    *   *Implementación*: Uso de Java Streams (`rows().stream()`, `IntStream.range()`) para recorrer y mapear la matriz espacial.
+    *   *Definición*: Patrón de comportamiento. Proporciona un acceso secuencial a los elementos de una colección sin exponer su estructura interna. Separa la lógica de iteración de la estructura de datos, promoviendo la modularidad y facilitando la reutilización de código.
+    *   *Implementación*: Uso de Java Streams (`rows().stream()`, `IntStream.range()`) para recorrer y mapear la matriz espacial de forma secuencial y abstracta.
+*   **Patrón funcional Closure**:
+    *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
+    *   *Implementación*: Expresiones lambda en la propagación de flujos que capturan variables locales y parámetros del método para realizar los cálculos dinámicos por fila.
 
 ---
 
@@ -63,9 +61,9 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 Se han diseñado pruebas detalladas utilizando **JUnit** y **AssertJ** para validar el comportamiento del motor de cálculo de flujos sobre la rejilla.
 
 ### Rutas de las pruebas
-*   **Tests de Deserialización**: [`src/test/java/test/Day07/ATest/TxtManifoldDeserializerTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/ATest/TxtManifoldDeserializerTest.java)
-*   **Tests de la Parte A**: [`src/test/java/test/Day07/ATest/ManifoldTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/ATest/ManifoldTest.java)
-*   **Tests de la Parte B**: [`src/test/java/test/Day07/BTest/ManifoldTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/BTest/ManifoldTest.java)
+*   **Tests de Deserialización**: [`src/test/java/test/Day07/IOTest/TxtManifoldDeserializerTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/IOTest/TxtManifoldDeserializerTest.java)
+*   **Tests de la Parte A**: [`src/test/java/test/Day07/ATest/ManifoldTest.java`](file:///c:/Users/laura/OneDrive/Desktop/AOC-2025/src/test/java/test/Day07/ATest/ManifoldTest.java)
+*   **Tests de la Parte B**: [`src/test/java/test/Day07/BTest/ManifoldTest.java`](file:///c:/Users/laura/OneDrive/Desktop/AOC-2025/src/test/java/test/Day07/BTest/ManifoldTest.java)
 
 ### Escenarios validados
 

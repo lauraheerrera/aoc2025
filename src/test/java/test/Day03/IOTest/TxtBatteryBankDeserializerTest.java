@@ -1,4 +1,4 @@
-package test.Day03.ATest;
+package test.Day03.IOTest;
 
 import org.junit.Test;
 import software.ulpgc.aoc.day03.io.TxtBatteryBankDeserializer;

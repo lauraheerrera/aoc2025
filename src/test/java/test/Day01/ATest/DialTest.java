@@ -51,15 +51,13 @@ public class DialTest {
 
     @Test
     public void given_exact_rotations_should_work_on_boundaries() {
-        // From 50, L50 -> 0. Lands exactly on 0.
         Dial dialToZero = Dial.create().execute(toOrders("L50"));
         assertThat(dialToZero.position()).isEqualTo(0);
         assertThat(dialToZero.count()).isEqualTo(1);
 
-        // From 50, L150 -> 00. Lands exactly on 0 (after wrapping around).
         Dial dialWrapToZero = Dial.create().execute(toOrders("L150"));
         assertThat(dialWrapToZero.position()).isEqualTo(0);
-        assertThat(dialWrapToZero.count()).isEqualTo(1); // count() only measures final positions of steps
+        assertThat(dialWrapToZero.count()).isEqualTo(1);
     }
 
     @Test

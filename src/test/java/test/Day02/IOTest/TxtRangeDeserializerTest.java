@@ -1,4 +1,4 @@
-package test.Day02.ATest;
+package test.Day02.IOTest;
 
 import org.junit.Test;
 import software.ulpgc.aoc.day02.io.TxtRangeDeserializer;

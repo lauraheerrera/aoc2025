@@ -16,12 +16,11 @@ El desafío consiste en simular un dial de seguridad que gira en base a una seri
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
-*   **Abstracción**: Oculta los detalles del parseo y la carga de datos tras las interfaces `Deserializer<Order>` y `OrderLoader`. Asimismo, la clase `Dial` encapsula la lógica matemática modular y de desbordamientos tras una interfaz pública simple (`position()`, `count()`, `countTotalZeros()`).
-*   **Modularidad**: Estructura el reto en paquetes independientes (`model`, `io`, `a`, `b`). Esto permite que los componentes se desarrollen y prueben por separado (mediante pruebas unitarias aisladas para deserializadores y modelos) y facilita su evolución o reutilización futura.
-*   **Alta cohesión**: Cada componente tiene una única responsabilidad bien enfocada. `TxtOrderDeserializer` se encarga únicamente de parsear cadenas de texto a `Order`, el record `Order` solo contiene el dato del paso, y `Dial` procesa de forma exclusiva el comportamiento y posicionamiento físico del dial.
-*   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (`Main`) depende de interfaces, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de dominio.
+*   **Abstracción**: La clase `Dial` encapsula la lógica matemática modular y de desbordamientos tras una interfaz pública simple (`position()`, `count()`, `countTotalZeros()`).
+*   **Modularidad**: Estructura el reto en paquetes independientes (`model`, `io`, `a`, `b`). Esto permite que los componentes se desarrollen y prueben por separado y facilita su evolución o reutilización futura.
+*   **Alta cohesión**: Cada componente tiene una única responsabilidad bien enfocada. El record `Order` solo contiene el dato del paso, y `Dial` procesa de forma exclusiva el comportamiento y posicionamiento físico del dial.
+*   **Bajo acoplamiento**: Las dependencias entre módulos se basan en abstracciones. El flujo principal (`Main`) depende de interfaces, lo que le permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de modelo.
 *   **Código expresivo**: El código es autoexplicativo y legible. El uso de **Records** inmutables y la programación funcional con **Java Streams** permiten que los algoritmos se lean de forma declarativa (evitando variables mutables e instrucciones anidadas), haciendo innecesarios los comentarios aclaratorios.
-*   **Diseño por contrato**: Las interfaces `Deserializer<Order>` y `OrderLoader` formalizan los límites del sistema. El cargador y deserializador garantizan proveer y procesar tipos estructurados de datos bajo contratos de signatura definidos.
 *   **Inmutabilidad del modelo**: El record `Order` es inmutable. Asimismo, la clase `Dial` es inmutable por diseño: cuando se ejecuta una nueva lista de órdenes mediante `execute()`, este método no modifica el estado interno sino que devuelve una nueva instancia combinada de `Dial`, evitando efectos secundarios.
 
 ## Principios SOLID
@@ -30,46 +29,46 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 
 *   **Principio de Responsabilidad Única (SRP - Single Responsibility Principle)**:
     *   *Definición*: Cada clase debe tener una única razón para cambiar.
-    *   *Implementación*: La lógica de cálculo de posición y estado reside exclusivamente en `Dial`, mientras que la interpretación y carga del archivo de entrada se delega en `TxtOrderDeserializer` y `OrderLoader`. Cada componente tiene una única responsabilidad bien delimitada.
+    *   *Implementación*: La lógica de cálculo de posición y estado reside exclusivamente en `Dial`.
 *   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
     *   *Definición*: Las entidades de software deben estar abiertas para la extensión, pero cerradas para la modificación.
     *   *Implementación*: `Dial` opera sobre una lista abstracta de `Order`. Podemos extender el comportamiento agregando nuevos tipos de órdenes o lógicas de negocio sin necesidad de alterar la implementación principal de `Dial.execute`.
-*   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
-    *   *Definición*: Depender de abstracciones, no de concreciones.
-    *   *Implementación*: La clase `Main` y el flujo principal no dependen directamente de una lectura concreta de archivos, sino de abstracciones como la interfaz `OrderLoader` y `Deserializer<Order>`, facilitando la inyección de dependencias y el desacoplamiento.
 
 ## Técnicas de diseño aplicadas
 
 Se han utilizado diversas técnicas de ingeniería de software para asegurar la robustez y limpieza del proyecto:
 
-*   **Inyección de dependencias**: La clase `Main` inyecta las dependencias del cargador y del deserializador para orquestar la ejecución, evitando la creación interna directa de recursos.
+*   **Programación funcional (con Java Streams)**:
+    *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
+    *   *Implementación*: Empleado en `Dial` para procesar la lista de órdenes y realizar sumas y conteos de forma declarativa utilizando la API de Streams y expresiones lambda.
+*   **Fluent API**:
+    *   *Definición*: Patrón que devuelve la propia instancia del objeto en cada método, permitiendo encadenar llamadas de forma legible. Mejora la expresividad del código.
+    *   *Implementación*: Empleado en la clase `Dial`, cuyos métodos `create()` y `execute(...)` permiten encadenar operaciones de forma fluida (`Dial.create().execute(...).execute(...)`), favoreciendo un estilo de programación más legible e inmutable.
 *   **Good Naming**: Nombres de variables y métodos descriptivos como `INITIAL_POSITION`, `calculateZerosCrossed()`, o `countTotalZeros()` aseguran que el código sea autodocumentado.
-
 
 ## Patrones de diseño
 *   **Patrón Factory Method**:
-    *   *Implementación*: Se utiliza `Dial.create()` y `LoaderFactory.txt(...)`. Estos métodos estáticos encapsulan la complejidad de la creación de objetos, ofreciendo una API limpia y expresiva en el punto de uso.
+    *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
+    *   *Implementación*: Se utiliza `Dial.create()`. Este método estático encapsula la complejidad de la creación de la instancia de `Dial`, ofreciendo una API limpia y expresiva en el punto de uso.
 *   **Patrón Iterator**:
+    *   *Definición*: Patrón de comportamiento. Proporciona un acceso secuencial a los elementos de una colección sin exponer su estructura interna. Separa la lógica de iteración de la estructura de datos, promoviendo la modularidad y facilitando la reutilización de código.
     *   *Implementación*: Mediante **Java Streams**, el sistema recorre y procesa las secuencias de órdenes abstrayendo el mecanismo de iteración subyacente.
+*   **Patrón funcional Closure**:
+    *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
+    *   *Implementación*: Uso de expresiones lambda dentro del flujo de `IntStream` y de Java Streams para capturar el contexto de ejecución de forma inmutable y legible.
 
 ---
 
 ## Pruebas realizadas
 
-Se han desarrollado tests unitarios automatizados utilizando **JUnit** y **AssertJ** para validar tanto el parseo de datos como la lógica de negocio en diversos escenarios, incluyendo casos límite.
+Se han desarrollado tests unitarios automatizados utilizando **JUnit** y **AssertJ** para validar la lógica de negocio en diversos escenarios, incluyendo casos límite.
 
 ### Rutas de las pruebas
-*   **Tests de Deserialización**: [`src/test/java/test/Day01/ATest/TxtOrderDeserializerTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day01/ATest/TxtOrderDeserializerTest.java)
+*   **Tests de Deserialización**: [`src/test/java/test/Day01/IOTest/TxtOrderDeserializerTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day01/IOTest/TxtOrderDeserializerTest.java)
 *   **Tests de Lógica de la Parte A**: [`src/test/java/test/Day01/ATest/DialTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day01/ATest/DialTest.java)
 *   **Tests de Lógica de la Parte B**: [`src/test/java/test/Day01/BTest/DialTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day01/BTest/DialTest.java)
 
 ### Escenarios validados
-
-#### Deserialización (`TxtOrderDeserializerTest`)
-*   **Parseo correcto**: Validación de giros a la izquierda (`"L5"` -> `-5`) y a la derecha (`"R10"` -> `10`), incluyendo números de varios dígitos.
-*   **Gestión de errores y robustez**: 
-    *   Lanzamiento de `IllegalArgumentException` ante entradas nulas, vacías o con espacios en blanco.
-    *   Lanzamiento de `NumberFormatException` cuando el formato numérico del paso es inválido (ej. `"L"`, `"Rabc"`).
 
 #### Parte A (`ATest/DialTest`)
 *   **Posición inicial**: Comprobación de que el dial se inicializa correctamente en la posición 50 (`initial_position_should_be_50_using_create`).
@@ -84,3 +83,4 @@ Se han desarrollado tests unitarios automatizados utilizando **JUnit** y **Asser
 Además de los casos de inicialización, posición final y casos vacíos o cíclicos (similares a la Parte A):
 *   **Total de pasos por cero durante el movimiento**: Validación precisa de cuántas veces el dial pasa por el 0 **en cualquier momento del trayecto del giro** (por ejemplo, giros continuos de más de una vuelta como `"R1000"` que cruza por cero 10 veces).
 *   **Cruces en giros exactos que terminan en cero**: Validación de que giros que finalizan exactamente en `0` (como `L50` o `L150`) registran correctamente todos los pasos intermedios y finales por el cero.
+

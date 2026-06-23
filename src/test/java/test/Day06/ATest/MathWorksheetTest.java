@@ -3,8 +3,10 @@ package test.Day06.ATest;
 import org.junit.Test;
 import software.ulpgc.aoc.day06.io.TxtMathProblemDeserializer;
 import software.ulpgc.aoc.day06.io.TxtMathWorksheetLoader;
+import software.ulpgc.aoc.day06.model.Operator;
 import software.ulpgc.aoc.day06.model.Problem;
-import software.ulpgc.aoc.common.io.Deserializer;
+import software.ulpgc.aoc.day06.model.Worksheet;
+
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,8 +19,9 @@ public class MathWorksheetTest {
             *   +   *   +
             """;
 
-    Deserializer<Problem> deserializer = new TxtMathProblemDeserializer();
-    TxtMathWorksheetLoader loader = new TxtMathWorksheetLoader(input, deserializer);
+    TxtMathWorksheetLoader loader = new TxtMathWorksheetLoader(
+            input,
+            new TxtMathProblemDeserializer(Worksheet.View.ROWS));
 
     List<Problem> problems = loader.load();
 
@@ -54,8 +57,15 @@ public class MathWorksheetTest {
         assertThat(toProblems(customInput).get(0).solve()).isEqualTo(200L);
     }
 
-    private List<Problem> toProblems(String input) {
-        return new TxtMathWorksheetLoader(input, deserializer).load();
+    @Test
+    public void solve_empty_problem_should_return_zero() {
+        Problem empty = new Problem(List.of(), Operator.ADD);
+        assertThat(empty.solve()).isEqualTo(0L);
     }
 
+    private List<Problem> toProblems(String input) {
+        return new TxtMathWorksheetLoader(
+                input,
+                new TxtMathProblemDeserializer(Worksheet.View.ROWS)).load();
+    }
 }

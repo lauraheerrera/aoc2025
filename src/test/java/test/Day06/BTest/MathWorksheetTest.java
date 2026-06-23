@@ -4,7 +4,8 @@ import org.junit.Test;
 import software.ulpgc.aoc.day06.io.TxtMathProblemDeserializer;
 import software.ulpgc.aoc.day06.io.TxtMathWorksheetLoader;
 import software.ulpgc.aoc.day06.model.Problem;
-import software.ulpgc.aoc.common.io.Deserializer;
+import software.ulpgc.aoc.day06.model.Worksheet;
+
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,8 +18,9 @@ public class MathWorksheetTest {
             *   +   *   +
             """;
 
-    Deserializer<Problem> deserializer = new TxtMathProblemDeserializer(TxtMathProblemDeserializer.View.ColumnsR2L);
-    TxtMathWorksheetLoader loader = new TxtMathWorksheetLoader(input, deserializer);
+    TxtMathWorksheetLoader loader = new TxtMathWorksheetLoader(
+            input,
+            new TxtMathProblemDeserializer(Worksheet.View.COLUMNS_R2L));
 
     List<Problem> problems = loader.load();
 
@@ -55,7 +57,8 @@ public class MathWorksheetTest {
     }
 
     private List<Problem> toProblems(String input) {
-        return new TxtMathWorksheetLoader(input, deserializer).load();
+        return new TxtMathWorksheetLoader(
+                input,
+                new TxtMathProblemDeserializer(Worksheet.View.COLUMNS_R2L)).load();
     }
-
 }

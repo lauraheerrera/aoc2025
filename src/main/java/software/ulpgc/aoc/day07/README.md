@@ -29,10 +29,28 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 
 *   **Principio de Responsabilidad Única (SRP - Single Responsibility Principle)**:
     *   *Definición*: Cada clase debe tener una única razón para cambiar.
-    *   *Implementación*: `Column` se encarga de la navegación horizontal, `Row` contiene los elementos de una fila y sabe si hay un divisor, `Paths` calcula la propagación matemática de los caminos, y `Manifold` realiza el cálculo del problema.
+    *   *Implementación*:
+        *   [Column.java:L3-L11](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Column.java#L3-L11): Modela de forma atómica el índice horizontal de la cuadrícula y sus movimientos laterales.
+        *   [Row.java:L6-L35](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Row.java#L6-L35): Almacena las baldosas de una única fila y responde a consultas espaciales locales.
+        *   [Paths.java:L7-L30](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Paths.java#L7-L30): Se encarga exclusivamente del cálculo matemático y transiciones de los caminos por fila.
+        *   [Manifold.java:L9-L64](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Manifold.java#L9-L64): Orquesta y ejecuta de forma única la simulación general sobre la rejilla.
 *   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
     *   *Definición*: Las entidades de software deben estar abiertas para la extensión, pero cerradas para la modificación.
-    *   *Implementación*: La rejilla `Grid` y las estructuras espaciales son reutilizables, lo que permitió añadir el cálculo de caminos de la Parte B simplemente extendiendo el modelo con la clase `Paths` y agregando un método a `Manifold` sin modificar la estructura del tablero.
+    *   *Implementación*:
+        *   [Grid.java:L5-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Grid.java#L5-L15): Su estructura bidimensional de cuadrícula permaneció completamente cerrada a la modificación, permitiendo añadir el cálculo dinámico de la Parte B mediante la creación de la clase `Paths` y agregando el método en `Manifold` sin modificar su lógica original.
+*   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
+    *   *Definición*: Las subclases o implementaciones deben ser sustituibles por sus tipos base sin alterar el comportamiento correcto del programa.
+    *   *Implementación*:
+        *   [TxtManifoldLoader.java:L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/io/TxtManifoldLoader.java#L10) y [TxtManifoldDeserializer.java:L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/io/TxtManifoldDeserializer.java#L5): Implementan de forma limpia `ManifoldLoader` y `Deserializer<Manifold>`, respectivamente, pudiendo sustituir a sus tipos abstractos de manera transparente.
+*   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
+    *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
+    *   *Implementación*:
+        *   [ManifoldLoader.java:L4-L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/io/ManifoldLoader.java#L4-L6): Define únicamente el método cohesivo `load()`, impidiendo que cargadores tengan contratos hinchados de bajo nivel.
+*   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
+    *   *Definición*: Depender de abstracciones, no de concreciones.
+    *   *Implementación*:
+        *   [TxtManifoldLoader.java:L10-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/io/TxtManifoldLoader.java#L10-L17): El cargador depende del contrato genérico `Deserializer<Manifold>` para parsear la rejilla de texto, desacoplándolo del motor de parseo específico.
+
 
 ## Técnicas de diseño aplicadas
 

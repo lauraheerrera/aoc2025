@@ -29,10 +29,27 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 
 *   **Principio de Responsabilidad Única (SRP - Single Responsibility Principle)**:
     *   *Definición*: Cada clase debe tener una única razón para cambiar.
-    *   *Implementación*: `BatteryBank` representa únicamente los datos de un banco individual (dígitos), `BatteryBankMaxJoltageCalculator` encapsula en exclusiva el algoritmo Greedy de maximización para un solo banco, y `TotalBatteryJoltageCalculator` realiza la agregación y cálculo del voltaje total de todos los bancos.
+    *   *Implementación*:
+        *   [BatteryBank.java:L5-L16](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/BatteryBank.java#L5-L16): Representa exclusivamente el modelo de datos de una batería individual.
+        *   [BatteryBankMaxJoltageCalculator.java:L8-L26](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/BatteryBankMaxJoltageCalculator.java#L8-L26): Encapsula en exclusiva la lógica del algoritmo Greedy para calcular el voltaje máximo de un banco individual.
+        *   [TotalBatteryJoltageCalculator.java:L10-L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java#L10-L19): Responsable único de realizar la agregación de voltajes máximos de una lista de bancos.
 *   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
     *   *Definición*: Las entidades de software deben estar abiertas para la extensión, pero cerradas para la modificación.
-    *   *Implementación*: La clase `TotalBatteryJoltageCalculator` está parametrizada mediante el constructor para la longitud de selección deseada (`length`). Esto permite dar soporte a la Parte 1 (longitud 2) y a la Parte 2 (longitud 12) sin modificar el código de la clase.
+    *   *Implementación*:
+        *   [TotalBatteryJoltageCalculator.java:L10-L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java#L10-L19): Está parametrizada mediante su constructor usando la abstracción de valor `Length`, permitiendo realizar la Parte A (longitud 2) y Parte B (longitud 12) sin modificar su código interno.
+*   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
+    *   *Definición*: Las subclases o implementaciones deben ser sustituibles por sus tipos base sin alterar el comportamiento correcto del programa.
+    *   *Implementación*:
+        *   [TxtBatteryBankDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/io/TxtBatteryBankDeserializer.java#L6): Implementa la interfaz genérica `Deserializer<BatteryBank>`, pudiendo ser utilizada indistintamente por cualquier cargador de ficheros de texto.
+*   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
+    *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
+    *   *Implementación*:
+        *   [BatteryBankLoader.java:L8-L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/io/BatteryBankLoader.java#L8-L10): Expone únicamente el método `load()`, previniendo que los cargadores tengan dependencias con métodos no cohesivos.
+*   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
+    *   *Definición*: Depender de abstracciones, no de concreciones.
+    *   *Implementación*:
+        *   [TotalBatteryJoltageCalculator.java:L10-L13](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java#L10-L13): Recibe sus dependencias (`BatteryBankMaxJoltageCalculator` y `Length`) desde el constructor (Inyección de Dependencias), y el punto de entrada principal `Main` depende de las abstracciones del cargador y deserializador.
+
 
 ## Técnicas de diseño aplicadas
 
@@ -40,7 +57,9 @@ Se han utilizado diversas técnicas de ingeniería de software para asegurar la 
 
 *   **Programación funcional (con Java Streams)**:
     *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
-    *   *Implementación*: Empleado en `TotalBatteryJoltageCalculator` y `BatteryBankMaxJoltageCalculator` para mapear y acumular los voltajes máximos de los bancos de baterías.
+    *   *Implementación*:
+        *   [TotalBatteryJoltageCalculator.java:L14-L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java#L14-L18) (`sumAllMaxJoltageFrom()`): Utiliza `batteryBanks.stream()` para recorrer declarativamente la lista de bancos de baterías, mapeando cada banco (`map`) a su voltaje máximo optimizado (calculado por la clase delegada) y reduciéndolos (`reduce`) con la suma de joltajes (`Joltage::add`) partiendo de `Joltage.ZERO`.
+        *   [BatteryBankMaxJoltageCalculator.java:L21-L25](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/BatteryBankMaxJoltageCalculator.java#L21-L25) (`findMaxIndex()`): Emplea `IntStream.rangeClosed(start, digitsNeeded)` para examinar los índices de los dígitos candidatos. Utiliza una reducción personalizada (`reduce((i, j) -> digits.charAt(i) >= digits.charAt(j) ? i : j)`) para encontrar de forma puramente funcional el índice del dígito con mayor valor numérico en el rango especificado.
 *   **Inyección de dependencias**:
     * *Definición*: Técnica de diseño que consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código.
     * *Implementación*: Se inyecta la instancia de `BatteryBankMaxJoltageCalculator` y el Value Object `Length` a través del constructor del acumulador `TotalBatteryJoltageCalculator`, promoviendo la modularidad y el desacoplamiento de componentes.
@@ -52,13 +71,13 @@ Se han utilizado diversas técnicas de ingeniería de software para asegurar la 
 ## Patrones de diseño
 *   **Patrón Factory Method**:
     *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
-    *   *Implementación*: Se definen métodos estáticos de creación como `BatteryBank.create()` y `BatteryBankMaxJoltageCalculator.create()`, abstrayendo la instanciación e inicialización.
+    *   *Implementación*: Se define y consume en [BatteryBank.java:L10-L12](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/BatteryBank.java#L10-L12) mediante `BatteryBank.create()`, abstrayendo la instanciación e inicialización del record del banco de baterías.
 *   **Patrón Iterator**:
     *   *Definición*: Patrón de comportamiento. Proporciona un acceso secuencial a los elementos de una colección sin exponer su estructura interna. Separa la lógica de iteración de la estructura de datos, promoviendo la modularidad y facilitando la reutilización de código.
-    *   *Implementación*: Uso de **Java Streams** (como `IntStream` en `findMaxIndex` y streams colectores en `sumAll`) para procesar iteraciones sobre listas y caracteres de manera fluida y declarativa.
+    *   *Implementación*: Aplicado mediante streams en [TotalBatteryJoltageCalculator.java:L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java#L15) (`batteryBanks.stream()`) y en [BatteryBankMaxJoltageCalculator.java:L22](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/BatteryBankMaxJoltageCalculator.java#L22) (`IntStream.rangeClosed(...)`) para procesar secuencialmente colecciones e índices.
 *   **Patrón funcional Closure**:
     *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
-    *   *Implementación*: Uso de expresiones lambda y referencias a métodos que capturan variables locales y propiedades en el procesamiento funcional de los streams de los calculadores.
+    *   *Implementación*: Empleado a través de lambdas y referencias a métodos en [TotalBatteryJoltageCalculator.java:L16-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java#L16-L17) (capturando `singleCalculator` y `length`) y en [BatteryBankMaxJoltageCalculator.java:L23](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/BatteryBankMaxJoltageCalculator.java#L23) (capturando la cadena `digits`) para delegar lógica encapsulada en los pipelines funcionales.
 
 ---
 

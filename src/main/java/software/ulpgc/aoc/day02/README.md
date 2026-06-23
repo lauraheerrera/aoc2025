@@ -33,19 +33,26 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 
 *   **Principio de Responsabilidad Única (SRP - Single Responsibility Principle)**:
     *   *Definición*: Cada clase debe tener una única razón para cambiar.
-    *   *Implementación*: La lógica de validación reside en las clases concretas `Id`, la generación del rango y conteo se maneja en `IdRange`, y el acumulado total en `GiftShop`.
+    *   *Implementación*:
+        *   [Id.java:L5-L16 (Parte A)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/a/model/Id.java#L5-L16): Se limita exclusivamente a representar y validar la condición de invalidez de un ID individual para la parte A.
+        *   [IdRange.java:L8-L26](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java#L8-L26): Encapsula únicamente la lógica de generación del rango numérico y la suma de IDs inválidos dentro de dicho rango.
+        *   [GiftShop.java:L10-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L10-L17): Agrega la suma total de todas las colecciones de rangos que componen la tienda.
 *   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
     *   *Definición*: Las entidades de software deben estar abiertas para la extensión, pero cerradas para la modificación.
-    *   *Implementación*: La infraestructura de `GiftShop` e `IdRange` es genérica. Para soportar nuevas reglas de validación (como las de la Parte B), el diseño permite simplemente crear una nueva clase que implemente `InvalidatableId`, sin necesidad de modificar la lógica de procesamiento existente.
+    *   *Implementación*:
+        *   [GiftShop.java:L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L10) y [IdRange.java:L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java#L10): Sus diseños son genéricos (`GiftShop<T extends InvalidatableId>`), lo que permite que el motor admita nuevas reglas de IDs (como los de la Parte B) extendiendo la clase mediante una nueva implementación sin modificar el código core del rango o de la tienda.
 *   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
     *   *Definición*: Las subclases o implementaciones deben ser sustituibles por sus tipos base sin alterar el comportamiento correcto del programa.
-    *   *Implementación*: Las clases `software.ulpgc.aoc.day02.a.model.Id` y `software.ulpgc.aoc.day02.b.model.Id` son completamente intercambiables bajo la interfaz común `InvalidatableId`. El sistema funciona correctamente al inyectar cualquiera de ellas, garantizando una correcta jerarquía de tipos.
+    *   *Implementación*:
+        *   [Id.java (Parte A)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/a/model/Id.java#L5) e [Id.java (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java#L5): Ambas clases son implementaciones completamente sustituibles e intercambiables bajo la interfaz común `InvalidatableId` sin alterar la corrección de la simulación.
 *   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
     *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
-    *   *Implementación*: La interfaz `InvalidatableId` expone únicamente dos métodos esenciales (`id()` e `isInvalid()`). Está altamente cohesionada y no obliga a las implementaciones concretas a arrastrar código innecesario.
+    *   *Implementación*:
+        *   [InvalidatableId.java:L3-L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/InvalidatableId.java#L3-L6): Define una interfaz minimalista de dos métodos (`id()` e `isInvalid()`), evitando obligar a las implementaciones concretas de dominio a arrastrar código innecesario.
 *   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
     *   *Definición*: Depender de abstracciones, no de concreciones.
-    *   *Implementación*: La clase `GiftShop` y la clase `IdRange` dependen de la interfaz `InvalidatableId` para desacoplar el procesamiento general de la lógica de negocio concreta.
+    *   *Implementación*:
+        *   [GiftShop.java:L10-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L10-L17): Depende enteramente del contrato abstracto `InvalidatableId`, logrando desacoplar por completo el procesamiento y suma del dominio real de la lógica concreta de validación.
 
 ## Técnicas de diseño aplicadas
 
@@ -53,7 +60,12 @@ Se han utilizado diversas técnicas de ingeniería de software para asegurar la 
 
 *   **Programación funcional (con Java Streams)**:
     *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
-    *   *Implementación*: Empleado en `GiftShop` y `IdRange` para recorrer, validar y sumar los identificadores inválidos haciendo uso de `LongStream` y la API de Streams.
+    *   *Implementación*:
+        *   [GiftShop.java:L12-L16](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L12-L16) (`sumAllInvalidIds()`): Usa `ranges.stream()` para recorrer todas las colecciones de rangos del GiftShop, convirtiéndolas a valores numéricos con la suma de sus correspondientes IDs inválidos (`mapToLong(IdRange::sumInvalidIDs)`) y obteniendo el total global mediante `sum()`.
+        *   [IdRange.java:L18-L24](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java#L18-L24) (`sumInvalidIDs()`): Emplea `LongStream.rangeClosed(start, end)` para generar de forma secuencial y eficiente todos los IDs del rango inclusive. Mapea cada ID al record `Id` del dominio, filtra los que son inválidos (`filter(InvalidatableId::isInvalid)`), extrae su valor primitivo y los suma (`sum()`).
+        *   [Id.java:L26-L30 (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java#L26-L30) (`hasRepeatedSequence()`): Utiliza `IntStream.rangeClosed(1, n / 2)` para probar todas las longitudes posibles de patrones. Filtra aquellas longitudes que dividen exactamente el tamaño total del ID (`validLength`) y evalúa si alguna de ellas compone un patrón repetitivo continuo con `anyMatch`.
+        *   [Id.java:L36-L41 (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java#L36-L41) (`isPatternRepeated()`): Usa `IntStream.iterate(len, i -> i + len)` para generar saltos secuenciales según la longitud del patrón, limitando las iteraciones a la cantidad exacta de bloques que quedan en la cadena, y comprueba con `allMatch` si todas las subcadenas coinciden exactamente con el prefijo inicial (el patrón).
+        *   [Main.java (Parte A y B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/a/Main.java#L25-L28): Utiliza `Arrays.stream(lines.getFirst().split(","))` para procesar la primera línea de entrada. Mapea cada token quitando los espacios en blanco (`trim`), lo deserializa a un `IdRange` de IDs y colecta la estructura con `.toList()`.
 *   **Inyección de dependencias**: 
     * *Definición*: Técnica de diseño que consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código.
     * *Implementación*: La creación de instancias de `Id` se delega externamente. La clase `IdRange` recibe su factoría de creación a través de su constructor (`LongFunction<T> idFactory`), reduciendo el acoplamiento y facilitando la reutilización del código.
@@ -63,16 +75,16 @@ Se han utilizado diversas técnicas de ingeniería de software para asegurar la 
 ## Patrones de diseño
 *   **Patrón Factory Method**:
     *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
-    *   *Implementación*: Se inyecta una referencia a método (`Id::create`) como `LongFunction<T>` en la creación del rango. Esto actúa como una factoría dinámica que permite instanciar el tipo concreto de ID necesario en tiempo de ejecución.
+    *   *Implementación*: Se utiliza la referencia al método estático `Id::create` (definido en [Id.java:L7-L9 (Parte A)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/a/model/Id.java#L7-L9) y [Id.java:L9-L11 (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java#L9-L11)) inyectándose como factoría funcional en el flujo de ejecución principal en `Main.java`.
 *   **Patrón Factory**:
     *   *Definición*: Patrón creacional que encapsula la lógica de creación de objetos en una clase dedicada, llamada factoría, la cual produce instancias de una familia de clases que comparten una interfaz o clase base común. Su propósito es abstraer el proceso de creación, centralizándolo.
-    *   *Implementación*: El uso de una factoría funcional (`LongFunction<T>`) centraliza la lógica de creación de objetos `InvalidatableId`, permitiendo al motor del rango (`IdRange`) generar familias de objetos desacoplándose de sus constructores concretos.
+    *   *Implementación*: Se utiliza la abstracción funcional [IdRange.java:L10-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java#L10-L15) mediante la interfaz genérica `LongFunction<T> idFactory`, lo que permite que el motor de rangos instancie dinámicamente subtipos del identificador sin conocer su constructor concreto.
 *   **Patrón Iterator**:
     *   *Definición*: Patrón de comportamiento. Proporciona un acceso secuencial a los elementos de una colección sin exponer su estructura interna. Separa la lógica de iteración de la estructura de datos, promoviendo la modularidad y facilitando la reutilización de código.
-    *   *Implementación*: Mediante **Java Streams** (específicamente `LongStream`), el sistema recorre y procesa los rangos de IDs abstrayendo el mecanismo de iteración subyacente de forma eficiente.
+    *   *Implementación*: Se utiliza mediante streams en [GiftShop.java:L13](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L13) (`ranges.stream()`) y [IdRange.java:L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java#L19) (`LongStream.rangeClosed(...)`) para iterar y agregar secuencialmente los identificadores válidos de forma abstracta.
 *   **Patrón funcional Closure**:
     *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
-    *   *Implementación*: Uso de expresiones lambda y referencias a métodos dentro de los pipelines funcionales para capturar y pasar comportamiento en tiempo de ejecución de manera expresiva.
+    *   *Implementación*: Se aplica a las expresiones lambda en [Id.java:L28-L29 (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java#L28-L29) (`len -> validLength(n, len)` y `len -> isPatternRepeated(...)`) y [Id.java:L38-L40 (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java#L38-L40) (`i -> i + len` e `i -> s.substring(...)`) para capturar las variables locales del contexto (`n`, `s` y `pattern`) y evaluar de forma inmutable la repetición de patrones.
 
 ---
 

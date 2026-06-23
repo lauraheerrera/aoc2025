@@ -29,10 +29,27 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 
 *   **Principio de Responsabilidad Única (SRP - Single Responsibility Principle)**:
     *   *Definición*: Cada clase debe tener una única razón para cambiar.
-    *   *Implementación*: La lógica de validación de pertenencia e intervalos reside exclusivamente en `Range` e `ID`, mientras que la agregación y el cálculo global corresponden a `FreshnessValidator`.
+    *   *Implementación*:
+        *   [Range.java:L5-L20](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/Range.java#L5-L20): Define exclusivamente las propiedades geométricas, límites y operaciones binarias de comparación de un intervalo de IDs.
+        *   [ID.java:L5-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/ID.java#L5-L15): Su responsabilidad es modelar y representar un identificador individual de la cafetería.
+        *   [FreshnessValidator.java:L10-L40](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L10-L40): Encapsula de forma única el algoritmo de validación de frescura y la fusión lineal de intervalos solapados.
 *   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
     *   *Definición*: Las entidades de software deben estar abiertas para la extensión, pero cerradas para la modificación.
-    *   *Implementación*: `Range` y `ID` implementan interfaces estándar de Java como `Comparable`, permitiendo extender las políticas de ordenación y clasificación sin modificar su estructura original.
+    *   *Implementación*:
+        *   [Range.java:L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/Range.java#L5) e [ID.java:L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/ID.java#L5): Implementan interfaces estándar como `Comparable`, lo que permite que algoritmos de ordenación externos ordenen sus colecciones de forma genérica sin alterar la definición original de las entidades.
+*   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
+    *   *Definición*: Las subclases o implementaciones deben ser sustituibles por sus tipos base sin alterar el comportamiento correcto del programa.
+    *   *Implementación*:
+        *   [TxtRangeDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtRangeDeserializer.java#L6) y [TxtIDDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtIDDeserializer.java#L6): Son perfectamente sustituibles bajo las firmas abstractas de `RangeDeserializer` y `IDDeserializer` en cualquier cargador adaptado.
+*   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
+    *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
+    *   *Implementación*:
+        *   [RangeLoader.java:L7-L9](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/RangeLoader.java#L7-L9) e [IDLoader.java:L7-L9](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/IDLoader.java#L7-L9): Están completamente segregadas, lo que permite que un cargador de base de datos (`TxtDatabaseLoader`) implemente de forma independiente la lectura de rangos o la lectura de identificadores.
+*   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
+    *   *Definición*: Depender de abstracciones, no de concreciones.
+    *   *Implementación*:
+        *   [TxtDatabaseLoader.java:L20-L24](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtDatabaseLoader.java#L20-L24): El cargador no depende de deserializadores de texto planos fijos, sino de las interfaces `RangeDeserializer` y `IDDeserializer`, permitiendo la inyección de dependencias para cambiar de forma externa la infraestructura física de los ficheros.
+
 
 ## Técnicas de diseño aplicadas
 
@@ -40,16 +57,19 @@ Se han utilizado diversas técnicas de ingeniería de software para asegurar la 
 
 *   **Programación funcional (con Java Streams)**:
     *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
-    *   *Implementación*: Empleado en `FreshnessValidator` para filtrar IDs válidos y reducir/acumular rangos ordenados de forma declarativa e inmutable.
+    *   *Implementación*:
+        *   [FreshnessValidator.java:L17-L22](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L17-L22) (`countFresh()`): Utiliza `ids.stream()` para recorrer la lista de IDs de entrada y filtrarlos (`filter`) verificando si alguno de ellos está contenido en los rangos de frescura (`validRanges.stream().anyMatch(...)`). Cuenta los elementos válidos resultantes (`count()`).
+        *   [FreshnessValidator.java:L24-L28](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L24-L28) (`countTotalFresh()`): Obtiene el stream de rangos ya consolidados (disjuntos y ordenados), mapea cada rango a su tamaño en elementos (`mapToLong(Range::length)`) y devuelve la suma total (`sum()`).
+        *   [FreshnessValidator.java:L30-L34](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L30-L34) (`mergedRanges()`): Utiliza `validRanges.stream()` para ordenar los rangos por su inicio (`sorted()`) y realiza una reducción mutable con `collect(ArrayList::new, this::accumulate, List::addAll)` para fusionar linealmente los rangos solapados o contiguos en una nueva lista disjunta de forma inmutable.
 *   **Good Naming**: Nombres de variables y métodos descriptivos como `contains()`, `mergeableWith()`, `merge()`, `countFresh()`, y `countTotalFresh()` aseguran que el código sea autodocumentado.
 
 ## Patrones de diseño
 *   **Patrón Factory Method**:
     *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
-    *   *Implementación*: Se utiliza `FreshnessValidator.fromRanges()`. Este método estático encapsula la complejidad de la creación de la instancia del validador, ofreciendo una API limpia y expresiva en el punto de uso.
+    *   *Implementación*: Se utiliza en [FreshnessValidator.java:L13-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L13-L15) con `FreshnessValidator.fromRanges()`. Este método estático encapsula la creación de la instancia del validador.
 *   **Patrón Iterator**:
     *   *Definición*: Patrón de comportamiento. Proporciona un acceso secuencial a los elementos de una colección sin exponer su estructura interna. Separa la lógica de iteración de la estructura de datos, promoviendo la modularidad y facilitando la reutilización de código.
-    *   *Implementación*: Mediante **Java Streams**, el validador recorre y procesa las secuencias de IDs y Rangos abstrayendo el mecanismo de iteración subyacente.
+    *   *Implementación*: Aplicado mediante Java Streams en [FreshnessValidator.java:L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L18) (`ids.stream()`), [FreshnessValidator.java:L25](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L25) (`mergedRanges().stream()`) y [FreshnessValidator.java:L31](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L31) (`validRanges.stream()`) para iterar y filtrar secuencias de IDs y Rangos de forma abstracta.
 
 ---
 

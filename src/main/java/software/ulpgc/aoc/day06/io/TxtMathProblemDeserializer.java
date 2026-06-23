@@ -1,73 +1,67 @@
 package software.ulpgc.aoc.day06.io;
 
 import software.ulpgc.aoc.common.io.Deserializer;
+import software.ulpgc.aoc.day06.model.Operand;
+import software.ulpgc.aoc.day06.model.Operator;
 import software.ulpgc.aoc.day06.model.Problem;
+import software.ulpgc.aoc.day06.model.Worksheet;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class TxtMathProblemDeserializer implements Deserializer<Problem> {
-    public enum View { Rows, ColumnsR2L }
-    private final View view;
+    private final Worksheet.View view;
 
-    public TxtMathProblemDeserializer() {
-        this(View.Rows);
-    }
-
-    public TxtMathProblemDeserializer(View view) {
+    public TxtMathProblemDeserializer(Worksheet.View view) {
         this.view = view;
     }
 
     @Override
-    public Problem deserialize(String block) {
-        return new Problem(numbersOf(block), operatorOf(block));
+    public Problem deserialize(String blockText) {
+        List<String> lines = blockText.lines().toList();
+        return new Problem(extractOperands(lines), extractOperator(lines));
     }
 
-    private List<Long> numbersOf(String block) {
-        return linesIn(block).stream()
-                .flatMap(this::numbersIn)
+    private Operator extractOperator(List<String> lines) {
+        return Operator.from(lines.get(lines.size() - 1).trim().charAt(0));
+    }
+
+    private List<Operand> extractOperands(List<String> lines) {
+        return view == Worksheet.View.ROWS ? extractOperandsByRow(lines) : extractOperandsByColumn(lines);
+    }
+
+    private List<Operand> extractOperandsByRow(List<String> lines) {
+        return lines.subList(0, lines.size() - 1).stream()
+                .flatMap(line -> parseNumbers(line).stream())
+                .map(Operand::new)
                 .toList();
     }
 
-    private List<String> linesIn(String block) {
-        return view == View.Rows ? rowsIn(block) : columnsIn(block);
-    }
-
-    private List<String> rowsIn(String block) {
-        return Arrays.asList(block.split("\n")).subList(0, block.split("\n").length - 1);
-    }
-
-    private List<String> columnsIn(String block) {
-        return IntStream.range(0, maxWidth(block.split("\n")))
-                .map(i -> maxWidth(block.split("\n")) - 1 - i)
-                .mapToObj(x -> digitsAt(block.split("\n"), x))
+    private List<Operand> extractOperandsByColumn(List<String> lines) {
+        int maxWidth = lines.stream().mapToInt(String::length).max().orElse(0);
+        return IntStream.range(0, maxWidth)
+                .map(x -> maxWidth - 1 - x)
+                .mapToObj(x -> columnString(lines, x))
+                .flatMap(colStr -> parseNumbers(colStr).stream())
+                .map(Operand::new)
                 .toList();
     }
 
-    private int maxWidth(String[] lines) {
-        return Arrays.stream(lines).mapToInt(String::length).max().orElse(0);
-    }
-
-    private String digitsAt(String[] lines, int x) {
-        return IntStream.range(0, lines.length - 1)
-                .mapToObj(y -> digitAt(lines[y], x))
+    private String columnString(List<String> lines, int x) {
+        return IntStream.range(0, lines.size() - 1)
+                .mapToObj(y -> charAt(lines.get(y), x))
                 .collect(Collectors.joining());
     }
 
-    private String digitAt(String line, int x) {
+    private String charAt(String line, int x) {
         return x < line.length() && Character.isDigit(line.charAt(x)) ? String.valueOf(line.charAt(x)) : "";
     }
 
-    private Stream<Long> numbersIn(String line) {
-        return Pattern.compile("\\d+").matcher(line).results()
-                .map(mr -> Long.parseLong(mr.group()));
-    }
-
-    private char operatorOf(String block) {
-        return block.trim().charAt(block.trim().length() - 1);
+    private List<Long> parseNumbers(String s) {
+        return Pattern.compile("\\d+").matcher(s).results()
+                .map(mr -> Long.parseLong(mr.group()))
+                .toList();
     }
 }

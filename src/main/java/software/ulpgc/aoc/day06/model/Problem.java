@@ -2,12 +2,16 @@ package software.ulpgc.aoc.day06.model;
 
 import java.util.List;
 
-public record Problem(List<Long> numbers, char operator) {
-    public long solve() {
-        return numbers.stream().reduce(this::apply).orElse(0L);
+public record Problem(List<Operand> operands, Operator operator) {
+    public Problem {
+        operands = List.copyOf(operands);
     }
 
-    private long apply(long acc, long val) {
-        return operator == '+' ? acc + val : acc * val;
+    public long solve() {
+        return (operands.isEmpty()) ? 0L
+                : operands.stream()
+                        .mapToLong(Operand::value)
+                        .reduce(operator::apply)
+                        .orElse(0L);
     }
 }

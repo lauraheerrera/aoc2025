@@ -1,0 +1,92 @@
+# Day 9: Movie Theater
+
+## Descripción
+
+El desafío consiste en optimizar la disposición espacial en un cine (`MovieTheater`), modelado mediante baldosas o asientos rojos posicionados en un plano bidimensional discreto.
+1.  **Parte 1**: Encontrar el área máxima de cualquier rectángulo (definido por dos puntos cualesquiera de entrada) sin restricciones de obstáculos, calculando el producto de la cantidad de filas y columnas que cubre.
+2.  **Parte 2**: Encontrar el área máxima de un rectángulo que no contenga ningún segmento del contorno o límite del cine en su interior, y que a su vez esté completamente contenido dentro del polígono delimitado por los segmentos de las baldosas rojas.
+
+## Diagramas UML
+
+| Parte A | Parte B |
+| :---: | :---: |
+| ![Diagrama UML Parte A](../../../../../../../UML%20diagrams/uml_day09a.png) | ![Diagrama UML Parte B](../../../../../../../UML%20diagrams/uml_day09b.png) |
+
+## Fundamentos de diseño
+
+La solución está construida siguiendo los fundamentos de la ingeniería del software:
+
+*   **Abstracción**: El modelo del plano geométrico está encapsulado en `Point`, `Segment` y `MovieTheater`, ocultando los algoritmos de detección de colisiones y cálculo de áreas.
+*   **Modularidad**: Separación limpia entre la lógica de E/S (`io`) y las estructuras espaciales del dominio (`model`).
+*   **Alta cohesión**: Las clases y registros representan conceptos atómicos bien acotados: `Point` maneja coordenadas individuales y áreas, `Segment` representa los límites físicos entre asientos, y `MovieTheater` implementa la lógica de optimización del espacio.
+*   **Bajo acoplamiento**: `TxtPointLoader` depende de la interfaz genérica `Deserializer<Point>`, abstrayendo la fuente y formato de los datos de entrada.
+*   **Inmutabilidad del modelo**: Todas las estructuras de datos (`Point`, `Segment` y `MovieTheater`) se implementan como **Records** inmutables en Java.
+*   **Diseño por contrato**: Definición de interfaces cohesivas como `PointLoader` y `Deserializer`.
+
+## Principios SOLID
+
+El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
+
+*   **Principio de Responsabilidad Única (SRP - Single Responsibility Principle)**:
+    *   *Definición*: Cada clase debe tener una única razón para cambiar.
+    *   *Implementación*:
+        *   [Point.java:L5-L16](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/model/Point.java#L5-L16): Modela exclusivamente una coordenada bidimensional discreta y calcula áreas rectangulares relativas.
+        *   [Segment.java:L5-L25](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/model/Segment.java#L5-L25): Representa únicamente aristas del polígono del cine y calcula colisiones con el contorno.
+        *   [MovieTheater.java:L9-L44](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/model/MovieTheater.java#L9-L44): Responsable exclusivo de buscar el área rectangular máxima libre de obstáculos.
+*   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
+    *   *Definición*: Las clases deben estar abiertas para la extensión, pero cerradas para la modificación.
+    *   *Implementación*:
+        *   [MovieTheater.java:L9-L44](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/model/MovieTheater.java#L9-L44): Se introdujo la estructura `Segment` en la Parte B y se modificó la lógica de búsqueda en el teatro sin necesidad de alterar el código del modelo básico `Point`.
+*   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
+    *   *Definición*: Los subtipos deben poder reemplazar a sus tipos base sin alterar el comportamiento.
+    *   *Implementación*:
+        *   [TxtPointLoader.java:L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/io/TxtPointLoader.java#L10): Implementa `PointLoader` de manera transparente para el cliente (`Main`), lo que permite que sea reemplazado por cargadores mock u otros sin romper el flujo principal.
+*   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
+    *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
+    *   *Implementación*:
+        *   [PointLoader.java:L8-L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/io/PointLoader.java#L8-L10): Define un único método cohesivo (`load()`), asegurando una interfaz minimalista.
+*   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
+    *   *Definición*: Depender de abstracciones, no de concreciones.
+    *   *Implementación*:
+        *   [TxtPointLoader.java:L10-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/io/TxtPointLoader.java#L10-L17): Depende de la interfaz genérica `Deserializer<Point>` para procesar la entrada de datos en lugar de una implementación deserializadora concreta.
+
+## Técnicas de diseño aplicadas
+
+*   **Programación funcional (con Java Streams)**:
+    *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
+    *   *Implementación*:
+        *   [MovieTheater.java:L9-L14 (Parte A)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/a/model/MovieTheater.java#L9-L14) (`maxRectangleArea()`): Utiliza combinaciones funcionales con `IntStream.range` y `flatMapToLong` para evaluar eficientemente las áreas de todos los pares de baldosas del cine.
+        *   [MovieTheater.java:L16-L22 (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/b/model/MovieTheater.java#L16-L22) (`maxRectangleAreaWithSegments()`): Aplica streams para filtrar combinaciones válidas que no toquen el contorno (`filter(isValidRectangle)`) y obtener el área máxima.
+        *   [MovieTheater.java:L38-L40 (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/b/model/MovieTheater.java#L38-L40) (`noSegmentIntersectsInterior()`): Usa `segments.stream().noneMatch()` para comprobar de forma declarativa que ninguna arista del polígono colisiona con el área rectangular.
+        *   [MovieTheater.java:L63-L69 (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/b/model/MovieTheater.java#L63-L69) (`isPointInside()`): Cuenta de forma declarativa el número de intersecciones de un rayo vertical mediante filtros y `count()`.
+*   **Inyección de dependencias**: El cargador recibe la instancia del deserializador por constructor.
+*   **Genéricos**: Uso de `Deserializer<T>` parametrizado para la entidad `Point`.
+*   **Good Naming**: Nombres autodescriptivos como `maxRectangleArea()`, `rectangleAreaWith()`, `noSegmentIntersectsInterior()`, `isOnBoundary()`.
+
+## Patrones de diseño
+
+*   **Patrón Iterator / Streams**:
+    *   *Implementación*: Uso de Java Streams (`IntStream.range().flatMapToLong()`) para evaluar de forma limpia y declarativa todas las combinaciones de pares de puntos en el cine.
+
+---
+
+## Pruebas realizadas
+
+Se han diseñado pruebas unitarias robustas utilizando **JUnit** y **AssertJ** para certificar el cálculo de áreas y la detección de intersecciones con los límites del polígono.
+
+### Rutas de las pruebas
+*   **Tests de Deserialización**: [TxtPointDeserializerTest.java](file:///c:/Users/laura/OneDrive/Desktop/AOC-2025/src/test/java/test/Day09/ATest/TxtPointDeserializerTest.java)
+*   **Tests de la Parte A**: [MovieTheaterTest.java](file:///c:/Users/laura/OneDrive/Desktop/AOC-2025/src/test/java/test/Day09/ATest/MovieTheaterTest.java)
+*   **Tests de la Parte B**: [MovieTheaterTest.java](file:///c:/Users/laura/OneDrive/Desktop/AOC-2025/src/test/java/test/Day09/BTest/MovieTheaterTest.java)
+
+### Escenarios validados
+
+#### Deserialización (`TxtPointDeserializerTest`)
+*   **Parseo de coordenadas**: Verificación del parseo de líneas con números positivos, negativos y con espacios.
+*   **Gestión de errores**: Comprobación de que lanza `IllegalArgumentException` ante entradas vacías o mal formateadas, y `NumberFormatException` si contiene valores no numéricos.
+
+#### Modelo y Algoritmos (`MovieTheaterTest`)
+*   **Propiedades de Segmento**: Validación de los métodos `isHorizontal()`, `isVertical()`, y los límites `minX/maxX/minY/maxY` para aristas horizontales y verticales.
+*   **Cálculo de Áreas Rectangulares**: Comprobación de que `rectangleAreaWith` calcula áreas correctas incluyendo los bordes del rectángulo.
+*   **Parte A**: Verificación de que el área máxima sin obstáculos en el ejemplo es de `50L`.
+*   **Parte B**: Verificación de que el área máxima respetando los límites del polígono interior del cine es de `24L`.

@@ -1,6 +1,8 @@
-package software.ulpgc.aoc.day09.model;
+package software.ulpgc.aoc.day09.b.model;
 
-public record Segment(Point start, Point end) {
+import software.ulpgc.aoc.day09.model.Tile;
+
+public record Segment(Tile start, Tile end) {
     public boolean isHorizontal() {
         return start.y() == end.y();
     }

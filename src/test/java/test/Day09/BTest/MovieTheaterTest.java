@@ -3,7 +3,7 @@ package test.Day09.BTest;
 import org.junit.Test;
 import software.ulpgc.aoc.day09.io.TxtPointDeserializer;
 import software.ulpgc.aoc.day09.b.model.MovieTheater;
-import software.ulpgc.aoc.day09.model.Point;
+import software.ulpgc.aoc.day09.model.Tile;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +26,7 @@ public class MovieTheaterTest {
     @Test
     public void solve_example() {
         TxtPointDeserializer deserializer = new TxtPointDeserializer();
-        List<Point> points = Arrays.stream(example.split("\n"))
+        List<Tile> points = Arrays.stream(example.split("\n"))
                 .map(deserializer::deserialize)
                 .collect(Collectors.toList());
 

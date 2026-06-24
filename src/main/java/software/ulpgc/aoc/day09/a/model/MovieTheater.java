@@ -2,9 +2,9 @@ package software.ulpgc.aoc.day09.a.model;
 
 import java.util.List;
 import java.util.stream.IntStream;
-import software.ulpgc.aoc.day09.model.Point;
+import software.ulpgc.aoc.day09.model.Tile;
 
-public record MovieTheater(List<Point> redTiles) {
+public record MovieTheater(List<Tile> redTiles) {
     public long maxRectangleArea() {
         return IntStream.range(0, redTiles.size())
                 .boxed()

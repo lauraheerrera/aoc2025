@@ -14,20 +14,21 @@ import java.io.IOException;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+        public static void main(String[] args) throws IOException {
 
-        File file = new File("src/main/resources/day03/input.txt");
-        Deserializer<BatteryBank> deserializer = new TxtBatteryBankDeserializer();
-        BatteryBankLoader loader = () -> LoaderFactory
-                .txt(file, deserializer::deserialize)
-                .load();
+                File file = new File("src/main/resources/day03/input.txt");
+                Deserializer<BatteryBank> deserializer = new TxtBatteryBankDeserializer();
+                BatteryBankLoader loader = () -> LoaderFactory
+                                .txt(file, deserializer::deserialize)
+                                .load();
 
-        List<BatteryBank> batteryBanks = loader.load();
-        BatteryBankMaxJoltageCalculator batteryMaxJoltageCalculator = new BatteryBankMaxJoltageCalculator();
-        Length length = new Length(12);
-        TotalBatteryJoltageCalculator totalCalculator = new TotalBatteryJoltageCalculator(batteryMaxJoltageCalculator,
-                length);
-        System.out.println(
-                "El total de voltaje máximo es: " + totalCalculator.sumAllMaxJoltageFrom(batteryBanks));
-    }
+                List<BatteryBank> batteryBanks = loader.load();
+                BatteryBankMaxJoltageCalculator batteryMaxJoltageCalculator = new BatteryBankMaxJoltageCalculator();
+                Length length = new Length(12);
+                TotalBatteryJoltageCalculator totalCalculator = new TotalBatteryJoltageCalculator(
+                                batteryMaxJoltageCalculator,
+                                length);
+                System.out.println(
+                                "El total de voltaje máximo es: " + totalCalculator.sumAllMaxJoltageFrom(batteryBanks));
+        }
 }

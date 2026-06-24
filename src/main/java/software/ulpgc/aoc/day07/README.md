@@ -8,9 +8,15 @@ El desafío consiste en simular la división de flujos (splits) y el recuento de
 
 ## Diagramas UML
 
+Modelo
 | Parte A | Parte B |
 | :---: | :---: |
 | ![Diagrama UML Parte A](../../../../../../../UML%20diagrams/uml_day07a.png) | ![Diagrama UML Parte B](../../../../../../../UML%20diagrams/uml_day07b.png) |
+
+I/O
+<p align="center">
+  <img src="../../../../../../../UML%20diagrams/uml_day07_io.png" width="400">
+</p>
 
 ## Fundamentos de diseño
 

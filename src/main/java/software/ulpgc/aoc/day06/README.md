@@ -7,10 +7,13 @@ El desafío consiste en resolver operaciones matemáticas impresas en hojas de e
 2.  **Parte 2**: Las operaciones están escritas en columnas (verticalmente, leídas de derecha a izquierda). Resolver cada problema y sumar los resultados.
 
 ## Diagramas UML
+Modelo
+![Diagrama UML Modelo](../../../../../../../UML%20diagrams/uml_day06.png)
 
-| Modelo |
-| :---:
-| ![Diagrama UML Modelo](../../../../../../../UML%20diagrams/uml_day06_model.png) |
+I/O
+<p align="center">
+  <img src="../../../../../../../UML%20diagrams/uml_day06_io.png" width="400">
+</p>
 
 ## Fundamentos de diseño
 

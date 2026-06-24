@@ -8,9 +8,15 @@ El desafío consiste en validar si una lista de identificadores numéricos (IDs)
 
 ## Diagramas UML
 
+Modelo
 | Parte A | Parte B |
 | :---: | :---: |
 | ![Diagrama UML Parte A](../../../../../../../UML%20diagrams/uml_day05a.png) | ![Diagrama UML Parte B](../../../../../../../UML%20diagrams/uml_day05b.png) |
+
+I/O
+<p align="center">
+  <img src="../../../../../../../UML%20diagrams/uml_day05_io.png" width="400">
+</p>
 
 ## Fundamentos de diseño
 

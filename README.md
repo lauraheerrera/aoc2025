@@ -61,14 +61,42 @@ La arquitectura global se cimienta sobre pilares fundamentales:
 *   **Patrón Iterator**:
     *   *Implementación*: Uso sistemático de **Java Streams** para recorrer secuencialmente las colecciones de datos abstrayendo los mecanismos de control de bucles.
 
+### Patrones y técnicas no aplicadas
+
+Siguiendo los principios **YAGNI** (You Aren't Gonna Need It) y **KISS** (Keep It Simple, Stupid), se descartó intencionadamente el uso de ciertos patrones y técnicas comunes para evitar sobreingeniería y complejidad innecesaria en las soluciones:
+
+*   **Patrón Singleton**: Al ser un proyecto de resolución de algoritmos por lotes, no existe estado mutable global compartido ni servicios compartidos de red o base de datos. Toda la lógica se maneja de forma funcional o instanciando modelos inmutables, evitando el acoplamiento global innecesario y efectos secundarios.
+*   **Patrón Builder**: Los modelos de datos y records de cada día (`JunctionBox`, `Point`, `Dial`, `Machine`) son sencillos y tienen pocos atributos. Sus constructores estándar o métodos factoría son suficientes, evitando la verbosidad y el código repetitivo que introduce un Builder.
+*   **Patrón Command**: Las órdenes e instrucciones se modelan directamente como tipos del dominio (por ejemplo, `Order` en el Día 1 o `Operator` en el Día 6) y se resuelven en pipelines lineales. Al no requerir colas de ejecución dinámicas, programadores o soporte para deshacer/rehacer, este patrón no aportaba valor real.
+*   **Patrones Observer / Listener**: Las soluciones se ejecutan de manera secuencial y por lotes (procesando ficheros de entrada a salida estándar). Al carecer de interfaces de usuario (GUI) u operaciones reactivas orientadas a eventos en tiempo real, no se requiere la complejidad de suscripciones asíncronas.
+*   **Patrón Adapter**: Debido a que todo el sistema y sus modelos se construyeron de forma nativa desde cero bajo nuestro propio diseño e interfaces comunes, no fue necesario integrar librerías externas o APIs incompatibles que requirieran adaptadores.
+*   **Patrón Decorador**: Las variaciones de comportamiento para la segunda parte de cada día se resolvieron mediante parametrización o implementando las interfaces base directamente (como en el Día 2). No se requirió añadir responsabilidades dinámicas envolviendo objetos en tiempo de ejecución.
+*   **Patrón Null Object**: Las referencias nulas o comportamientos vacíos se controlan a través del uso de colecciones vacías (`List.of()`) y del tipo `Optional` de Java (actuando como mónada), lo que hace innecesario definir objetos nulos artificiales del dominio.
+*   **Inversión de Control (IoC con contenedores)**: El flujo principal y la inyección de dependencias se configuran de manera manual y directa en el método `Main` de cada reto. Utilizar un framework de contenedor externo (como Spring) violaría el principio de mínima sorpresa y simplicidad en un proyecto de algoritmos.
+
 ---
 
 ## Arquitectura de Entrada/Salida (I/O)
 
-La entrada/salida de datos en este proyecto se ha unificado y abstraído en el paquete común `common.io`, permitiendo desacoplar por completo la infraestructura técnica de almacenamiento físico de la lógica de negocio de los retos.
+La entrada/salida de datos en este proyecto se ha estructurado para desacoplar por completo el acceso físico a los datos de la lógica de negocio de los retos. Sin embargo, debido a la naturaleza cambiante de los inputs de cada día, la arquitectura de I/O no es idéntica para todos los problemas.
+
+### Modelo de la I/O
+
+El modelo se apoya en dos conceptos clave con diferentes niveles de abstracción:
+
+1.  **Interfaz de Deserialización (`Deserializer<T>`) [Común para todos]**: Es una interfaz genérica que define el contrato `deserialize(String content)` para transformar texto plano en una entidad o colección del dominio de negocio. Todos los retos reutilizan esta abstracción genérica de `common.io`.
+2.  **Cargador (Loader) y Factoría (`LoaderFactory`) [Depende del reto]**: 
+    *   **Carga Genérica por Línea**: Para retos donde el input consiste en una lista homogénea de registros línea por línea (Días 1, 2, 3, 4), se reutiliza el cargador genérico [TxtLoader.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/TxtLoader.java) y la factoría [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java).
+    *   **Carga Personalizada**: Cuando la estructura del input requiere procesar el archivo completo en bloque, secciones múltiples o estructuras bidimensionales (Días 5, 6, 7), no es viable la carga secuencial línea a línea de `TxtLoader`. En estos casos, se desarrollan cargadores específicos para el día (ej. `TxtDatabaseLoader`, `TxtMathWorksheetLoader`, `TxtManifoldLoader`), aunque se sigue respetando el contrato de la interfaz de deserialización.
+
+### Diagrama de I/O
+
+El siguiente diagrama modela la arquitectura de I/O utilizada para los retos con carga secuencial **línea a línea** (Días 1, 2, 3, 4):
+
+![UML io](UML%20diagrams/uml_io.png)
 
 ### Componentes genéricos (`common.io`)
-*   **[Deserializer.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java)**: Interfaz genérica que define el contrato `T deserialize(String line)` para transformar una línea de texto plano en un objeto estructurado del dominio.
+*   **[Deserializer.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java)**: Interfaz genérica que define el contrato `T deserialize(String line)` para transformar texto plano en objetos estructurados del dominio.
 *   **[TxtLoader.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/TxtLoader.java)**: Implementación genérica que utiliza un `BufferedReader` para leer secuencialmente las líneas de un archivo físico y delegar su deserialización mediante una función (`Function<String, T>`).
 *   **[LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java)**: Factoría que centraliza y simplifica la creación de cargadores de ficheros de texto.
 
@@ -98,4 +126,4 @@ A continuación se detalla cada día resuelto, con accesos directos a su corresp
 | **04** | Printing Department |  [Día 4](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day04) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day04/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day04/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day04/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day04/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day04/ATest/DiagramAnalyzerTest.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day04/BTest/DiagramAnalyzerTest.java)** |
 | **05** | Cafeteria | [Día 5](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day05) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day05/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day05/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day05/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day05/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day05/ATest/ValidatorTest.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day05/BTest/ValidatorTest.java)** |
 | **06** | Trash Compactor |  [Día 6](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day06)| **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day06/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day06/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day06/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day06/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day06/ATest/MathWorksheetTest.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day06/BTest/MathWorksheetTest.java)** |
----
+| **07** | Laboratories | [Día 7](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/ATest/ManifoldTest.java)** <br> **[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/BTest/ManifoldTest.java)**

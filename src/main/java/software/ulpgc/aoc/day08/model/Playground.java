@@ -7,27 +7,21 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public record Playground(List<JunctionBox> boxes) {
-    
+
     public long multiplyThreeLargestCircuitSizesAfterConnecting(int limit) {
         return multiplyThreeLargestSizes(
-            applyConnections(
-                new DisjointSet<>(),
-                allConnections().stream().limit(limit)
-            )
-        );
-    }
-
-    public long lastConnectionCoordinatesProduct() {
-        return productOfXCoordinates(findLastConnection(allConnections()));
+                applyConnections(
+                        new DisjointSet<>(),
+                        allConnections().stream().limit(limit)));
     }
 
     public List<Connection> allConnections() {
         return IntStream.range(0, boxes.size())
-            .boxed()
-            .flatMap(i -> IntStream.range(i + 1, boxes.size())
-                .mapToObj(j -> new Connection(boxes.get(i), boxes.get(j))))
-            .sorted()
-            .collect(Collectors.toList());
+                .boxed()
+                .flatMap(i -> IntStream.range(i + 1, boxes.size())
+                        .mapToObj(j -> new Connection(boxes.get(i), boxes.get(j))))
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     private DisjointSet<JunctionBox> applyConnections(DisjointSet<JunctionBox> ds, Stream<Connection> connections) {
@@ -37,24 +31,30 @@ public record Playground(List<JunctionBox> boxes) {
 
     private long multiplyThreeLargestSizes(DisjointSet<JunctionBox> ds) {
         return boxes.stream()
-            .map(ds::find)
-            .distinct()
-            .map(ds::size)
-            .sorted(Comparator.reverseOrder())
-            .limit(3)
-            .mapToLong(Integer::longValue)
-            .reduce(1, (a, b) -> a * b);
+                .map(ds::find)
+                .distinct()
+                .map(ds::size)
+                .sorted(Comparator.reverseOrder())
+                .limit(3)
+                .mapToLong(Integer::longValue)
+                .reduce(1, (a, b) -> a * b);
+    }
+
+    public long lastConnectionCoordinatesProduct() {
+        return productOfXCoordinates(findLastConnection(allConnections()));
     }
 
     private Connection findLastConnection(List<Connection> connections) {
         return findLastConnectionWithState(new DisjointSet<>(), connections, boxes.size());
     }
 
-    private Connection findLastConnectionWithState(DisjointSet<JunctionBox> ds, List<Connection> connections, int totalBoxes) {
+    private Connection findLastConnectionWithState(DisjointSet<JunctionBox> ds, List<Connection> connections,
+            int totalBoxes) {
         return connections.stream()
-            .filter(c -> ds.union(c.first(), c.second()) && ds.size(c.first()) == totalBoxes)
-            .findFirst()
-            .orElseThrow();
+                .peek(c -> ds.union(c.first(), c.second()))
+                .filter(c -> ds.size(c.first()) == totalBoxes)
+                .findFirst()
+                .orElseThrow();
     }
 
     private long productOfXCoordinates(Connection connection) {

@@ -86,12 +86,12 @@ El modelo se apoya en dos conceptos clave con diferentes niveles de abstracción
 
 1.  **Interfaz de Deserialización (`Deserializer<T>`) [Común para todos]**: Es una interfaz genérica que define el contrato `deserialize(String content)` para transformar texto plano en una entidad o colección del dominio de negocio. Todos los retos reutilizan esta abstracción genérica de `common.io`.
 2.  **Cargador (Loader) y Factoría (`LoaderFactory`) [Depende del reto]**: 
-    *   **Carga Genérica por Línea**: Para retos donde el input consiste en una lista homogénea de registros línea por línea (Días 1, 2, 3, 4), se reutiliza el cargador genérico [TxtLoader.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/TxtLoader.java) y la factoría [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java).
+    *   **Carga Genérica por Línea**: Para retos donde el input consiste en una lista homogénea de registros línea por línea (Días 1, 2, 3, 4, 8), se reutiliza el cargador genérico [TxtLoader.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/TxtLoader.java) y la factoría [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java).
     *   **Carga Personalizada**: Cuando la estructura del input requiere procesar el archivo completo en bloque, secciones múltiples o estructuras bidimensionales (Días 5, 6, 7), no es viable la carga secuencial línea a línea de `TxtLoader`. En estos casos, se desarrollan cargadores específicos para el día (ej. `TxtDatabaseLoader`, `TxtMathWorksheetLoader`, `TxtManifoldLoader`), aunque se sigue respetando el contrato de la interfaz de deserialización.
 
 ### Diagrama de I/O
 
-El siguiente diagrama modela la arquitectura de I/O utilizada para los retos con carga secuencial **línea a línea** (Días 1, 2, 3, 4):
+El siguiente diagrama modela la arquitectura de I/O utilizada para los retos con carga secuencial **línea a línea** (Días 1, 2, 3, 4, 8):
 
 ![UML io](UML%20diagrams/uml_io.png)
 

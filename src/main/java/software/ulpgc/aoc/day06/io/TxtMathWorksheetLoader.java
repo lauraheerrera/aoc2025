@@ -6,13 +6,9 @@ import software.ulpgc.aoc.day06.model.Worksheet;
 
 import java.util.List;
 
-public class TxtMathWorksheetLoader implements ProblemLoader {
-    private final List<String> lines;
-    private final Deserializer<Problem> deserializer;
-
+public record TxtMathWorksheetLoader(List<String> lines, Deserializer<Problem> deserializer) implements ProblemLoader {
     public TxtMathWorksheetLoader(String content, Deserializer<Problem> deserializer) {
-        this.lines = content.lines().toList();
-        this.deserializer = deserializer;
+        this(content.lines().toList(), deserializer);
     }
 
     @Override

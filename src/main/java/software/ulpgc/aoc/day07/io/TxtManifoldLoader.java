@@ -7,17 +7,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class TxtManifoldLoader implements ManifoldLoader {
-    private final File file;
-    private final Deserializer<Manifold> deserializer;
-
-    public TxtManifoldLoader(File file, Deserializer<Manifold> deserializer) {
-        this.file = file;
-        this.deserializer = deserializer;
-    }
-
+public record TxtManifoldLoader(File file, Deserializer<Manifold> deserializer) implements ManifoldLoader {
     @Override
     public Manifold load() throws IOException {
-        return deserializer.deserialize(String.join("\n", Files.readAllLines(file.toPath())));
+        return deserializer.deserialize(Files.readString(file.toPath()));
     }
 }

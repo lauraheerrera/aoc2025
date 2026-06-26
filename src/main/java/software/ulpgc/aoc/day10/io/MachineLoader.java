@@ -5,5 +5,5 @@ import java.io.IOException;
 import java.util.List;
 
 public interface MachineLoader {
-    List<Machine> load() throws IOException;
+    List<? extends Machine> load() throws IOException;
 }

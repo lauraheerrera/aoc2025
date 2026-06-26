@@ -78,6 +78,13 @@ Se han utilizado diversas técnicas de ingeniería de software para asegurar la 
     *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
     *   *Implementación*: Expresiones lambda en la propagación de flujos que capturan variables locales y parámetros del método para realizar los cálculos dinámicos por fila.
 
+## Elección de diseño: Primitivos con orElse vs Optional
+
+En la clase `Row`, el método `findStartColumn()` utiliza el operador `orElse` para buscar la celda inicial:
+
+*   **¿Por qué es mejor `orElse`?**
+    Dado que las especificaciones del problema garantizan que siempre existirá un punto de partida `S` en el primer renglón, esta búsqueda siempre tiene éxito en condiciones de ejecución normales. Devolver un objeto directo `Column` simplifica al cliente (`Manifold.java`) que consume la columna inicial inmediatamente, evitando tener que lidiar con envoltorios `Optional<Column>` de manera innecesaria. El valor por defecto `new Column(-1)` proporciona un centinela limpio de fallo sin alterar las firmas ni requerir flujos de unboxing.
+
 ---
 
 ## Pruebas realizadas

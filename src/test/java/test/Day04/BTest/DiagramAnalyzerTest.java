@@ -1,10 +1,7 @@
 package test.Day04.BTest;
 
 import org.junit.Test;
-import software.ulpgc.aoc.day04.model.Coordinate;
-import software.ulpgc.aoc.day04.model.Diagram;
-import software.ulpgc.aoc.day04.model.DiagramAnalyzer;
-import software.ulpgc.aoc.day04.model.Tile;
+import software.ulpgc.aoc.day04.model.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,15 +22,16 @@ public class DiagramAnalyzerTest {
         Diagram diagram = createDiagram(
                 "@@",
                 "@@");
+        DiagramStatus status = DiagramStatus.initial(diagram);
 
         List<Coordinate> toClear = List.of(new Coordinate(0, 0));
-        Diagram newDiagram = diagram.withClearedCoordinates(toClear);
+        DiagramStatus newStatus = status.withClearedCoordinates(toClear);
 
-        assertThat(newDiagram.get(new Coordinate(0, 0))).isEqualTo(Tile.CLEARED);
-        assertThat(newDiagram.get(new Coordinate(0, 1))).isEqualTo(Tile.ROLL);
-        assertThat(newDiagram.get(new Coordinate(1, 0))).isEqualTo(Tile.ROLL);
-        assertThat(newDiagram.get(new Coordinate(1, 1))).isEqualTo(Tile.ROLL);
-        assertThat(diagram.get(new Coordinate(0, 0))).isEqualTo(Tile.ROLL);
+        assertThat(newStatus.get(new Coordinate(0, 0))).isEqualTo(Tile.CLEARED);
+        assertThat(newStatus.get(new Coordinate(0, 1))).isEqualTo(Tile.ROLL);
+        assertThat(newStatus.get(new Coordinate(1, 0))).isEqualTo(Tile.ROLL);
+        assertThat(newStatus.get(new Coordinate(1, 1))).isEqualTo(Tile.ROLL);
+        assertThat(status.get(new Coordinate(0, 0))).isEqualTo(Tile.ROLL);
     }
 
     @Test
@@ -51,34 +49,35 @@ public class DiagramAnalyzerTest {
                 "@.@.@@@.@."
         };
         Diagram diagram = createDiagram(lines);
+        DiagramStatus status = DiagramStatus.initial(diagram);
 
         DiagramAnalyzer analyzer = new DiagramAnalyzer();
 
-        List<Coordinate> step1 = analyzer.findAccessibleCoordinates(diagram);
+        List<Coordinate> step1 = analyzer.findAccessibleCoordinates(status);
         assertThat(step1).hasSize(13);
-        diagram = diagram.withClearedCoordinates(step1);
-        List<Coordinate> step2 = analyzer.findAccessibleCoordinates(diagram);
+        status = status.withClearedCoordinates(step1);
+        List<Coordinate> step2 = analyzer.findAccessibleCoordinates(status);
         assertThat(step2).hasSize(12);
-        diagram = diagram.withClearedCoordinates(step2);
-        List<Coordinate> step3 = analyzer.findAccessibleCoordinates(diagram);
+        status = status.withClearedCoordinates(step2);
+        List<Coordinate> step3 = analyzer.findAccessibleCoordinates(status);
         assertThat(step3).hasSize(7);
-        diagram = diagram.withClearedCoordinates(step3);
-        List<Coordinate> step4 = analyzer.findAccessibleCoordinates(diagram);
+        status = status.withClearedCoordinates(step3);
+        List<Coordinate> step4 = analyzer.findAccessibleCoordinates(status);
         assertThat(step4).hasSize(5);
-        diagram = diagram.withClearedCoordinates(step4);
+        status = status.withClearedCoordinates(step4);
 
         int totalRemoved = 13 + 12 + 7 + 5;
         while (true) {
-            List<Coordinate> toRemove = analyzer.findAccessibleCoordinates(diagram);
+            List<Coordinate> toRemove = analyzer.findAccessibleCoordinates(status);
             if (toRemove.isEmpty())
                 break;
             totalRemoved += toRemove.size();
-            diagram = diagram.withClearedCoordinates(toRemove);
+            status = status.withClearedCoordinates(toRemove);
         }
 
         assertThat(totalRemoved).isEqualTo(43);
 
         Diagram initialDiagram = createDiagram(lines);
-        assertThat(analyzer.totalAccessibleRollsClearCycle(initialDiagram).value()).isEqualTo(43);
+        assertThat(analyzer.totalAccessibleRollsClearCycle(DiagramStatus.initial(initialDiagram)).value()).isEqualTo(43);
     }
 }

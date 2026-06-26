@@ -7,18 +7,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class Worksheet {
+public record Worksheet(List<String> lines) {
     public enum View {
         ROWS, COLUMNS_R2L
     }
 
-    private final List<String> lines;
-
-    public Worksheet(List<String> lines) {
+    public Worksheet {
         if (lines == null || lines.isEmpty() || lines.stream().allMatch(String::isBlank)) {
             throw new IllegalArgumentException("Worksheet lines cannot be null, empty or blank");
         }
-        this.lines = List.copyOf(lines);
+        lines = List.copyOf(lines);
     }
 
     public List<Problem> parse(Deserializer<Problem> deserializer) {

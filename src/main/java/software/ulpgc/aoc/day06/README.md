@@ -83,8 +83,14 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
     *   *Implementación*: Consumido de forma abstracta a través de Java Streams en clases como `Worksheet`, `Problem` y `TxtMathProblemDeserializer` para iterar y procesar cuadrículas, caracteres y líneas sin bucles explícitos.
 *   **Patrón funcional Closure**:
     *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
-    *   *Implementación*: Empleado mediante expresiones lambda en [Worksheet.java:L26](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/model/Worksheet.java#L26) (capturando `deserializer`), [Worksheet.java:L32](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/model/Worksheet.java#L32) (capturando `this`), y en [TxtMathProblemDeserializer.java:L46](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/TxtMathProblemDeserializer.java#L46) (capturando `lines`) para encapsular el comportamiento funcional con estados en tiempo de ejecución.
+    *   *Implementación*: Empleado mediante expresiones lambda en [Worksheet.java:L26](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/model/Worksheet.java#L26) (capturando `deserializer`), [Worksheet.java:L32](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/model/Worksheet.java#L32) (capturando `this`), y en [TxtMathProblemDeserializer.java:L46](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/TxtMathProblemDeserializer.java#L46) (capturando `lines`) para eludir el comportamiento funcional con estados en tiempo de ejecución.
 
+## Elección de diseño: Primitivos con orElse vs Optional
+
+En el código de resolución matemática del Día 6 se utilizan los operadores `orElse` y `orElseThrow` en lugar de propagar `Optional` en varias áreas clave:
+
+*   **Matemáticas y Dimensiones (`Problem` y `Worksheet`)**: Los métodos `solve()`, `maxWidth()` y la detección de ancho del deserializador devuelven tipos primitivos directos (`long` e `int`). Usar `orElse(0L)` y `orElse(0)` permite resolver los streams numéricos inmediatamente y evita que la lógica llamadora de formateo o acumulación de sumas tenga que lidiar con envoltorios innecesarios.
+*   **Gestión de Errores Críticos (`Operator.from`)**: Si un carácter del fichero no corresponde a un operador válido, se utiliza `.orElseThrow(...)` para abortar la ejecución. Dado que las entradas del problema de Advent of Code deben ser correctas, un carácter inválido es un error de programación irrecuperable y lanzar una excepción de inmediato (fail-fast) es mucho mejor que retornar un `Optional.empty()`.
 
 ---
 

@@ -79,6 +79,13 @@ Se han utilizado diversas técnicas de ingeniería de software para asegurar la 
     *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
     *   *Implementación*: Empleado a través de lambdas y referencias a métodos en [TotalBatteryJoltageCalculator.java:L16-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java#L16-L17) (capturando `singleCalculator` y `length`) y en [BatteryBankMaxJoltageCalculator.java:L23](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/BatteryBankMaxJoltageCalculator.java#L23) (capturando la cadena `digits`) para delegar lógica encapsulada en los pipelines funcionales.
 
+## Elección de diseño: Primitivos con orElse vs Optional
+
+En la clase `BatteryBankMaxJoltageCalculator`, el método `findMaxIndex` utiliza el operador `orElse` para resolver la reducción de un stream de enteros:
+
+*   **¿Por qué es mejor `orElse`?**
+    El método debe devolver un índice de carácter como tipo primitivo `int` para realizar el troceado recursivo directo de la cadena. Si retornara un `OptionalInt`, obligaría a la función recursiva llamadora a gestionar la verificación de presencia de valor. Dado que el flujo del algoritmo Greedy garantiza que el rango tiene elementos válidos, resolver el flujo con `.orElse(start)` proporciona una salvaguarda segura y directa (retornando el propio índice de inicio) manteniendo el código ágil y sin envoltorios.
+
 ---
 
 ## Pruebas realizadas

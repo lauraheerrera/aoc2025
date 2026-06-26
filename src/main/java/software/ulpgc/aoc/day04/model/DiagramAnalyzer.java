@@ -20,45 +20,45 @@ public class DiagramAnalyzer {
         }
     }
 
-    public RollsCount sumAllAccessibleRolls(Diagram diagram) {
-        return new RollsCount(findAccessibleCoordinates(diagram).size());
+    public RollsCount sumAllAccessibleRolls(DiagramStatus status) {
+        return new RollsCount(findAccessibleCoordinates(status).size());
     }
 
-    public List<Coordinate> findAccessibleCoordinates(Diagram diagram) {
-        return diagram.coordinates()
-                .filter(c -> isAccessible(diagram, c))
+    public List<Coordinate> findAccessibleCoordinates(DiagramStatus status) {
+        return status.coordinates()
+                .filter(c -> isAccessible(status, c))
                 .toList();
     }
 
-    public RollsCount totalAccessibleRollsClearCycle(Diagram diagram) {
-        return clearCycle(diagram, new RollsCount(0));
+    public RollsCount totalAccessibleRollsClearCycle(DiagramStatus status) {
+        return clearCycle(status, new RollsCount(0));
     }
 
-    private RollsCount clearCycle(Diagram diagram, RollsCount accumulated) {
-        List<Coordinate> toRemove = findAccessibleCoordinates(diagram);
+    private RollsCount clearCycle(DiagramStatus status, RollsCount accumulated) {
+        List<Coordinate> toRemove = findAccessibleCoordinates(status);
         return toRemove.isEmpty()
                 ? accumulated
-                : clearCycle(diagram.withClearedCoordinates(toRemove), new RollsCount(accumulated.value() + toRemove.size()));
+                : clearCycle(status.withClearedCoordinates(toRemove), new RollsCount(accumulated.value() + toRemove.size()));
     }
 
-    private boolean isAccessible(Diagram diagram, Coordinate coordinate) {
-        return diagram.isInBounds(coordinate)
-                && isTarget(diagram, coordinate)
-                && countAdjacentTargets(diagram, coordinate) < MAX_ADJACENT;
+    private boolean isAccessible(DiagramStatus status, Coordinate coordinate) {
+        return status.isInBounds(coordinate)
+                && isTarget(status, coordinate)
+                && countAdjacentTargets(status, coordinate) < MAX_ADJACENT;
     }
 
-    private boolean isTarget(Diagram diagram, Coordinate coordinate) {
-        return diagram.get(coordinate) == Tile.ROLL;
+    private boolean isTarget(DiagramStatus status, Coordinate coordinate) {
+        return status.get(coordinate) == Tile.ROLL;
     }
 
-    private int countAdjacentTargets(Diagram diagram, Coordinate coordinate) {
+    private int countAdjacentTargets(DiagramStatus status, Coordinate coordinate) {
         return (int) Arrays.stream(Direction.values())
-                .filter(dir -> isTargetAtOffset(diagram, coordinate, dir))
+                .filter(dir -> isTargetAtOffset(status, coordinate, dir))
                 .count();
     }
 
-    private boolean isTargetAtOffset(Diagram diagram, Coordinate coordinate, Direction dir) {
+    private boolean isTargetAtOffset(DiagramStatus status, Coordinate coordinate, Direction dir) {
         Coordinate offsetCoord = coordinate.offset(dir.rowOffset, dir.colOffset);
-        return diagram.isInBounds(offsetCoord) && isTarget(diagram, offsetCoord);
+        return status.isInBounds(offsetCoord) && isTarget(status, offsetCoord);
     }
 }

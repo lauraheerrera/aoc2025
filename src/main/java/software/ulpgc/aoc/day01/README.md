@@ -6,11 +6,9 @@ El desafío consiste en simular un dial de seguridad que gira en base a una seri
 1.  **Parte 1**: Calcular cuántas veces el dial termina exactamente en la posición `0` al finalizar una rotación.
 2.  **Parte 2**: Calcular cuántas veces el dial pasa por la posición `0` en cualquier momento del movimiento.
 
-## Diagramas UML
+## Diagrama UML
 
-| Parte A | Parte B |
-| :---: | :---: |
-| ![Diagrama UML Parte A](../../../../../../../UML%20diagrams/uml_day01a.png) | ![Diagrama UML Parte B](../../../../../../../UML%20diagrams/uml_day01b.png) |
+![Diagrama UML](../../../../../../../UML%20diagrams/uml_day01.png)
 
 ## Fundamentos de diseño
 
@@ -21,7 +19,7 @@ La solución está construida siguiendo los fundamentos de la ingeniería del so
 *   **Alta cohesión**: Cada componente tiene una única responsabilidad bien enfocada. El record `Order` solo contiene el dato del paso, y `Dial` procesa de forma exclusiva el comportamiento y posicionamiento físico del dial.
 *   **Bajo acoplamiento**: Las dependencias entre módulos se basan en abstracciones. El flujo principal (`Main`) depende de interfaces, lo que le permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de modelo.
 *   **Código expresivo**: El código es autoexplicativo y legible. El uso de **Records** inmutables y la programación funcional con **Java Streams** permiten que los algoritmos se lean de forma declarativa (evitando variables mutables e instrucciones anidadas), haciendo innecesarios los comentarios aclaratorios.
-*   **Inmutabilidad del modelo**: El record `Order` es inmutable. Asimismo, la clase `Dial` es inmutable por diseño: cuando se ejecuta una nueva lista de órdenes mediante `execute()`, este método no modifica el estado interno sino que devuelve una nueva instancia combinada de `Dial`, evitando efectos secundarios.
+*   **Inmutabilidad del modelo**: Se establece mediante el patrón de separación entre **Entidad** y **Estado (Status)**. El record `Dial` es la entidad estática y completamente inmutable (sin estado). Las propiedades que cambian con las acciones (el historial de órdenes y la posición) se encapsulan en el record `DialStatus`. Al ejecutar nuevas órdenes con `execute()`, se devuelve un nuevo `DialStatus` que hace referencia al mismo `Dial` inicial, evitando la recreación innecesaria de la propia entidad del modelo y garantizando un diseño funcional libre de efectos secundarios. El record `Order` es también inmutable.
 
 ## Principios SOLID
 

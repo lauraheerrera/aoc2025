@@ -2,6 +2,7 @@ package test.Day01.ATest;
 
 import org.junit.Test;
 import software.ulpgc.aoc.day01.model.Dial;
+import software.ulpgc.aoc.day01.model.DialStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,51 +22,57 @@ public class DialTest {
 
     @Test
     public void initial_position_should_be_50_using_create() {
-        assertThat(Dial.create().position()).isEqualTo(50);
+        Dial dial = new Dial("test-dial");
+        assertThat(DialStatus.initial(dial).position()).isEqualTo(50);
     }
 
     @Test
     public void given_orders_should_account_the_final_position() {
-        assertThat(Dial.create().execute(toOrders("L1")).position()).isEqualTo(49);
-        assertThat(Dial.create().execute(toOrders("L1", "R1", "R50")).position()).isEqualTo(0);
-        assertThat(Dial.create().execute(toOrders("L68")).position()).isEqualTo(82);
-        assertThat(Dial.create().execute(toOrders("R68", "L68")).position()).isEqualTo(50);
-        assertThat(Dial.create().execute(toOrders("L51", "L500")).position()).isEqualTo(99);
-        assertThat(Dial.create().execute(toOrders(orders.split("\n"))).position()).isEqualTo(32);
+        Dial dial = new Dial("test-dial");
+        assertThat(DialStatus.initial(dial).execute(toOrders("L1")).position()).isEqualTo(49);
+        assertThat(DialStatus.initial(dial).execute(toOrders("L1", "R1", "R50")).position()).isEqualTo(0);
+        assertThat(DialStatus.initial(dial).execute(toOrders("L68")).position()).isEqualTo(82);
+        assertThat(DialStatus.initial(dial).execute(toOrders("R68", "L68")).position()).isEqualTo(50);
+        assertThat(DialStatus.initial(dial).execute(toOrders("L51", "L500")).position()).isEqualTo(99);
+        assertThat(DialStatus.initial(dial).execute(toOrders(orders.split("\n"))).position()).isEqualTo(32);
     }
 
     @Test
     public void given_orders_should_account_the_times_that_position_is_zero() {
-        assertThat(Dial.create().execute(toOrders(orders.split("\n"))).count()).isEqualTo(3);
-        assertThat(Dial.create().execute(toOrders("L1")).count()).isEqualTo(0);
-        assertThat(Dial.create().execute(toOrders("L1", "R1", "R50")).count()).isEqualTo(1);
-        assertThat(Dial.create().execute(toOrders("L51", "L500")).count()).isEqualTo(0);
+        Dial dial = new Dial("test-dial");
+        assertThat(DialStatus.initial(dial).execute(toOrders(orders.split("\n"))).count()).isEqualTo(3);
+        assertThat(DialStatus.initial(dial).execute(toOrders("L1")).count()).isEqualTo(0);
+        assertThat(DialStatus.initial(dial).execute(toOrders("L1", "R1", "R50")).count()).isEqualTo(1);
+        assertThat(DialStatus.initial(dial).execute(toOrders("L51", "L500")).count()).isEqualTo(0);
     }
 
     @Test
     public void given_empty_orders_should_remain_at_50_and_count_zero_zeros() {
-        Dial dial = Dial.create().execute(toOrders());
-        assertThat(dial.position()).isEqualTo(50);
-        assertThat(dial.count()).isEqualTo(0);
+        Dial dial = new Dial("test-dial");
+        DialStatus status = DialStatus.initial(dial).execute(toOrders());
+        assertThat(status.position()).isEqualTo(50);
+        assertThat(status.count()).isEqualTo(0);
     }
 
     @Test
     public void given_exact_rotations_should_work_on_boundaries() {
-        Dial dialToZero = Dial.create().execute(toOrders("L50"));
+        Dial dial = new Dial("test-dial");
+        DialStatus dialToZero = DialStatus.initial(dial).execute(toOrders("L50"));
         assertThat(dialToZero.position()).isEqualTo(0);
         assertThat(dialToZero.count()).isEqualTo(1);
 
-        Dial dialWrapToZero = Dial.create().execute(toOrders("L150"));
+        DialStatus dialWrapToZero = DialStatus.initial(dial).execute(toOrders("L150"));
         assertThat(dialWrapToZero.position()).isEqualTo(0);
         assertThat(dialWrapToZero.count()).isEqualTo(1);
     }
 
     @Test
     public void given_exact_full_turnaround_should_return_to_50() {
-        Dial dialFullRight = Dial.create().execute(toOrders("R100"));
+        Dial dial = new Dial("test-dial");
+        DialStatus dialFullRight = DialStatus.initial(dial).execute(toOrders("R100"));
         assertThat(dialFullRight.position()).isEqualTo(50);
 
-        Dial dialFullLeft = Dial.create().execute(toOrders("L100"));
+        DialStatus dialFullLeft = DialStatus.initial(dial).execute(toOrders("L100"));
         assertThat(dialFullLeft.position()).isEqualTo(50);
     }
 

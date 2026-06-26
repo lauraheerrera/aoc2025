@@ -5,27 +5,18 @@
 classDiagram
     direction TB
     class TotalBatteryJoltageCalculator {
-        -BatteryBankMaxJoltageCalculator singleCalculator
-        -Length length
-        +TotalBatteryJoltageCalculator(BatteryBankMaxJoltageCalculator singleCalculator, Length length)
-        +sumAllMaxJoltageFrom(List~BatteryBank~ batteryBanks) Joltage
+        <<record>>
     }
     class BatteryBankMaxJoltageCalculator {
-        +calculate(BatteryBank batteryBank, Length length) Joltage
     }
     class BatteryBank {
-        -String digits
-        -BatteryBank(String digits)
-        +create(String digits)$ BatteryBank
-        +digits() String
+        <<record>>
     }
     class Joltage {
-        +long value
-        +ZERO$ Joltage
-        +add(Joltage other) Joltage
+        <<record>>
     }
     class Length {
-        +int value
+        <<record>>
     }
     TotalBatteryJoltageCalculator --> BatteryBankMaxJoltageCalculator
     TotalBatteryJoltageCalculator --> Length

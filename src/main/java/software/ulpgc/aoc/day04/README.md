@@ -8,11 +8,9 @@ El desafío consiste en optimizar el acceso a rollos de papel (`@`) en una cuadr
 
 El objetivo final es encontrar el número de rollos a los que se puede acceder tras la eliminación iterativa.
 
-## Diagramas UML
+## Diagrama UML
 
-| Parte A | Parte B |
-| :---: | :---: |
-| ![Diagrama UML Parte A](../../../../../../../UML%20diagrams/uml_day04a.png) | ![Diagrama UML Parte B](../../../../../../../UML%20diagrams/uml_day04b.png) |
+![Diagrama UML](../../../../../../../UML%20diagrams/uml_day04.png)
 
 ## Fundamentos de diseño
 
@@ -23,7 +21,7 @@ La solución está construida siguiendo los fundamentos de la ingeniería del so
 *   **Alta cohesión**: Cada componente tiene una única responsabilidad. `Diagram` representa el estado de la cuadrícula de forma inmutable, y `DiagramAnalyzer` calcula las reglas de accesibilidad sobre el estado actual.
 *   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (Main) depende de interfaces, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de modelo.
 *   **Código expresivo**: Se utiliza el enum `Direction` (`NORTH`, `SOUTH_EAST`, etc.) para representar los vectores de movimiento de vecindad de forma clara, eliminando números mágicos y haciendo el código autoexplicativo.
-*   **Inmutabilidad del modelo**: La clase `Diagram` es inmutable. El método `withClearedCoordinates` no altera el estado de la instancia existente, sino que devuelve un nuevo objeto `Diagram` con las modificaciones. Esto garantiza que cada paso de la simulación sea discreto y libre de efectos secundarios.
+*   **Inmutabilidad del modelo**: Se establece mediante el patrón de separación entre **Entidad** y **Estado (Status)**. El record `Diagram` es la entidad estática y completamente inmutable (que solo representa la plantilla de celdas inicial y sus dimensiones). El estado que cambia a lo largo de la simulación (qué celdas se van despejando) se encapsula en el record `DiagramStatus`. Cuando se eliminan coordenadas accesibles mediante `withClearedCoordinates()`, no se recrea la entidad `Diagram` original; en su lugar, se devuelve un nuevo `DiagramStatus` que hace referencia al mismo `Diagram` inicial, garantizando un flujo inmutable y previniendo efectos secundarios.
 *   **Eliminación de la obsesión por los primitivos (Primitive Obsession)**: Se han eliminado los tipos primitivos en las firmas del modelo. En su lugar:
     *   Se utiliza el enum `Tile` (`ROLL`, `EMPTY`, `CLEARED`) en lugar de caracteres primitivos (`char`) para representar el estado de las celdas.
     *   Se utiliza el record `RollsCount` para representar el conteo acumulado de rollos en lugar de enteros planos (`int`).

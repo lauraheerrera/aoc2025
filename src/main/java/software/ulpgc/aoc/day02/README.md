@@ -8,11 +8,9 @@ El desafío consiste en validar identificadores numéricos dentro de rangos espe
 
 El objetivo final es sumar todos los IDs inválidos encontrados en los rangos proporcionados.
 
-## Diagramas UML
+## Diagrama UML
 
-| Parte A | Parte B |
-| :---: | :---: |
-| ![Diagrama UML Parte A](../../../../../../../UML%20diagrams/uml_day02a.png) | ![Diagrama UML Parte B](../../../../../../../UML%20diagrams/uml_day02b.png) |
+![Diagrama UML](../../../../../../../UML%20diagrams/uml_day02.png)
 
 ## Fundamentos de diseño
 

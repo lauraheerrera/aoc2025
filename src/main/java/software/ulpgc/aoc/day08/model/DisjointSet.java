@@ -3,9 +3,10 @@ package software.ulpgc.aoc.day08.model;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DisjointSet<T> {
-    private final Map<T, T> parent = new HashMap<>();
-    private final Map<T, Integer> size = new HashMap<>();
+public record DisjointSet<T>(Map<T, T> parent, Map<T, Integer> size) {
+    public DisjointSet() {
+        this(new HashMap<>(), new HashMap<>());
+    }
 
     public T find(T item) {
         return parent.getOrDefault(item, item).equals(item) 

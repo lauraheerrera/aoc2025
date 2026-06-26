@@ -1,24 +1,17 @@
-# Day 05 (Parte A)
+# Day 05
 
 ```mermaid
 %%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
 classDiagram
     direction TB
     class FreshnessValidator {
-        -List~Range~ validRanges
-        +fromRanges(List~Range~ validRanges)$ FreshnessValidator
-        +countFresh(List~ID~ ids) int
+        <<record>>
     }
     class Range {
         <<record>>
-        +ID start
-        +ID end
-        +contains(ID id) boolean
     }
     class ID {
         <<record>>
-        +long value
-        +compareTo(ID other) int
     }
     FreshnessValidator --> Range
     FreshnessValidator --> ID

@@ -68,6 +68,13 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 *   **Patrón Iterator / Streams**:
     *   *Implementación*: Uso de Java Streams (`IntStream.range().flatMapToLong()`) para evaluar de forma limpia y declarativa todas las combinaciones de pares de puntos en el cine.
 
+## Elección de diseño: Primitivos con orElse vs Optional
+
+En la clase `MovieTheater`, los métodos `maxRectangleArea()` (Parte A y Parte B) utilizan el operador `orElse` sobre el stream de áreas reducidas:
+
+*   **¿Por qué es mejor `orElse`?**
+    El método de cálculo de área debe devolver un resultado numérico final directo de tipo primitivo `long` para que sea consumido y acumulado en el punto de entrada principal `Main`. Si el stream de puntos estuviera vacío o no se encontrara ningún rectángulo válido (por ejemplo, si no se cumple el contorno de exclusión de obstáculos), el valor por defecto natural de área es `0L`. Retornar un `OptionalLong` añadiría una complejidad de envoltura innecesaria para el cliente, por lo que resolverlo de inmediato con `.orElse(0L)` es la mejor opción.
+
 ---
 
 ## Pruebas realizadas

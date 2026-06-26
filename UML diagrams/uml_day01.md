@@ -1,14 +1,21 @@
-# Day 09 (Parte A)
+# Day 01
 
 ```mermaid
 %%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
 classDiagram
     direction TB
-    class MovieTheater {
+    class Dial {
         <<record>>
     }
-    class Point {
+
+    class DialStatus {
         <<record>>
     }
-    MovieTheater --> Point
+
+    class Order {
+        <<record>>
+    }
+
+    DialStatus --> Dial
+    DialStatus --> Order
 ```

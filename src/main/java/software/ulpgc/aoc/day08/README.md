@@ -6,11 +6,9 @@ El desafío consiste en modelar y conectar una red tridimensional de cajas de co
 1.  **Parte 1**: Conectar las cajas utilizando el algoritmo de Kruskal (Kruskal's MST algorithm) / estructura de conjuntos disjuntos (Disjoint Set) y, tras aplicar las primeras 1000 conexiones más cortas, calcular el producto del tamaño de los 3 componentes conexos (circuitos) más grandes.
 2.  **Parte 2**: Determinar cuál es la última conexión que une todos los nodos en una única red conectada (árbol de expansión mínimo completo) y calcular el producto de las coordenadas `x` de los dos extremos de dicha conexión.
 
-## Diagramas UML
+## Diagrama UML
 
-| Parte A | Parte B |
-| :---: | :---: |
-| ![Diagrama UML Parte A](../../../../../../../UML%20diagrams/uml_day08a.png) | ![Diagrama UML Parte B](../../../../../../../UML%20diagrams/uml_day08b.png) |
+![Diagrama UML](../../../../../../../UML%20diagrams/uml_day08.png)
 
 ## Fundamentos de diseño
 
@@ -64,7 +62,14 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 ## Patrones de diseño
 
 *   **Patrón Iterator / Streams**:
-    *   *Implementación*: Uso exhaustivo de flujos y generadores en `Playground` (`IntStream.range().flatMap()`, `sorted()`, `collect()`) para emparejar y ordenar todas las conexiones combinatorias de manera declarativa.
+    *   *Implementación*: Uso exhaustivo de flujos y generadores en `Playground` (`IntStream.range().flatMap()`, `sorted()`, `collect()`) para emparejar y ordenar todas las conexiones combinatorias de manera de forma declarativa.
+
+## Elección de diseño: Primitivos con orElse vs Optional
+
+En la clase `Playground`, el método `findLastConnectionWithState` utiliza el operador `orElseThrow` para resolver la búsqueda de la última conexión de red:
+
+*   **¿Por qué es mejor `orElseThrow`?**
+    El problema garantiza matemáticamente que siempre habrá una última conexión que termine de conectar todos los nodos en una única red unificada. Al resolver el stream con `.orElseThrow()`, evitamos propagar un `Optional<Connection>` a lo largo del flujo de ejecución del Playground y simplificamos las llamadas del cliente en `Main`. Si por alguna anomalía en los datos de entrada el grafo no pudiera conectarse por completo, el sistema fallaría de inmediato (fail-fast), lo cual es el comportamiento ideal para detectar datos corruptos de entrada.
 
 ---
 

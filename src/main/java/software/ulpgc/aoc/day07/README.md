@@ -93,8 +93,8 @@ Se han diseñado pruebas detalladas utilizando **JUnit** y **AssertJ** para vali
 
 ### Rutas de las pruebas
 *   **Tests de Deserialización**: [`src/test/java/test/Day07/IOTest/TxtManifoldDeserializerTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/IOTest/TxtManifoldDeserializerTest.java)
-*   **Tests de la Parte A**: [`src/test/java/test/Day07/ATest/ManifoldTest.java`](file:///c:/Users/laura/OneDrive/Desktop/AOC-2025/src/test/java/test/Day07/ATest/ManifoldTest.java)
-*   **Tests de la Parte B**: [`src/test/java/test/Day07/BTest/ManifoldTest.java`](file:///c:/Users/laura/OneDrive/Desktop/AOC-2025/src/test/java/test/Day07/BTest/ManifoldTest.java)
+*   **Tests de la Parte A**: [`src/test/java/test/Day07/ATest/ManifoldTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/ATest/ManifoldTest.java)
+*   **Tests de la Parte B**: [`src/test/java/test/Day07/BTest/ManifoldTest.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/BTest/ManifoldTest.java)
 
 ### Escenarios validados
 

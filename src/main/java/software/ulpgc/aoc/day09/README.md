@@ -82,9 +82,9 @@ En la clase `MovieTheater`, los métodos `maxRectangleArea()` (Parte A y Parte B
 Se han diseñado pruebas unitarias robustas utilizando **JUnit** y **AssertJ** para certificar el cálculo de áreas y la detección de intersecciones con los límites del polígono.
 
 ### Rutas de las pruebas
-*   **Tests de Deserialización**: [TxtPointDeserializerTest.java](file:///c:/Users/laura/OneDrive/Desktop/AOC-2025/src/test/java/test/Day09/ATest/TxtPointDeserializerTest.java)
-*   **Tests de la Parte A**: [MovieTheaterTest.java](file:///c:/Users/laura/OneDrive/Desktop/AOC-2025/src/test/java/test/Day09/ATest/MovieTheaterTest.java)
-*   **Tests de la Parte B**: [MovieTheaterTest.java](file:///c:/Users/laura/OneDrive/Desktop/AOC-2025/src/test/java/test/Day09/BTest/MovieTheaterTest.java)
+*   **Tests de Deserialización**: [TxtPointDeserializerTest.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day09/ATest/TxtPointDeserializerTest.java)
+*   **Tests de la Parte A**: [MovieTheaterTest.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day09/ATest/MovieTheaterTest.java)
+*   **Tests de la Parte B**: [MovieTheaterTest.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day09/BTest/MovieTheaterTest.java)
 
 ### Escenarios validados
 

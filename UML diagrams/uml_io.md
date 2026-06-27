@@ -3,42 +3,32 @@
 classDiagram
     direction TB
 
-    class LoaderInterface {
-        <<interface>>
-        +load()* List~T~
-    }
-
     class Deserializer~T~ {
         <<interface>>
-        +deserialize(String line)* T
+        +deserialize(String) T
     }
 
     class TxtConcreteDeserializer {
-        +deserialize(String line) T
+        +deserialize(String) T
     }
 
     class LoaderFactory {
-        +txt(File file, Function~String, T~ deserializer)$ TxtLoader~T~
+        +txt(File, Function~String,T~) TxtLoader~T~
+        +sections(File) List~List~String~~
     }
 
     class TxtLoader~T~ {
         -File file
-        -Function~String, T~ adapter
-        +TxtLoader(File file, Function~String, T~ adapter)
+        -Function~String,T~ deserializer
         +load() List~T~
     }
 
     class Main {
     }
 
-    %% Implementaciones de Interfaces
     Deserializer <|.. TxtConcreteDeserializer 
-    LoaderInterface <.. Main 
-    %% Dependencias reales del Main
     Main --> LoaderFactory
     Main --> TxtConcreteDeserializer
-    Main --> LoaderInterface
-
-    %% Dependencias internas de la Infraestructura (IO)
+    Main ..> TxtLoader
     LoaderFactory ..> TxtLoader
 ```

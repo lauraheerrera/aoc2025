@@ -1,7 +1,6 @@
 package software.ulpgc.aoc.day10.a;
 
 import software.ulpgc.aoc.common.io.Deserializer;
-import software.ulpgc.aoc.day10.io.MachineLoader;
 import software.ulpgc.aoc.common.io.LoaderFactory;
 import software.ulpgc.aoc.day10.a.io.TxtMachineDeserializer;
 import software.ulpgc.aoc.day10.model.Factory;
@@ -15,8 +14,9 @@ public class Main {
     public static void main(String[] args) throws IOException {
         File file = new File("src/main/resources/day10/input.txt");
         Deserializer<Machine> deserializer = new TxtMachineDeserializer();
-        MachineLoader loader = () -> LoaderFactory.txt(file, deserializer::deserialize).load();
-        List<? extends software.ulpgc.aoc.day10.model.Machine> machines = loader.load();
+        List<Machine> machines = LoaderFactory
+                .txt(file, deserializer::deserialize)
+                .load();
         Factory factory = new Factory(machines);
         System.out.println("El resultado es: " + factory.totalMinPresses());
     }

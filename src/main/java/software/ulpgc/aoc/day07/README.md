@@ -25,7 +25,7 @@ La solución está construida siguiendo los fundamentos de la ingeniería del so
 *   **Abstracción**: Toda la lógica matemática y de propagación de caminos está encapsulada en las clases del modelo `Manifold` y `Paths`, ocultando al exterior la forma en la que se calculan las transiciones.
 *   **Modularidad**: Organización limpia en paquetes específicos de lógica de negocio (`model`), permitiendo testear de forma aislada cada una de las partes.
 *   **Alta cohesión**: Las clases y registros representan conceptos atómicos del problema: `Column` (coordenada horizontal), `Row` (fila con celdas), `Tile` (tipo de celda), `Grid` (matriz de celdas), `Paths` (caminos acumulados) y `Manifold` (orquestador del cálculo).
-*   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (`Main`) depende de interfaces, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de modelo.
+*   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io` para leer las líneas del fichero, y construye directamente el `Manifold` con esas líneas, lo que permite cambiar el formato de datos sin afectar a las clases de modelo.
 *   **Código expresivo**: Se resuelven las propagaciones por filas mediante acumulaciones declarativas usando el método `reduce` sobre los flujos de filas (`grid.rows().stream().reduce(...)`), lo que evita la necesidad de bucles de control anidados complejos y variables globales mutables.
 *   **Inmutabilidad del modelo**: Las estructuras de datos principales (`Column`, `Row`, `Grid`, `Paths`, `Manifold`) se implementan como **Records** inmutables. Las transiciones de estado por cada fila devuelven nuevas instancias de `Paths` o de los estados intermedios, protegiendo al sistema contra efectos secundarios.
 
@@ -47,15 +47,15 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 *   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
     *   *Definición*: Las subclases o implementaciones deben ser sustituibles por sus tipos base sin alterar el comportamiento correcto del programa.
     *   *Implementación*:
-        *   [TxtManifoldLoader.java:L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/io/TxtManifoldLoader.java#L10) y [TxtManifoldDeserializer.java:L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/io/TxtManifoldDeserializer.java#L5): Implementan de forma limpia `ManifoldLoader` y `Deserializer<Manifold>`, respectivamente, pudiendo sustituir a sus tipos abstractos de manera transparente.
+        *   La carga del fichero se delega en la factoría genérica `LoaderFactory`, que devuelve un `TxtLoader<String>` y lee las líneas del fichero. El `Manifold` se construye directamente con la lista de líneas leídas (`new Manifold(lines)`), eliminando la necesidad de interfaces de carga específicas para este día.
 *   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
     *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
     *   *Implementación*:
-        *   [ManifoldLoader.java:L4-L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/io/ManifoldLoader.java#L4-L6): Define únicamente el método cohesivo `load()`, impidiendo que cargadores tengan contratos hinchados de bajo nivel.
+        *   La factoría `LoaderFactory` utiliza la interfaz funcional `Function<String, T>` de Java, que expone un único método (`apply()`). No se imponen interfaces específicas de carga a cada día, evitando contratos innecesarios.
 *   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
     *   *Definición*: Depender de abstracciones, no de concreciones.
     *   *Implementación*:
-        *   [TxtManifoldLoader.java:L10-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/io/TxtManifoldLoader.java#L10-L17): El cargador depende del contrato genérico `Deserializer<Manifold>` para parsear la rejilla de texto, desacoplándolo del motor de parseo específico.
+        *   [Main.java (day07/a)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/a/Main.java): El flujo principal depende de la factoría genérica `LoaderFactory` del paquete `common.io` en lugar de un cargador concreto (`TxtManifoldLoader`), lo que permite desacoplar la lectura de datos del dominio específico del día.
 
 
 ## Técnicas de diseño aplicadas

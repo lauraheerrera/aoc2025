@@ -2,7 +2,6 @@ package software.ulpgc.aoc.day02.b;
 
 import software.ulpgc.aoc.common.io.LoaderFactory;
 import software.ulpgc.aoc.common.io.Deserializer;
-import software.ulpgc.aoc.day02.io.RangeLoader;
 import software.ulpgc.aoc.day02.io.TxtRangeDeserializer;
 import software.ulpgc.aoc.day02.b.model.Id;
 import software.ulpgc.aoc.day02.model.GiftShop;
@@ -21,12 +20,11 @@ public class Main {
 
         List<String> lines = LoaderFactory.txt(file, line -> line).load();
 
-        RangeLoader<Id> loader = () -> Arrays.stream(lines.getFirst().split(","))
+        List<IdRange<Id>> ranges = lines.stream()
+                .flatMap(line -> Arrays.stream(line.split(",")))
                 .map(String::trim)
                 .map(deserializer::deserialize)
                 .toList();
-
-        List<IdRange<Id>> ranges = loader.load();
 
         GiftShop<Id> giftShop = new GiftShop<>(ranges);
         System.out.println("Suma IDs invalidos: " + giftShop.sumAllInvalidIds());

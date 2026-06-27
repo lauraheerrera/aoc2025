@@ -2,7 +2,6 @@ package software.ulpgc.aoc.day01.a;
 
 import software.ulpgc.aoc.common.io.LoaderFactory;
 import software.ulpgc.aoc.common.io.Deserializer;
-import software.ulpgc.aoc.day01.io.OrderLoader;
 import software.ulpgc.aoc.day01.io.TxtOrderDeserializer;
 import software.ulpgc.aoc.day01.model.Dial;
 import software.ulpgc.aoc.day01.model.DialStatus;
@@ -17,10 +16,9 @@ public class Main {
 
         File file = new File("src/main/resources/day01/input.txt");
         Deserializer<Order> deserializer = new TxtOrderDeserializer();
-        OrderLoader loader = () -> LoaderFactory
+        List<Order> orders = LoaderFactory
                 .txt(file, deserializer::deserialize)
                 .load();
-        List<Order> orders = loader.load();
 
         Dial dial = new Dial("main-dial");
         DialStatus status = DialStatus.initial(dial).execute(orders);

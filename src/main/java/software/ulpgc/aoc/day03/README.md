@@ -19,7 +19,7 @@ La solución está construida siguiendo los fundamentos de la ingeniería del so
 *   **Abstracción**: Oculta la lógica compleja de cálculo voraz y recursivo tras la API de `BatteryBank` (`maxJoltageOfLength()`).
 *   **Modularidad**: Estructura el reto en paquetes independientes (`model`, `a`, `b`). Esto permite que los componentes se desarrollen y prueben por separado (mediante pruebas unitarias para los modelos) y facilita su mantenimiento.
 *   **Alta cohesión**: Cada componente tiene una única responsabilidad bien enfocada. `BatteryBank` se encarga exclusivamente de resolver el algoritmo de optimización matemática para un banco de baterías, y `BatteryBankMaxJoltageCalculator` realiza la agregación total.
-*   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (`Main`) depende de interfaces, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de dominio.
+*   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io` para leer el fichero, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de dominio.
 *   **Código expresivo**: Se utiliza una aproximación recursiva con nombres de métodos declarativos (`selectDigitAndRecurse`, `findMaxIndex`), lo que permite que el algoritmo "Greedy" sea autoexplicativo, evitando bucles iterativos complejos y anidados.
 *   **Inmutabilidad del modelo**: Las instancias (`BatteryBank` y `BatteryBankMaxJoltageCalculator`) son completamente inmutables una vez creadas. Sus estados internos no pueden ser modificados y la adición de nuevos bancos a través del calculador genera una nueva instancia independiente del mismo.
 
@@ -44,11 +44,11 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 *   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
     *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
     *   *Implementación*:
-        *   [BatteryBankLoader.java:L8-L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/io/BatteryBankLoader.java#L8-L10): Expone únicamente el método `load()`, previniendo que los cargadores tengan dependencias con métodos no cohesivos.
+        *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`). La factoría `LoaderFactory` utiliza la interfaz funcional `Function<String, T>`, igualmente mínima, evitando contratos innecesarios.
 *   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
     *   *Definición*: Depender de abstracciones, no de concreciones.
     *   *Implementación*:
-        *   [TotalBatteryJoltageCalculator.java:L10-L13](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java#L10-L13): Recibe sus dependencias (`BatteryBankMaxJoltageCalculator` y `Length`) desde el constructor (Inyección de Dependencias), y el punto de entrada principal `Main` depende de las abstracciones del cargador y deserializador.
+        *   [TotalBatteryJoltageCalculator.java:L10-L13](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java#L10-L13): Recibe sus dependencias (`BatteryBankMaxJoltageCalculator` y `Length`) desde el constructor (Inyección de Dependencias), y el punto de entrada principal `Main` depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<BatteryBank>`.
 
 
 ## Técnicas de diseño aplicadas

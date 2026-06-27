@@ -19,9 +19,9 @@ La solución está construida siguiendo los fundamentos de la ingeniería del so
 *   **Abstracción**: El modelo del plano geométrico está encapsulado en `Point`, `Segment` y `MovieTheater`, ocultando los algoritmos de detección de colisiones y cálculo de áreas.
 *   **Modularidad**: Separación limpia entre la lógica de E/S (`io`) y las estructuras espaciales del dominio (`model`).
 *   **Alta cohesión**: Las clases y registros representan conceptos atómicos bien acotados: `Point` maneja coordenadas individuales y áreas, `Segment` representa los límites físicos entre asientos, y `MovieTheater` implementa la lógica de optimización del espacio.
-*   **Bajo acoplamiento**: `TxtPointLoader` depende de la interfaz genérica `Deserializer<Point>`, abstrayendo la fuente y formato de los datos de entrada.
+*   **Bajo acoplamiento**: El flujo principal (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io`, que recibe una `Function<String, T>` de deserialización, abstrayendo la fuente y formato de los datos de entrada.
 *   **Inmutabilidad del modelo**: Todas las estructuras de datos (`Point`, `Segment` y `MovieTheater`) se implementan como **Records** inmutables en Java.
-*   **Diseño por contrato**: Definición de interfaces cohesivas como `PointLoader` y `Deserializer`.
+*   **Diseño por contrato**: Definición de la interfaz genérica `Deserializer<T>` para la deserialización, y uso de la factoría `LoaderFactory` que respeta el contrato genérico `TxtLoader<T>`.
 
 ## Principios SOLID
 
@@ -40,15 +40,15 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 *   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
     *   *Definición*: Los subtipos deben poder reemplazar a sus tipos base sin alterar el comportamiento.
     *   *Implementación*:
-        *   [TxtPointLoader.java:L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/io/TxtPointLoader.java#L10): Implementa `PointLoader` de manera transparente para el cliente (`Main`), lo que permite que sea reemplazado por cargadores mock u otros sin romper el flujo principal.
+        *   La factoría `LoaderFactory` devuelve un `TxtLoader<T>` genérico que es sustituible por cualquier implementación de carga. El `TxtPointDeserializer` implementa `Deserializer<Point>` de forma limpia, lo que permite reemplazarlo por cargadores mock u otros sin romper el flujo principal.
 *   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
     *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
     *   *Implementación*:
-        *   [PointLoader.java:L8-L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/io/PointLoader.java#L8-L10): Define un único método cohesivo (`load()`), asegurando una interfaz minimalista.
+        *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`). La factoría `LoaderFactory` utiliza la interfaz funcional `Function<String, T>`, igualmente mínima.
 *   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
     *   *Definición*: Depender de abstracciones, no de concreciones.
     *   *Implementación*:
-        *   [TxtPointLoader.java:L10-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/io/TxtPointLoader.java#L10-L17): Depende de la interfaz genérica `Deserializer<Point>` para procesar la entrada de datos en lugar de una implementación deserializadora concreta.
+        *   [Main.java:L17-L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day09/a/Main.java#L17-L19): El flujo principal depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<Point>` en lugar de una implementación deserializadora concreta.
 
 ## Técnicas de diseño aplicadas
 

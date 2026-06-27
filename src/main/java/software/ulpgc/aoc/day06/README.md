@@ -19,12 +19,12 @@ I/O
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
-*   **Abstracción**: Oculta los detalles del algoritmo de segmentación de bloques y la conversión de orientaciones tras la clase `TxtMathWorksheetLoader`. Asimismo, la carga y extracción de problemas se realiza tras la interfaz `ProblemLoader`.
+*   **Abstracción**: Oculta los detalles del algoritmo de segmentación de bloques y la conversión de orientaciones tras la clase `Worksheet`. La carga del fichero se delega en la factoría genérica `LoaderFactory`, que abstrae la lectura línea a línea del sistema de archivos.
 *   **Modularidad**: Estructura el reto en paquetes independientes (`model`, `io`, `a`, `b`), facilitando el desarrollo y testeo por separado de cada lógica de entrada o resolución.
-*   **Alta cohesión**: Cada componente tiene una única responsabilidad. El record `Problem` se encarga únicamente de evaluar la operación sobre una lista de números, y `TxtMathWorksheetLoader` detecta las columnas vacías para dividir el worksheet en bloques individuales.
-*   **Bajo acoplamiento**: Las interacciones se basan en abstracciones. El cargador de hojas de ejercicios depende de la interfaz `Deserializer<Problem>` en lugar de una clase de deserialización acoplada.
+*   **Alta cohesión**: Cada componente tiene una única responsabilidad. El record `Problem` se encarga únicamente de evaluar la operación sobre una lista de números, y `Worksheet` detecta las columnas vacías para dividir el worksheet en bloques individuales.
+*   **Bajo acoplamiento**: Las interacciones se basan en abstracciones. La carga de ficheros se realiza mediante la factoría genérica `LoaderFactory` del paquete `common.io`, reutilizable por cualquier día. El modelo `Worksheet` depende de la interfaz `Deserializer<Problem>` en lugar de una clase de deserialización acoplada.
 *   **Código expresivo**: Se hace un uso extensivo de la API funcional de streams y expresiones regulares para parsear los números (`Pattern.compile("\\d+")`) e identificar los límites de cada bloque de forma declarativa.
-*   **Diseño por contrato**: El cargador y deserializador cumplen rigurosamente con las firmas genéricas de `ProblemLoader` y `Deserializer`.
+*   **Diseño por contrato**: El deserializador cumple rigurosamente con la firma genérica de `Deserializer<Problem>`, y la factoría `LoaderFactory` respeta el contrato genérico `TxtLoader<T>`.
 *   **Inmutabilidad del modelo**: La representación de cada operación matemática `Problem` es un **Record** inmutable de Java, lo que previene que los números u operadores sufran modificaciones indeseadas durante el cálculo.
 
 ## Principios SOLID
@@ -35,7 +35,7 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
     *   *Definición*: Cada clase debe tener una única razón para cambiar.
     *   *Implementación*:
         *   [Problem.java:L6-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/model/Problem.java#L6-L15) (`solve()`): Se encarga exclusivamente de resolver la operación matemática sobre una lista de operandos.
-        *   [TxtMathWorksheetLoader.java:L9-L22](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/TxtMathWorksheetLoader.java#L9-L22): Su única responsabilidad es cargar las líneas del archivo de ejercicios y delegar su creación.
+        *   [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java): Su única responsabilidad es crear instancias de `TxtLoader` para la lectura de ficheros línea a línea, desacoplando la carga de datos del dominio específico de cada día.
         *   [TxtMathProblemDeserializer.java:L14-L29](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/TxtMathProblemDeserializer.java#L14-L29) (`deserialize()`): Lee y parsea los operandos y el operador a partir de bloques de texto.
 *   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
     *   *Definición*: Las entidades de software deben estar abiertas para la extensión, pero cerradas para la modificación.
@@ -44,15 +44,15 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 *   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
     *   *Definición*: Las subclases o implementaciones deben ser sustituibles por sus tipos base sin alterar el comportamiento correcto del programa.
     *   *Implementación*:
-        *   [TxtMathProblemDeserializer.java:L14](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/TxtMathProblemDeserializer.java#L14): La clase implementa `Deserializer<Problem>` de forma limpia, y la clase `TxtMathWorksheetLoader` en [TxtMathWorksheetLoader.java:L9](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/TxtMathWorksheetLoader.java#L9) implementa `ProblemLoader`. Ambas son inyectables de forma transparente en la clase `Main`.
+        *   [TxtMathProblemDeserializer.java:L14](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/TxtMathProblemDeserializer.java#L14): La clase implementa `Deserializer<Problem>` de forma limpia y es inyectable de forma transparente en `Worksheet.parse()`. La factoría `LoaderFactory` devuelve un `TxtLoader<T>` genérico que es sustituible por cualquier implementación de carga.
 *   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
     *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
     *   *Implementación*:
-        *   [ProblemLoader.java:L7-L9](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/ProblemLoader.java#L7-L9) y [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Son interfaces minimalistas y cohesivas que exponen un único método (`load()` y `deserialize()` respectivamente), evitando forzar la implementación de métodos innecesarios.
+        *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista y cohesiva que expone un único método (`deserialize()`), evitando forzar la implementación de métodos innecesarios. La factoría `LoaderFactory` utiliza la interfaz funcional `Function<String, T>` de Java, igualmente mínima.
 *   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
     *   *Definición*: Depender de abstracciones, no de concreciones.
     *   *Implementación*:
-        *   [TxtMathWorksheetLoader.java:L11-L16](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/TxtMathWorksheetLoader.java#L11-L16): El cargador `TxtMathWorksheetLoader` depende de la interfaz genérica `Deserializer<Problem>` en lugar de una clase deserializadora concreta, facilitando el desacoplamiento de la lógica de análisis.
+        *   [Main.java (day06/a)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/a/Main.java): El flujo principal depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<Problem>` en lugar de clases concretas de carga, facilitando el desacoplamiento de la lógica de análisis.
 
 ## Técnicas de diseño aplicadas
 
@@ -67,7 +67,7 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
         *   [Operator.java:L32-L35](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/model/Operator.java#L32-L35) (`from()`): Utiliza `Arrays.stream(values()).filter(...)` para buscar el operador correspondiente a un carácter simbólico de forma funcional.
 *   **Inyección de dependencias**:
     *   *Definición*: Técnica de diseño que consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código.
-    *   *Implementación*: El cargador `TxtMathWorksheetLoader` en [TxtMathWorksheetLoader.java:L13-L16](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/TxtMathWorksheetLoader.java#L13-L16) recibe el `Deserializer<Problem>` en su constructor.
+    *   *Implementación*: La factoría `LoaderFactory` recibe una `Function<String, T>` (la función de deserialización) como parámetro, inyectándola en el `TxtLoader` genérico. A su vez, `Worksheet.parse()` recibe el `Deserializer<Problem>` como argumento, desacoplando la lógica de parseo de la estructura del worksheet.
 *   **Genéricos**:
     *   *Definición*: Permiten parametrizar clases, interfaces y métodos con tipos para proveer seguridad de tipos en tiempo de compilación y evitar duplicidades.
     *   *Implementación*: Se consume la interfaz parametrizada `Deserializer<T>` para desacoplar el deserializador del tipo concreto `Problem`.

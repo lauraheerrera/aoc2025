@@ -1,6 +1,5 @@
 package software.ulpgc.aoc.day09.b;
 
-import software.ulpgc.aoc.day09.io.PointLoader;
 import software.ulpgc.aoc.common.io.LoaderFactory;
 import software.ulpgc.aoc.day09.io.TxtPointDeserializer;
 import software.ulpgc.aoc.common.io.Deserializer;
@@ -15,9 +14,10 @@ public class Main {
     public static void main(String[] args) throws IOException {
         File file = new File("src/main/resources/day09/input.txt");
         Deserializer<Tile> deserializer = new TxtPointDeserializer();
-        PointLoader loader = () -> LoaderFactory.txt(file, deserializer::deserialize).load();
-        List<Tile> points = loader.load();
-        MovieTheater theater = new MovieTheater(points);
+        List<Tile> tiles = LoaderFactory
+                .txt(file, deserializer::deserialize)
+                .load();
+        MovieTheater theater = new MovieTheater(tiles);
         System.out.println("Area máxima: " + theater.maxRectangleArea());
     }
 }

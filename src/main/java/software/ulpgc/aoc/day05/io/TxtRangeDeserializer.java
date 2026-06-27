@@ -1,9 +1,10 @@
 package software.ulpgc.aoc.day05.io;
 
+import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.day05.model.ID;
 import software.ulpgc.aoc.day05.model.Range;
 
-public class TxtRangeDeserializer implements RangeDeserializer {
+public class TxtRangeDeserializer implements Deserializer<Range> {
     private static final String SEPARATOR = "-";
 
     @Override

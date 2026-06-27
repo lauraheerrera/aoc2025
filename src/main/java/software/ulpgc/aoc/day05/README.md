@@ -44,15 +44,15 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 *   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
     *   *Definición*: Las subclases o implementaciones deben ser sustituibles por sus tipos base sin alterar el comportamiento correcto del programa.
     *   *Implementación*:
-        *   [TxtRangeDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtRangeDeserializer.java#L6) y [TxtIDDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtIDDeserializer.java#L6): Son perfectamente sustituibles bajo las firmas abstractas de `RangeDeserializer` y `IDDeserializer` en cualquier cargador adaptado.
+        *   [TxtRangeDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtRangeDeserializer.java#L6) y [TxtIDDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtIDDeserializer.java#L6): Son perfectamente sustituibles bajo las firmas abstractas de `Deserializer<Range>` y `Deserializer<ID>` en cualquier cargador adaptado.
 *   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
     *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
     *   *Implementación*:
-        *   [RangeLoader.java:L7-L9](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/RangeLoader.java#L7-L9) e [IDLoader.java:L7-L9](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/IDLoader.java#L7-L9): Están completamente segregadas, lo que permite que un cargador de base de datos (`TxtDatabaseLoader`) implemente de forma independiente la lectura de rangos o la lectura de identificadores.
+        *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz genérica minimalista que expone un único método (`deserialize()`). El cargador `TxtDatabaseLoader` recibe instancias separadas de `Deserializer<Range>` y `Deserializer<ID>`, manteniendo la segregación de responsabilidades sin necesidad de interfaces específicas de carga.
 *   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
     *   *Definición*: Depender de abstracciones, no de concreciones.
     *   *Implementación*:
-        *   [TxtDatabaseLoader.java:L20-L24](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtDatabaseLoader.java#L20-L24): El cargador no depende de deserializadores de texto planos fijos, sino de las interfaces `RangeDeserializer` y `IDDeserializer`, permitiendo la inyección de dependencias para cambiar de forma externa la infraestructura física de los ficheros.
+        *   [TxtDatabaseLoader.java:L20-L24](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtDatabaseLoader.java#L20-L24): El cargador no depende de deserializadores de texto planos fijos, sino de las interfaces genéricas `Deserializer<Range>` y `Deserializer<ID>`, permitiendo la inyección de dependencias para cambiar de forma externa la infraestructura física de los ficheros.
 
 
 ## Técnicas de diseño aplicadas

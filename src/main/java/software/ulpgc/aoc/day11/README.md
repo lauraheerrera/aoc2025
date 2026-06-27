@@ -19,9 +19,9 @@ La solución está construida siguiendo los fundamentos de la ingeniería del so
 *   **Abstracción**: La lógica de conteo de caminos mediante recursión y memoización está completamente encapsulada dentro del record `Network`, ocultando los detalles del algoritmo al exterior.
 *   **Modularidad**: Separación limpia entre la lógica de E/S (`io`) y las entidades operacionales del grafo (`model`).
 *   **Alta cohesión**: `Device` modela únicamente un nodo del grafo con su nombre y sus conexiones de salida. `Network` es responsable exclusivo de construir la lista de adyacencia y resolver los recuentos de caminos.
-*   **Bajo acoplamiento**: El punto de entrada (`Main`) depende de la interfaz `DeviceLoader` y no de ninguna implementación concreta de lectura de archivos.
+*   **Bajo acoplamiento**: El punto de entrada (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io` y no depende de ninguna implementación concreta de lectura de archivos.
 *   **Inmutabilidad del modelo**: Las clases de datos clave del sistema (`Device` y `Network`) se implementan como **Records** inmutables en Java, garantizando la ausencia de efectos secundarios.
-*   **Diseño por contrato**: Definición de interfaces cohesivas como `DeviceLoader` y el genérico `Deserializer<Device>`.
+*   **Diseño por contrato**: Definición de la interfaz genérica `Deserializer<T>` para la deserialización, y uso de la factoría `LoaderFactory` que respeta el contrato genérico `TxtLoader<T>`.
 
 ## Principios SOLID
 
@@ -40,15 +40,15 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 *   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
     *   *Definición*: Los subtipos deben poder reemplazar a sus tipos base sin alterar el comportamiento.
     *   *Implementación*:
-        *   [Main.java (a):L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/a/Main.java#L18): La implementación lambda de `DeviceLoader` puede sustituirse por cualquier otra implementación de la interfaz sin alterar el flujo principal del programa.
+        *   [Main.java (a):L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/a/Main.java#L18): La factoría `LoaderFactory` devuelve un `TxtLoader<T>` genérico que puede sustituirse por cualquier otra implementación de carga sin alterar el flujo principal del programa.
 *   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
     *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
     *   *Implementación*:
-        *   [DeviceLoader.java:L7-L9](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/io/DeviceLoader.java#L7-L9): Define un único método cohesivo (`load()`), asegurando una interfaz funcional minimalista.
+        *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`). La factoría `LoaderFactory` utiliza la interfaz funcional `Function<String, T>`, igualmente mínima.
 *   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
     *   *Definición*: Depender de abstracciones, no de concreciones.
     *   *Implementación*:
-        *   [Main.java (a):L17-L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/a/Main.java#L17-L18): El punto de entrada depende de la interfaz genérica `Deserializer<Device>` y de `DeviceLoader` en lugar de implementaciones concretas, desacoplando la carga de datos de la lógica de negocio.
+        *   [Main.java (a):L17-L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/a/Main.java#L17-L18): El punto de entrada depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<Device>` en lugar de implementaciones concretas, desacoplando la carga de datos de la lógica de negocio.
 
 ## Técnicas de diseño aplicadas
 
@@ -57,7 +57,7 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
     *   *Implementación*:
         *   [Network.java:L14-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/model/Network.java#L14-L17) (`toAdjMap()`): Construye la lista de adyacencia de forma declarativa con `devices.stream().collect(Collectors.toMap(...))`.
         *   [Network.java:L31-L33](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/model/Network.java#L31-L33) (`computeAndMemoize()`): Suma funcional de los caminos de todos los vecinos del nodo con `adjacentList.get(current).stream().mapToLong(...).sum()`.
-*   **Inyección de dependencias**: El constructor de `Main` recibe la implementación de `DeviceLoader` y `Deserializer<Device>` como lambda en tiempo de ejecución.
+*   **Inyección de dependencias**: La factoría `LoaderFactory` recibe la función de deserialización (`Deserializer<Device>::deserialize`) como parámetro en tiempo de ejecución, inyectándola en el `TxtLoader` genérico.
 *   **Genéricos**: Uso de la interfaz parametrizada `Deserializer<T>` para la entidad `Device`.
 *   **Good Naming**: Nombres autodescriptivos como `countPaths()`, `computeAndMemoize()`, `toAdjMap()`, `adjacentList`.
 

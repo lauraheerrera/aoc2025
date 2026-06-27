@@ -1,8 +1,8 @@
 package test.Day06.ATest;
 
 import org.junit.Test;
+import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.day06.io.TxtMathProblemDeserializer;
-import software.ulpgc.aoc.day06.io.TxtMathWorksheetLoader;
 import software.ulpgc.aoc.day06.model.Operator;
 import software.ulpgc.aoc.day06.model.Problem;
 import software.ulpgc.aoc.day06.model.Worksheet;
@@ -19,11 +19,8 @@ public class MathWorksheetTest {
             *   +   *   +
             """;
 
-    TxtMathWorksheetLoader loader = new TxtMathWorksheetLoader(
-            input,
-            new TxtMathProblemDeserializer(Worksheet.View.ROWS));
-
-    List<Problem> problems = loader.load();
+    Deserializer<Problem> deserializer = new TxtMathProblemDeserializer(Worksheet.View.ROWS);
+    List<Problem> problems = new Worksheet(input.lines().toList()).parse(deserializer);
 
     @Test
     public void solve_example_problems() {
@@ -64,8 +61,6 @@ public class MathWorksheetTest {
     }
 
     private List<Problem> toProblems(String input) {
-        return new TxtMathWorksheetLoader(
-                input,
-                new TxtMathProblemDeserializer(Worksheet.View.ROWS)).load();
+        return new Worksheet(input.lines().toList()).parse(deserializer);
     }
 }

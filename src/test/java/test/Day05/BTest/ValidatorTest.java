@@ -2,16 +2,13 @@ package test.Day05.BTest;
 
 import org.junit.Test;
 
-import software.ulpgc.aoc.day05.io.RangeDeserializer;
-import software.ulpgc.aoc.day05.io.TxtDatabaseLoader;
-import software.ulpgc.aoc.day05.io.TxtIDDeserializer;
+import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.day05.io.TxtRangeDeserializer;
 import software.ulpgc.aoc.day05.model.FreshnessValidator;
 import software.ulpgc.aoc.day05.model.ID;
 import software.ulpgc.aoc.day05.model.Range;
-import software.ulpgc.aoc.day05.io.IDDeserializer;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ValidatorTest {
@@ -23,12 +20,19 @@ public class ValidatorTest {
             12-18
             """;
 
-    RangeDeserializer rangeDeserializer = new TxtRangeDeserializer();
-    IDDeserializer idDeserializer = new TxtIDDeserializer();
-    TxtDatabaseLoader loader = new TxtDatabaseLoader(input, rangeDeserializer, idDeserializer);
+    Deserializer<Range> rangeDeserializer = new TxtRangeDeserializer();
 
-    List<Range> ranges = loader.loadRanges();
-    List<ID> ids = loader.loadIds();
+    List<Range> ranges = parseSection(input, 0, rangeDeserializer);
+    List<ID> ids = List.of();
+
+    private static <T> List<T> parseSection(String content, int sectionIndex, Deserializer<T> deserializer) {
+        String[] sections = content.split("\r?\n\r?\n");
+        if (sectionIndex >= sections.length) return List.of();
+        return Arrays.stream(sections[sectionIndex].split("\r?\n"))
+                .filter(line -> !line.isBlank())
+                .map(deserializer::deserialize)
+                .toList();
+    }
 
     @Test
     public void count_fresh_ids() {

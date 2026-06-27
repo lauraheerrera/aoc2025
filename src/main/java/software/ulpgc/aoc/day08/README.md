@@ -17,9 +17,9 @@ La solución está construida siguiendo los fundamentos de la ingeniería del so
 *   **Abstracción**: El modelo matemático de distancias tridimensionales y de optimización de redes está encapsulado en `JunctionBox`, `Connection` y `Playground`, ocultando los detalles algorítmicos.
 *   **Modularidad**: Separación limpia entre la lógica de E/S (`io`) y las estructuras algebraicas (`model`).
 *   **Alta cohesión**: Cada componente tiene un propósito claro. `DisjointSet` se encarga exclusivamente de la estructura Union-Find (con compresión de caminos y unión por tamaño), `Connection` representa un enlace ordenable por distancia, y `JunctionBox` es un nodo en el espacio 3D.
-*   **Bajo acoplamiento**: `TxtJunctionBoxLoader` depende de la interfaz `Deserializer<JunctionBox>`, evitando el acoplamiento a formatos de texto concretos.
+*   **Bajo acoplamiento**: El flujo principal (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io`, que recibe una `Function<String, T>` de deserialización, evitando el acoplamiento a formatos de texto concretos.
 *   **Inmutabilidad del modelo**: Las entidades principales del modelo (`JunctionBox` y `Connection`) se implementan como **Records** inmutables en Java.
-*   **Diseño por contrato**: Definición limpia de interfaces para la lectura (`JunctionBoxLoader`) y la deserialización (`Deserializer`).
+*   **Diseño por contrato**: Definición limpia de la interfaz genérica `Deserializer<T>` para la deserialización, y uso de la factoría `LoaderFactory` que respeta el contrato genérico `TxtLoader<T>`.
 
 ## Principios SOLID
 
@@ -38,15 +38,15 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 *   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
     *   *Definición*: Los objetos de una subclase deben poder reemplazar a los de su superclase sin alterar la corrección del programa.
     *   *Implementación*:
-        *   [JunctionBoxLoader.java:L7-L9](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/io/JunctionBoxLoader.java#L7-L9): Define la interfaz que se implementa de manera transparente mediante una expresión lambda en el cliente (`Main`), lo que permite que sea reemplazado por cargadores mock u otros sin romper el flujo principal.
+        *   La factoría `LoaderFactory` devuelve un `TxtLoader<T>` genérico que es sustituible por cualquier implementación de carga. El `TxtJunctionBoxDeserializer` implementa `Deserializer<JunctionBox>` de forma limpia, permitiéndose reemplazar por mock u otros sin romper el flujo principal.
 *   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
     *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
     *   *Implementación*:
-        *   [JunctionBoxLoader.java:L7-L9](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/io/JunctionBoxLoader.java#L7-L9): Define un único método cohesivo (`load()`), asegurando una interfaz minimalista.
+        *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`). La factoría `LoaderFactory` utiliza la interfaz funcional `Function<String, T>`, igualmente mínima.
 *   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
     *   *Definición*: Depender de abstracciones, no de concreciones.
     *   *Implementación*:
-        *   [Main.java:L17-L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/a/Main.java#L17-L19): El cliente (`Main`) y la lógica dependen de la abstracción `JunctionBoxLoader` en lugar de una clase cargadora concreta, inyectando la implementación dinámicamente mediante una lambda.
+        *   [Main.java:L17-L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/a/Main.java#L17-L19): El cliente (`Main`) depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<JunctionBox>` en lugar de una clase cargadora concreta.
 
 ## Técnicas de diseño aplicadas
 

@@ -19,7 +19,7 @@ La solución está construida siguiendo los fundamentos de la ingeniería del so
 *   **Abstracción**: Oculta la complejidad de la navegación espacial y la verificación de límites tras la clase `Diagram` y el enum `Direction`.
 *   **Modularidad**: Estructura el reto en paquetes independientes (`model`, `a`, `b`). Esto permite aislar y desarrollar componentes por separado, facilitando la mantenibilidad.
 *   **Alta cohesión**: Cada componente tiene una única responsabilidad. `Diagram` representa el estado de la cuadrícula de forma inmutable, y `DiagramAnalyzer` calcula las reglas de accesibilidad sobre el estado actual.
-*   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (Main) depende de interfaces, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de modelo.
+*   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io` para leer el fichero, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de modelo.
 *   **Código expresivo**: Se utiliza el enum `Direction` (`NORTH`, `SOUTH_EAST`, etc.) para representar los vectores de movimiento de vecindad de forma clara, eliminando números mágicos y haciendo el código autoexplicativo.
 *   **Inmutabilidad del modelo**: Se establece mediante el patrón de separación entre **Entidad** y **Estado (Status)**. El record `Diagram` es la entidad estática y completamente inmutable (que solo representa la plantilla de celdas inicial y sus dimensiones). El estado que cambia a lo largo de la simulación (qué celdas se van despejando) se encapsula en el record `DiagramStatus`. Cuando se eliminan coordenadas accesibles mediante `withClearedCoordinates()`, no se recrea la entidad `Diagram` original; en su lugar, se devuelve un nuevo `DiagramStatus` que hace referencia al mismo `Diagram` inicial, garantizando un flujo inmutable y previniendo efectos secundarios.
 *   **Eliminación de la obsesión por los primitivos (Primitive Obsession)**: Se han eliminado los tipos primitivos en las firmas del modelo. En su lugar:
@@ -47,11 +47,11 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
 *   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
     *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
     *   *Implementación*:
-        *   [DiagramLoader.java:L8-L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/io/DiagramLoader.java#L8-L10): Expone un contrato muy restrictivo de un único método (`load()`), simplificando el desarrollo de cargadores específicos.
+        *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`). La factoría `LoaderFactory` utiliza la interfaz funcional `Function<String, T>`, igualmente mínima, evitando contratos innecesarios.
 *   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
     *   *Definición*: Depender de abstracciones, no de concreciones.
     *   *Implementación*:
-        *   [Main.java:L18-L21](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/a/Main.java#L18-L21): La ejecución en `Main` interactúa únicamente con las abstracciones `DiagramLoader` y `Deserializer<Tile[]>`, evitando acoplar el flujo central del programa a las dependencias de ficheros físicas.
+        *   [Main.java:L18-L21](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/a/Main.java#L18-L21): La ejecución en `Main` interactúa con la factoría genérica `LoaderFactory` y la interfaz `Deserializer<Tile[]>`, evitando acoplar el flujo central del programa a las dependencias de ficheros físicas.
 
     
 

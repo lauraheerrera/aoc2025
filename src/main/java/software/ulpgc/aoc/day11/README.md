@@ -16,39 +16,74 @@ El desafío consiste en contar rutas dirigidas a través de una red de dispositi
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
-*   **Abstracción**: La lógica de conteo de caminos mediante recursión y memoización está completamente encapsulada dentro del record `Network`, ocultando los detalles del algoritmo al exterior.
-*   **Modularidad**: Separación limpia entre la lógica de E/S (`io`) y las entidades operacionales del grafo (`model`).
-*   **Alta cohesión**: `Device` modela únicamente un nodo del grafo con su nombre y sus conexiones de salida. `Network` es responsable exclusivo de construir la lista de adyacencia y resolver los recuentos de caminos.
-*   **Bajo acoplamiento**: El punto de entrada (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io` y no depende de ninguna implementación concreta de lectura de archivos.
-*   **Inmutabilidad del modelo**: Las clases de datos clave del sistema (`Device` y `Network`) se implementan como **Records** inmutables en Java, garantizando la ausencia de efectos secundarios.
-*   **Diseño por contrato**: Definición de la interfaz genérica `Deserializer<T>` para la deserialización, y uso de la factoría `LoaderFactory` que respeta el contrato genérico `TxtLoader<T>`.
+*   **Abstracción**:
+    *   *Definición*: Permite identificar y modelar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
+    *   *Implementación*: La lógica de conteo de caminos mediante recursión y memoización está completamente encapsulada dentro del record `Network`, ocultando los detalles del algoritmo al exterior.
+*   **Encapsulamiento**:
+    *   *Definición*: El código esconde su complejidad interna, mostrándose al exterior mediante una interfaz más simple de operar.
+    *   *Implementación*: La lista de adyacencia y el almacenamiento en caché (`memo`) se ocultan a los clientes de la red.
+*   **Cohesión**:
+    *   *Definición*: Se refiere al grado en que los elementos de un módulo —como una clase o función— están relacionados entre sí y colaboran para cumplir una única tarea o propósito. Un módulo se considera altamente cohesivo cuando todas sus partes están directamente conectadas con la responsabilidad central que se le ha asignado, trabajando de forma coordinada hacia un objetivo común.
+    *   *Implementación*: `Device` modela únicamente un nodo del grafo con su nombre y sus conexiones de salida. `Network` es responsable exclusivo de construir la lista de adyacencia y resolver los recuentos de caminos.
+*   **Bajo acoplamiento**:
+    *   *Definición*: Las dependencias entre módulos son mínimas y se basan en abstracciones.
+    *   *Implementación*: El punto de entrada (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io` y no depende de ninguna implementación concreta de lectura de archivos.
+*   **Código expresivo**:
+    *   *Definición*: El código es claro y fácil de entender.
+    *   *Implementación*: El mapeo de adyacencias y sumas de vecinos se resuelven de manera declarativa y comprensible mediante la API de Streams en Java.
+*   **Inmutabilidad del modelo**:
+    *   *Definición*: Las clases del modelo se definen como Records, asegurando que sus instancias sean totalmente inmutables una vez creadas, lo que favorece la abstracción y evita errores relacionados con efectos secundarios.
+    *   *Implementación*: Las clases de datos clave del sistema (`Device` y `Network`) se implementan como **Records** inmutables en Java, garantizando la ausencia de efectos secundarios.
 
-## Principios SOLID
+## Principios de diseño
 
-El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
+El proyecto está diseñado siguiendo rigurosamente los principios de diseño y **SOLID**:
 
-*   **Principio de Responsabilidad Única (SRP - Single Responsibility Principle)**:
-    *   *Definición*: Cada clase debe tener una única razón para cambiar.
-    *   *Implementación*:
-        *   [Device.java:L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/model/Device.java#L5): Modela exclusivamente un nodo del grafo dirigido con su nombre y lista de dispositivos de salida.
-        *   [Network.java:L8-L36](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/model/Network.java#L8-L36): Se limita únicamente a construir la lista de adyacencia a partir de los dispositivos y a resolver el conteo de caminos con memoización.
-        *   [TxtDeviceDeserializer.java:L10-L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/io/TxtDeviceDeserializer.java#L10-L18): Concentra exclusivamente el parseo de líneas de texto en la forma `nombre: salida1 salida2 ...` para producir instancias de `Device`.
-*   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
-    *   *Definición*: Las clases deben estar abiertas para la extensión, pero cerradas para la modificación.
-    *   *Implementación*:
-        *   [Network.java:L8](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/model/Network.java#L8): La estrategia de recuento de caminos (DFS con memoización) puede refactorizarse o extenderse internamente sin alterar la interfaz pública `countPaths(String, String)` expuesta a los clientes.
-*   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
-    *   *Definición*: Los subtipos deben poder reemplazar a sus tipos base sin alterar el comportamiento.
-    *   *Implementación*:
-        *   [Main.java (a):L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/a/Main.java#L18): La factoría `LoaderFactory` devuelve un `TxtLoader<T>` genérico que puede sustituirse por cualquier otra implementación de carga sin alterar el flujo principal del programa.
-*   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
-    *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
-    *   *Implementación*:
-        *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`). La factoría `LoaderFactory` utiliza la interfaz funcional `Function<String, T>`, igualmente mínima.
-*   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
-    *   *Definición*: Depender de abstracciones, no de concreciones.
-    *   *Implementación*:
-        *   [Main.java (a):L17-L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/a/Main.java#L17-L18): El punto de entrada depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<Device>` en lugar de implementaciones concretas, desacoplando la carga de datos de la lógica de negocio.
+*   **Composition Over Inheritance (COI - Composición sobre herencia)**:
+    *   *Definición*: Prefiere la composición de objetos frente a la herencia, utilizando atributos en lugar de extender clases, para mejorar la modularidad y facilitar el mantenimiento.
+    *   *Implementación*: `Network` se compone de una colección de `Device` mapeada como una lista de adyacencia sin recurrir a herencia de grafos.
+*   **SOLID**:
+    *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
+        *   *Definición*: Cada clase o módulo debe tener una única responsabilidad o razón para cambiar, favoreciendo la cohesión y la claridad del diseño.
+        *   *Implementación*:
+            *   [Device.java:L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/model/Device.java#L5): Modela exclusivamente un nodo del grafo dirigido con su nombre y lista de dispositivos de salida.
+            *   [Network.java:L8-L36](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/model/Network.java#L8-L36): Se limita únicamente a construir la lista de adyacencia a partir de los dispositivos y a resolver el conteo de caminos con memoización.
+            *   [TxtDeviceDeserializer.java:L10-L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/io/TxtDeviceDeserializer.java#L10-L18): Concentra exclusivamente el parseo de líneas de texto para producir instancias de `Device`.
+    *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
+        *   *Definición*: Las clases deben estar abiertas a la extensión pero cerradas a la modificación, permitiendo añadir funcionalidad sin alterar el código existente.
+        *   *Implementación*:
+            *   [Network.java:L8](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/model/Network.java#L8): La estrategia de recuento de caminos (DFS con memoización) puede refactorizarse o extenderse internamente sin alterar la interfaz pública `countPaths(String, String)` expuesta a los clientes.
+    *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
+        *   *Definición*: Los objetos de una subclase deben poder reemplazar a los de su superclase sin alterar el funcionamiento del programa, garantizando consistencia, modularidad e interoperabilidad y la sustitución segura de componentes (Evolución de la Ley de Deméter).
+        *   *Implementación*:
+            *   [Main.java (a):L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/a/Main.java#L18): La factoría `LoaderFactory` devuelve un `TxtLoader<T>` genérico que puede sustituirse por cualquier otra implementación de carga sin alterar el flujo principal del programa.
+    *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:
+        *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza, reduciendo el acoplamiento y favoreciendo la especialización.
+        *   *Implementación*:
+            *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`).
+    *   **Dependency Inversion Principle (DIP - Principio de Inversión de Dependencias)**:
+        *   *Definición*: Los módulos de alto nivel no deben depender de módulos de bajo nivel, sino de abstracciones, lo que disminuye la dependencia entre componentes.
+        *   *Implementación*:
+            *   [Main.java (a):L17-L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/a/Main.java#L17-L18): El punto de entrada depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<Device>` en lugar de implementaciones concretas, desacoplando la carga de datos de la lógica de negocio.
+*   **Don’t Repeat Yourself (DRY)**:
+    *   *Definición*: Evita la duplicación de código, promoviendo la reutilización mediante funciones o componentes comunes para mejorar la mantenibilidad.
+*   **Law of Demeter (LoD - Ley de Deméter)**:
+    *   *Definición*: Una unidad de software debe conocer solo a sus colaboradores directos, evitando el acceso profundo a objetos y reduciendo así el acoplamiento y facilitando la prueba y mantenimiento del código.
+    *   *Implementación*: La red `Network` opera sobre las propiedades del record `Device` de manera directa sin encadenar llamadas profundas sobre sus atributos de salidas.
+*   **You Aren’t Gonna Need It (YAGNI)**:
+    *   *Definición*: No se debe implementar funcionalidad hasta que realmente sea necesaria, evitando complejidad innecesaria.
+*   **Convention Over Configuration (CoC - Convención sobre configuración)**:
+    *   *Definición*: El sistema debe funcionar con una configuración mínima, asumiendo convenciones por defecto para simplificar su uso.
+*   **Principio de mínima sorpresa**:
+    *   *Definición*: El comportamiento de un componente debe ser predecible e intuitivo, sin efectos secundarios inesperados.
+*   **Principio de mínimo compromiso**:
+    *   *Definición*: Una interfaz debe exponer sólo lo necesario para operar, ocultando detalles internos y reduciendo la dependencia entre módulos.
+*   **Keep It Simple, Stupid (KISS)**:
+    *   *Definición*: El código debe ser claro, directo y fácil de entender, evitando la complejidad innecesaria.
+
+## Diseño por contrato
+*   **Definición**: El diseño por contrato es un enfoque de diseño que formaliza los acuerdos entre un componente y sus consumidores (por ejemplo, entre una clase y quien la utiliza), a través de interfaces claras y bien definidas. Se basa en la idea de que cada componente ofrece una serie de servicios bajo ciertas condiciones (precondiciones) y, a cambio, garantiza ciertos resultados (postcondiciones), mientras mantiene invariantes internas.
+*   **Implementación**: La firma de la interfaz `Deserializer<Device>` formaliza el contrato del dominio para parsear los nodos de la red.
 
 ## Técnicas de diseño aplicadas
 
@@ -57,18 +92,31 @@ El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
     *   *Implementación*:
         *   [Network.java:L14-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/model/Network.java#L14-L17) (`toAdjMap()`): Construye la lista de adyacencia de forma declarativa con `devices.stream().collect(Collectors.toMap(...))`.
         *   [Network.java:L31-L33](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day11/model/Network.java#L31-L33) (`computeAndMemoize()`): Suma funcional de los caminos de todos los vecinos del nodo con `adjacentList.get(current).stream().mapToLong(...).sum()`.
-*   **Inyección de dependencias**: La factoría `LoaderFactory` recibe la función de deserialización (`Deserializer<Device>::deserialize`) como parámetro en tiempo de ejecución, inyectándola en el `TxtLoader` genérico.
-*   **Genéricos**: Uso de la interfaz parametrizada `Deserializer<T>` para la entidad `Device`.
-*   **Good Naming**: Nombres autodescriptivos como `countPaths()`, `computeAndMemoize()`, `toAdjMap()`, `adjacentList`.
+*   **Inyección de dependencias**:
+    *   *Definición*: Consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código. Esto se puede hacer con constructores o mediante propiedades.
+    *   *Implementación*: La factoría `LoaderFactory` recibe la función de deserialización como parámetro en tiempo de ejecución, inyectándola en el `TxtLoader` genérico.
+*   **Genéricos**:
+    *   *Definición*: Permiten definir estructuras de datos tipadas evitando castings.
+    *   *Implementación*: Uso de la interfaz parametrizada `Deserializer<T>` para la entidad `Device`.
+*   **Good Naming**:
+    *   *Definición*: Consiste en asignar nombres claros, significativos y relacionados con su propósito a clases, variables y métodos, mejorando la claridad y expresividad del código.
+    *   *Implementación*: Nombres autodescriptivos como `countPaths()`, `computeAndMemoize()`, `toAdjMap()`, `adjacentList`.
+*   **Inversión del control (IoC)**:
+    *   *Definición*: Delega el flujo del programa a un contenedor externo, facilitando la modularidad y reduciendo el acoplamiento.
 
 ## Patrones de diseño
-
-*   **Memoización (Programación Dinámica)**:
-    *   *Implementación*: El método privado `countPaths(String current, String end, Map<String, Long> memo)` implementa un algoritmo de **búsqueda en profundidad (DFS) con memoización** sobre el grafo dirigido. Antes de calcular los caminos de un nodo, se consulta el `HashMap` de resultados cacheados (`memo`). Si el resultado ya fue calculado, se devuelve directamente sin recomputar los subproblemas. Esto reduce la complejidad de exponencial a lineal respecto al número de nodos, siendo esencial para redes con múltiples caminos convergentes.
-
-
-*   **Consistencia con el estilo funcional**: El método es puramente funcional: dadas las mismas entradas siempre devuelve el mismo resultado sin efectos secundarios. La expresión ternaria refuerza visualmente esta naturaleza declarativa, expresando la lógica como una selección de valores en lugar de como una secuencia de instrucciones imperativas.
-*   **Eliminación de cláusulas de guardia redundantes**: Cada condición actúa como una cláusula de guardia que descarta un caso base antes de llegar al caso recursivo. La estructura anidada hace explícita la prioridad de evaluación de forma compacta y sin necesidad de variables intermedias.
+*   **Patrones creacionales**:
+    *   **Factory Method**:
+        *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
+*   **Patrones de comportamiento**:
+    *   **Iterator**:
+        *   *Definición*: Patrón de comportamiento. Proporciona un acceso secuencial a los elementos de una colección sin exponer su estructura interna. Separa la lógica de iteración de la estructura de datos, promoviendo la modularidad y facilitando la reutilización de código.
+*   **Patrones funcionales**:
+    *   **Closure**:
+        *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
+    *   **Memoization**:
+        *   *Definición*: Técnica de optimización que consiste en almacenar los resultados de llamadas a funciones costosas y devolver el resultado almacenado en caché cuando se vuelven a producir las mismas entradas.
+        *   *Implementación*: El método privado `countPaths(String current, String end, Map<String, Long> memo)` implementa un algoritmo de **búsqueda en profundidad (DFS) con memoización** sobre el grafo dirigido, cacheando los resultados parciales en un `HashMap`.
 
 ---
 

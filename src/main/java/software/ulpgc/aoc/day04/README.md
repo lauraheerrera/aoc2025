@@ -16,72 +16,108 @@ El objetivo final es encontrar el número de rollos a los que se puede acceder t
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
-*   **Abstracción**: Oculta la complejidad de la navegación espacial y la verificación de límites tras la clase `Diagram` y el enum `Direction`.
-*   **Modularidad**: Estructura el reto en paquetes independientes (`model`, `a`, `b`). Esto permite aislar y desarrollar componentes por separado, facilitando la mantenibilidad.
-*   **Alta cohesión**: Cada componente tiene una única responsabilidad. `Diagram` representa el estado de la cuadrícula de forma inmutable, y `DiagramAnalyzer` calcula las reglas de accesibilidad sobre el estado actual.
-*   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. El flujo principal (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io` para leer el fichero, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de modelo.
-*   **Código expresivo**: Se utiliza el enum `Direction` (`NORTH`, `SOUTH_EAST`, etc.) para representar los vectores de movimiento de vecindad de forma clara, eliminando números mágicos y haciendo el código autoexplicativo.
-*   **Inmutabilidad del modelo**: Se establece mediante el patrón de separación entre **Entidad** y **Estado (Status)**. El record `Diagram` es la entidad estática y completamente inmutable (que solo representa la plantilla de celdas inicial y sus dimensiones). El estado que cambia a lo largo de la simulación (qué celdas se van despejando) se encapsula en el record `DiagramStatus`. Cuando se eliminan coordenadas accesibles mediante `withClearedCoordinates()`, no se recrea la entidad `Diagram` original; en su lugar, se devuelve un nuevo `DiagramStatus` que hace referencia al mismo `Diagram` inicial, garantizando un flujo inmutable y previniendo efectos secundarios.
-*   **Eliminación de la obsesión por los primitivos (Primitive Obsession)**: Se han eliminado los tipos primitivos en las firmas del modelo. En su lugar:
-    *   Se utiliza el enum `Tile` (`ROLL`, `EMPTY`, `CLEARED`) en lugar de caracteres primitivos (`char`) para representar el estado de las celdas.
-    *   Se utiliza el record `RollsCount` para representar el conteo acumulado de rollos en lugar de enteros planos (`int`).
-    *   Tanto el acceso al mapa como los cálculos de bordes y vecindad se realizan directamente con objetos `Coordinate` en lugar de pasar variables coordinadas `row` y `col` primitivas por separado.
+*   **Abstracción**:
+    *   *Definición*: Permite identificar y modelar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
+    *   *Implementación*: Oculta la complejidad de la navegación espacial y la verificación de límites tras la clase `Diagram` y el enum `Direction`.
+*   **Encapsulamiento**:
+    *   *Definición*: El código esconde su complejidad interna, mostrándose al exterior mediante una interfaz más simple de operar.
+    *   *Implementación*: La representación bidimensional del mapa de papel se oculta tras la interfaz del record `Diagram`, impidiendo la manipulación directa de la matriz interna de celdas.
+*   **Cohesión**:
+    *   *Definición*: Se refiere al grado en que los elementos de un módulo —como una clase o función— están relacionados entre sí y colaboran para cumplir una única tarea o propósito. Un módulo se considera altamente cohesivo cuando todas sus partes están directamente conectadas con la responsabilidad central que se le ha asignado, trabajando de forma coordinada hacia un objetivo común.
+    *   *Implementación*: En nuestro diseño, `Diagram` representa el estado de la cuadrícula de forma inmutable, y `DiagramAnalyzer` calcula las reglas de accesibilidad sobre el estado actual.
+*   **Bajo acoplamiento**:
+    *   *Definición*: Las dependencias entre módulos son mínimas y se basan en abstracciones.
+    *   *Implementación*: El flujo principal (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io` para leer el fichero, lo que permite cambiar el formato o el cargador de datos sin afectar en absoluto a las clases de modelo.
+*   **Código expresivo**:
+    *   *Definición*: El código es claro y fácil de entender.
+    *   *Implementación*: Se utiliza el enum `Direction` (`NORTH`, `SOUTH_EAST`, etc.) para representar los vectores de movimiento de vecindad de forma clara, eliminando números mágicos y haciendo el código autoexplicativo.
+*   **Inmutabilidad del modelo**:
+    *   *Definición*: Las clases del modelo se definen como Records, asegurando que sus instancias sean totalmente inmutables una vez creadas, lo que favorece la abstracción y evita errores relacionados con efectos secundarios.
+    *   *Implementación*: Se establece mediante el patrón de separación entre **Entidad** y **Estado (Status)**. El record `Diagram` es la entidad estática y completamente inmutable (que solo representa la plantilla de celdas inicial y sus dimensiones). El estado que cambia a lo largo de la simulación (qué celdas se van despejando) se encapsula en el record `DiagramStatus`. Cuando se eliminan coordenadas accesibles mediante `withClearedCoordinates()`, no se recrea la entidad `Diagram` original; en su lugar, se devuelve un nuevo `DiagramStatus` que hace referencia al mismo `Diagram` inicial, garantizando un flujo inmutable y previniendo efectos secundarios.
 
-## Principios SOLID
+## Principios de diseño
 
-El proyecto está diseñado siguiendo rigurosamente los principios **SOLID**:
+El proyecto está diseñado siguiendo rigurosamente los principios de diseño y **SOLID**:
 
-*   **Principio de Responsabilidad Única (SRP - Single Responsibility Principle)**:
-    *   *Definición*: Cada clase debe tener una única razón para cambiar.
-    *   *Implementación*:
-        *   [Diagram.java:L12-L30](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L12-L30): Se enfoca de manera única e inmutable en contener y proporcionar acceso a la estructura bidimensional del tablero de juego.
-        *   [DiagramAnalyzer.java:L12-L40](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/DiagramAnalyzer.java#L12-L40): Contiene exclusivamente las reglas de accesibilidad de vecinos y la simulación iterativa espacial.
-*   **Principio Abierto/Cerrado (OCP - Open/Closed Principle)**:
-    *   *Definición*: Las entidades de software deben estar abiertas para la extensión, pero cerradas para la modificación.
-    *   *Implementación*:
-        *   [DiagramAnalyzer.java:L27-L40](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/DiagramAnalyzer.java#L27-L40): La lógica de la simulación se puede extender agregando nuevas restricciones espaciales o algoritmos de limpieza en el tablero sin necesidad de reescribir ni modificar la estructura interna de `Diagram`.
-*   **Principio de Sustitución de Liskov (LSP - Liskov Substitution Principle)**:
-    *   *Definición*: Las subclases o implementaciones deben ser sustituibles por sus tipos base sin alterar el comportamiento correcto del programa.
-    *   *Implementación*:
-        *   [TxtDiagramDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/io/TxtDiagramDeserializer.java#L6): Implementa la interfaz genérica `Deserializer<Tile[]>`, siendo sustituible por cualquier otra clase de análisis de entrada sin romper la cohesión del cargador.
-*   **Principio de Segregación de Interfaces (ISP - Interface Segregation Principle)**:
-    *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza.
-    *   *Implementación*:
-        *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`). La factoría `LoaderFactory` utiliza la interfaz funcional `Function<String, T>`, igualmente mínima, evitando contratos innecesarios.
-*   **Principio de Inversión de Dependencias (DIP - Dependency Inversion Principle)**:
-    *   *Definición*: Depender de abstracciones, no de concreciones.
-    *   *Implementación*:
-        *   [Main.java:L18-L21](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/a/Main.java#L18-L21): La ejecución en `Main` interactúa con la factoría genérica `LoaderFactory` y la interfaz `Deserializer<Tile[]>`, evitando acoplar el flujo central del programa a las dependencias de ficheros físicas.
+*   **Composition Over Inheritance (COI - Composición sobre herencia)**:
+    *   *Definición*: Prefiere la composición de objetos frente a la herencia, utilizando atributos en lugar de extender clases, para mejorar la modularidad y facilitar el mantenimiento.
+    *   *Implementación*: La simulación en `DiagramStatus` se compone por referencia del record `Diagram` en lugar de extender de él, manteniendo las responsabilidades aisladas.
+*   **SOLID**:
+    *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
+        *   *Definición*: Cada clase o módulo debe tener una única responsabilidad o razón para cambiar, favoreciendo la cohesión y la claridad del diseño.
+        *   *Implementación*:
+            *   [Diagram.java:L12-L30](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L12-L30): Se enfoca de manera única e inmutable en contener y proporcionar acceso a la estructura bidimensional del tablero de juego.
+            *   [DiagramAnalyzer.java:L12-L40](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/DiagramAnalyzer.java#L12-L40): Contiene exclusivamente las reglas de accesibilidad de vecinos y la simulación iterativa espacial.
+    *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
+        *   *Definición*: Las clases deben estar abiertas a la extensión pero cerradas a la modificación, permitiendo añadir funcionalidad sin alterar el código existente.
+        *   *Implementación*:
+            *   [DiagramAnalyzer.java:L27-L40](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/DiagramAnalyzer.java#L27-L40): La lógica de la simulación se puede extender agregando nuevas restricciones espaciales o algoritmos de limpieza en el tablero sin necesidad de reescribir ni modificar la estructura interna de `Diagram`.
+    *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
+        *   *Definición*: Los objetos de una subclase deben poder reemplazar a los de su superclase sin alterar el funcionamiento del programa, garantizando consistencia, modularidad e interoperabilidad y la sustitución segura de componentes (Evolución de la Ley de Deméter).
+        *   *Implementación*:
+            *   [TxtDiagramDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/io/TxtDiagramDeserializer.java#L6): Implementa la interfaz genérica `Deserializer<Tile[]>`, siendo sustituible por cualquier otra clase de análisis de entrada sin romper la cohesión del cargador.
+    *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:
+        *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza, reduciendo el acoplamiento y favoreciendo la especialización.
+        *   *Implementación*:
+            *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`).
+    *   **Dependency Inversion Principle (DIP - Principio de Inversión de Dependencias)**:
+        *   *Definición*: Los módulos de alto nivel no deben depender de módulos de bajo nivel, sino de abstracciones, lo que disminuye la dependencia entre componentes.
+        *   *Implementación*:
+            *   [Main.java:L18-L21](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/a/Main.java#L18-L21): La ejecución en `Main` interactúa con la factoría genérica `LoaderFactory` y la interfaz `Deserializer<Tile[]>`, evitando acoplar el flujo central del programa a las dependencias de ficheros físicas.
+*   **Don’t Repeat Yourself (DRY)**:
+    *   *Definición*: Evita la duplicación de código, promoviendo la reutilización mediante funciones o componentes comunes para mejorar la mantenibilidad.
+*   **Law of Demeter (LoD - Ley de Deméter)**:
+    *   *Definición*: Una unidad de software debe conocer solo a sus colaboradores directos, evitando el acceso profundo a objetos y reduciendo así el acoplamiento y facilitando la prueba y mantenimiento del código.
+    *   *Implementación*: El analizador `DiagramAnalyzer` interactúa únicamente con `Diagram` y `Coordinate`, sin navegar de forma profunda por las estructuras del array bidimensional o la representación de caracteres primitiva.
+*   **You Aren’t Gonna Need It (YAGNI)**:
+    *   *Definición*: No se debe implementar funcionalidad hasta que realmente sea necesaria, evitando complejidad innecesaria.
+*   **Convention Over Configuration (CoC - Convención sobre configuración)**:
+    *   *Definición*: El sistema debe funcionar con una configuración mínima, asumiendo convenciones por defecto para simplificar su uso.
+*   **Principio de mínima sorpresa**:
+    *   *Definición*: El comportamiento de un componente debe ser predecible e intuitivo, sin efectos secundarios inesperados.
+*   **Principio de mínimo compromiso**:
+    *   *Definición*: Una interfaz debe exponer sólo lo necesario para operar, ocultando detalles internos y reduciendo la dependencia entre módulos.
+    *   *Implementación*: La interfaz de `Diagram` no permite la manipulación directa o destructiva de su matriz interna, exponiendo solo consultas y métodos inmutables de copia.
+*   **Keep It Simple, Stupid (KISS)**:
+    *   *Definición*: El código debe ser claro, directo y fácil de entender, evitando la complejidad innecesaria.
 
-    
+## Diseño por contrato
+*   **Definición**: El diseño por contrato es un enfoque de diseño que formaliza los acuerdos entre un componente y sus consumidores (por ejemplo, entre una clase y quien la utiliza), a través de interfaces claras y bien definidas. Se basa en la idea de que cada componente ofrece una serie de servicios bajo ciertas condiciones (precondiciones) y, a cambio, garantiza ciertos resultados (postcondiciones), mientras mantiene invariantes internas.
 
 ## Técnicas de diseño aplicadas
 
 *   **Programación funcional (con Java Streams)**:
-    *   *Definición*: Paradigma de programación que trata la computación como la evaluación de funciones matemáticas y evita cambiar datos mutables. En Java, se ve implementado a través de expresiones lambda, referencias a métodos y la API de Streams, la cual permite encadenar operaciones (como filter, map, reduce) de forma declarativa e inmutable.
+    *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
     *   *Implementación*:
         *   [DiagramAnalyzer.java:L27-L31](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/DiagramAnalyzer.java#L27-L31) (`findAccessibleCoordinates()`): Filtra de forma funcional todas las coordenadas del tablero a través del método `diagram.coordinates()`, reteniendo sólo aquellas que resultan ser accesibles (`filter(c -> isAccessible(diagram, c))`) y recolectándolas en una lista (`toList()`).
         *   [DiagramAnalyzer.java:L54-L58](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/DiagramAnalyzer.java#L54-L58) (`countAdjacentTargets()`): Procesa las 8 posibles direcciones a partir de `Direction.values()`, filtrando aquellas en las que hay un objetivo (`ROLL`) en la celda adyacente y contando su cantidad con `count()`.
-        *   [Diagram.java:L18-L22](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L18-L22) (`create()`): Usa `Stream.of(tiles)` para mapear cada fila clonándola (`map(Tile[]::clone)`) y recolectándola en un nuevo array bidimensional (`toArray(Tile[][]::new)`), preservando la inmutabilidad de la cuadrícula.
-        *   [Diagram.java:L37-L41](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L37-L41) (`coordinates()`): Genera una cuadrícula declarativa de coordenadas con `IntStream.range` sobre las filas, convirtiéndola en objetos de coordenadas emparejadas con las columnas mediante `flatMap` y `mapToObj(c -> new Coordinate(r, c))`.
-        *   [Diagram.java:L51-L57](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L51-L57) (`withClearedCoordinates()`): Clona la cuadrícula usando `Stream.of` y posteriormente recorre la lista de coordenadas a limpiar (`coordinates.stream()`), filtrando por límites y actualizando los valores del clon de forma secuencial y sin efectos colaterales en la instancia original.
-        *   [Main.java (Parte A y B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/a/Main.java#L25-L26): Utiliza `diagramLines.stream().toArray(Tile[][]::new)` para convertir la colección dinámica en el array bidimensional final que representa la cuadrícula.
-*   **Clases internas**: Se define el enum privado `Direction` como una clase interna en `DiagramAnalyzer` para estructurar de forma altamente cohesiva los vectores de movimiento espacial de los vecinos de una celda.
-*   **Good Naming**: Nombres de variables y métodos descriptivos como `sumAllAccessibleRolls()`, `isInBounds()`, `withClearedCoordinates()`.
+*   **Clases internas**:
+    *   *Definición*: Clases definidas dentro de otra clase, útiles para agrupar elementos relacionados. Aumentan la cohesión del diseño y se clasifican en internas estáticas e internas no estáticas.
+    *   *Implementación*: Se define el enum privado `Direction` como una clase interna estática en `DiagramAnalyzer` para estructurar de forma altamente cohesiva los vectores de movimiento espacial de los vecinos de una celda.
+*   **Genéricos**:
+    *   *Definición*: Permiten definir estructuras de datos tipadas evitando castings.
+*   **Good Naming**:
+    *   *Definición*: Consiste en asignar nombres claros, significativos y relacionados con su propósito a clases, variables y métodos, mejorando la claridad y expresividad del código.
+    *   *Implementación*: Nombres de variables y métodos descriptivos como `sumAllAccessibleRolls()`, `isInBounds()`, `withClearedCoordinates()`.
+*   **Inversión del control (IoC)**:
+    *   *Definición*: Delega el flujo del programa a un contenedor externo, facilitando la modularidad y reduciendo el acoplamiento.
 
 ## Patrones de diseño
-*   **Constructores (Constructor privado)**:
-    *   *Definición*: Son métodos especiales que permiten crear nuevas instancias de una clase. Su propósito es inicializar el objeto con un estado válido. Pueden ser privados para restringir y controlar la creación de objetos desde el exterior.
-    *   *Implementación*: La clase `Diagram` define su constructor en [Diagram.java:L12-L16](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L12-L16) para restringir la instanciación directa externa, garantizando el encapsulamiento de la cuadrícula.
-*   **Patrón Factory Method**:
-    *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
-    *   *Implementación*: Se define en [Diagram.java:L18-L22](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L18-L22) con el método estático `Diagram.create()`, centralizando la instanciación e inicialización del tablero a través del clonado seguro de celdas.
-*   **Patrón Iterator**:
-    *   *Definición*: Patrón de comportamiento. Proporciona un acceso secuencial a los elementos de una colección sin exponer su estructura interna. Separa la lógica de iteración de la estructura de datos, promoviendo la modularidad y facilitando la reutilización de código.
-    *   *Implementación*: Empleado a través de Java Streams en [DiagramAnalyzer.java:L55-L57](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/DiagramAnalyzer.java#L55-L57) (`Arrays.stream(Direction.values())`), [Diagram.java:L38-L40](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L38-L40) (`IntStream.range`) y [Diagram.java:L53-L55](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L53-L55) (`coordinates.stream()`) para iterar colecciones y matrices sin bucles explícitos.
-*   **Patrón funcional Closure**:
-    *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
-    *   *Implementación*: Se utiliza en las expresiones lambda en [DiagramAnalyzer.java:L29](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/DiagramAnalyzer.java#L29) (capturando `diagram`) y [DiagramAnalyzer.java:L56](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/DiagramAnalyzer.java#L56) (capturando `diagram` y `coordinate`) para encapsular estados inmutables en tiempo de ejecución.
+*   **Patrones creacionales**:
+    *   **Constructores**:
+        *   *Definición*: Son métodos especiales que permiten crear nuevas instancias de una clase. Su propósito es inicializar el objeto con un estado válido. Pueden ser privados para restringir y controlar la creación de objetos desde el exterior.
+        *   *Implementación*: La clase `Diagram` define su constructor en [Diagram.java:L12-L16](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L12-L16) para restringir la instanciación directa externa, garantizando el encapsulamiento de la cuadrícula.
+    *   **Factory Method**:
+        *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
+        *   *Implementación*: Se define en [Diagram.java:L18-L22](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L18-L22) con el método estático `Diagram.create()`, centralizando la instanciación e inicialización del tablero a través del clonado seguro de celdas.
+*   **Patrones de comportamiento**:
+    *   **Iterator**:
+        *   *Definición*: Patrón de comportamiento. Proporciona un acceso secuencial a los elementos de una colección sin exponer su estructura interna. Separa la lógica de iteración de la estructura de datos, promoviendo la modularidad y facilitando la reutilización de código.
+        *   *Implementación*: Empleado a través de Java Streams en [DiagramAnalyzer.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/DiagramAnalyzer.java).
+*   **Patrones funcionales**:
+    *   **Closure**:
+        *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
+        *   *Implementación*: Se utiliza en las expresiones lambda en `DiagramAnalyzer` para encapsular estados inmutables en tiempo de ejecución.
 
 ---
 

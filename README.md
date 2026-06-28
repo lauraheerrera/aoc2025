@@ -78,20 +78,28 @@ Siguiendo los principios **YAGNI** (You Aren't Gonna Need It) y **KISS** (Keep I
 
 ## Arquitectura de Entrada/Salida (I/O)
 
-La entrada/salida de datos en este proyecto se ha estructurado para desacoplar por completo el acceso físico a los datos de la lógica de negocio de los retos. Sin embargo, debido a la naturaleza cambiante de los inputs de cada día, la arquitectura de I/O no es idéntica para todos los problemas.
+La capa de entrada/salida se basa en una arquitectura genérica y reutilizable, donde el comportamiento de parseo se desacopla completamente del mecanismo de lectura de ficheros. Esto permite eliminar loaders específicos por dominio y favorecer la composición frente a la herencia.
 
-### Modelo de la I/O
+### Modelo de la I/O y Patrones Aplicados
 
 El modelo se apoya en dos conceptos clave con diferentes niveles de abstracción:
 
-1.  **Interfaz de Deserialización (`Deserializer<T>`) [Común para todos]**: Es una interfaz genérica que define el contrato `deserialize(String content)` para transformar texto plano en una entidad o colección del dominio de negocio. Todos los retos reutilizan esta abstracción genérica de `common.io`.
-2.  **Cargador (Loader) y Factoría (`LoaderFactory`) [Depende del reto]**: 
-    *   **Carga Genérica por Línea**: Para retos donde el input consiste en una lista homogénea de registros línea por línea (Días 1, 2, 3, 4, 8), se reutiliza el cargador genérico [TxtLoader.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/TxtLoader.java) y la factoría [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java).
-    *   **Carga Personalizada**: Cuando la estructura del input requiere procesar el archivo completo en bloque, secciones múltiples o estructuras bidimensionales (Días 5, 6, 7), no es viable la carga secuencial línea a línea de `TxtLoader`. En estos casos, se desarrollan cargadores específicos para el día (ej. `TxtDatabaseLoader`, `TxtMathWorksheetLoader`, `TxtManifoldLoader`), aunque se sigue respetando el contrato de la interfaz de deserialización.
+1.  **Interfaz de Deserialización (`Deserializer<T>`)**: Es una interfaz genérica que define el contrato `deserialize(String content)` para transformar texto plano en una entidad o colección del dominio de negocio. Todos los retos reutilizan esta abstracción genérica de `common.io`.
+2.  **Cargador y Factoría (`LoaderFactory`)**: Centraliza la lectura de ficheros delegando la deserialización a través de funciones.
+
+A continuación se detallan los patrones de diseño aplicados en esta capa para lograr un alto desacoplamiento:
+
+| Elemento | Patrón aplicado | Descripción |
+| :--- | :--- | :--- |
+| **`LoaderFactory`** | Factory Method | Encapsula la creación de `TxtLoader<T>`, simplificando su instanciación y ocultando detalles de construcción al cliente. |
+| **`Function<String, T>`** | Strategy Pattern | Define la estrategia de transformación de entrada (String → T), permitiendo intercambiar fácilmente distintos parsers. |
+| **`TxtLoader<T>`** | Template Method (implícito) | Implementa el algoritmo general de lectura (apertura, recorrido y cierre del fichero), delegando el procesamiento de cada línea. |
+| **Uso de `Function` en vez de clases** | Composition over inheritance | Sustituye jerarquías de deserializadores por composición de comportamiento, reduciendo la complejidad estructural. |
+| **Inyección de deserializador** | Dependency Injection | El comportamiento de parseo se inyecta externamente en la factoría, eliminando dependencias directas y mejorando la testabilidad. |
 
 ### Diagrama de I/O
 
-El siguiente diagrama modela la arquitectura de I/O utilizada para los retos con carga secuencial **línea a línea** (Días 1, 2, 3, 4, 8):
+El siguiente diagrama modela la arquitectura de I/O genérica utilizada:
 
 ![UML io](UML%20diagrams/uml_io.png)
 
@@ -101,11 +109,19 @@ El siguiente diagrama modela la arquitectura de I/O utilizada para los retos con
 *   **[LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java)**: Factoría que centraliza y simplifica la creación de cargadores de ficheros de texto.
 
 ### Implementación específica por reto
-Cada día cuenta con un paquete `io` específico para aislar el parseo correspondiente:
-1.  **Día 1**: Define `OrderLoader` (interfaz) y `TxtOrderDeserializer` que implementa `Deserializer<Order>`, parseando entradas como `L5` o `R10`.
-2.  **Día 2**: Define `RangeLoader` y `TxtRangeDeserializer` que implementa `Deserializer<IdRange>`, procesando rangos de tipo `start-end`.
-3.  **Día 3**: Define `BatteryBankLoader` y `TxtBatteryBankDeserializer` que implementa `Deserializer<BatteryBank>`, deserializando bancos de baterías a partir de secuencias de dígitos.
-4.  **Día 4**: Define `DiagramLoader` y `TxtDiagramDeserializer` que implementa `Deserializer<Tile[]>`, convirtiendo mapas bidimensionales de caracteres (`.`, `@`) a un array estructurado de casillas.
+Cada día cuenta con un paquete `io` específico para aislar el parseo correspondiente mediante un deserializador dedicado inyectado a la factoría:
+1.  **Día 1**: Define `TxtOrderDeserializer` que implementa `Deserializer<Order>`, parseando entradas como `L5` o `R10`.
+2.  **Día 2**: Define `TxtRangeDeserializer` que implementa `Deserializer<IdRange>`, procesando rangos de tipo `start-end`.
+3.  **Día 3**: Define `TxtBatteryBankDeserializer` que implementa `Deserializer<BatteryBank>`, deserializando bancos de baterías a partir de secuencias de dígitos.
+4.  **Día 4**: Define `TxtDiagramDeserializer` que implementa `Deserializer<Tile[]>`, convirtiendo mapas de caracteres a un array estructurado de casillas.
+5.  **Día 5**: Define `TxtRangeDeserializer` y `TxtIDDeserializer` para procesar de forma diferenciada las secciones del fichero de base de datos.
+6.  **Día 6**: Define `TxtMathWorksheetDeserializer` para deserializar ecuaciones.
+7.  **Día 7**: Utiliza funciones lambda en línea para el parseo de datos de manifolds.
+8.  **Día 8**: Define `TxtJunctionBoxDeserializer` para modelar y conectar cajas de conexiones.
+9.  **Día 9**: Define `TxtPointDeserializer` para localizar butacas de cine.
+10. **Día 10**: Define `TxtMachineDeserializer` para leer parámetros de maquinaria de fábrica.
+11. **Día 11**: Define `TxtDeviceDeserializer` para interpretar el cableado de la red.
+12. **Día 12**: Define `TxtShapeDeserializer` y `TxtRegionDeserializer` para cargar las figuras de regalos y las regiones.
 
 ### Pruebas de deserialización
 Todos los deserializadores específicos se validan de forma independiente mediante tests unitarios dedicados:
@@ -113,6 +129,7 @@ Todos los deserializadores específicos se validan de forma independiente median
 *   Se comprueba la robustez del sistema y el control de errores mediante el lanzamiento de excepciones esperadas (como `IllegalArgumentException` o `NumberFormatException`) ante entradas vacías, nulas, con espacios en blanco o mal formateadas.
 
 ---
+
 
 ## Índice
 
@@ -126,4 +143,9 @@ A continuación se detalla cada día resuelto, con accesos directos a su corresp
 | **04** | Printing Department |  [Día 4](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day04) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day04/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day04/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day04/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day04/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day04/ATest/DiagramAnalyzerTest.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day04/BTest/DiagramAnalyzerTest.java)** |
 | **05** | Cafeteria | [Día 5](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day05) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day05/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day05/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day05/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day05/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day05/ATest/ValidatorTest.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day05/BTest/ValidatorTest.java)** |
 | **06** | Trash Compactor |  [Día 6](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day06)| **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day06/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day06/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day06/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day06/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day06/ATest/MathWorksheetTest.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day06/BTest/MathWorksheetTest.java)** |
-| **07** | Laboratories | [Día 7](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/ATest/ManifoldTest.java)** <br> **[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/BTest/ManifoldTest.java)**
+| **07** | Laboratories | [Día 7](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day07/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/ATest/ManifoldTest.java)** <br> **[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day07/BTest/ManifoldTest.java)** |
+| **08** | Junction Box | [Día 8](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day08) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day08/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day08/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day08/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day08/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day08/ATest/PlaygroundTest.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day08/BTest/PlaygroundTest.java)**<br>**[IO](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day08/IOTest/TxtJunctionBoxDeserializerTest.java)** |
+| **09** | Movie Theater | [Día 9](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day09) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day09/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day09/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day09/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day09/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day09/ATest/MovieTheaterTest.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day09/BTest/MovieTheaterTest.java)** |
+| **10** | Machine Factory | [Día 10](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day10) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day10/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day10/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day10/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day10/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day10/ATest/FactoryTest.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day10/BTest/FactoryTest.java)**<br>**[IO](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day10/IOTest/TxtMachineDeserializerTest.java)** |
+| **11** | Reactor | [Día 11](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day11) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day11/a/Main.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day11/b/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day11/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day11/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day11/ATest/NetworkTest.java)**<br>**[Parte B](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day11/BTest/NetworkTest.java)**<br>**[IO](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day11/IOTest/TxtDeviceDeserializerTest.java)** |
+| **12** | Christmas Tree Farm | [Día 12](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day12) | **[Parte A](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day12/a/Main.java)**<br>[Modelo](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day12/model) \| [IO](https://github.com/lauraheerrera/aoc2025/tree/master/src/main/java/software/ulpgc/aoc/day12/io) | **[Parte A](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day12/ATest/FarmTest.java)**<br>**[IO](https://github.com/lauraheerrera/aoc2025/blob/master/src/test/java/test/Day12/IOTest/TxtShapeDeserializerTest.java)** |

@@ -2,7 +2,13 @@ package software.ulpgc.aoc.day02.a.model;
 
 import software.ulpgc.aoc.day02.model.InvalidatableId;
 
-public record Id(long id) implements InvalidatableId {
+public class Id implements InvalidatableId {
+
+    private final long id;
+
+    private Id(long id) {
+        this.id = id;
+    }
 
     public static Id create(long id) {
         return new Id(id);
@@ -24,4 +30,9 @@ public record Id(long id) implements InvalidatableId {
     private int getMiddleIndex() {
         return (int) Math.pow(10, getDigitCount() / 2.0);
     }
+
+    public long id() {
+        return this.id;
+    }
+
 }

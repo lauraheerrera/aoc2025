@@ -16,105 +16,63 @@ El objetivo final es sumar todos los IDs inválidos encontrados en los rangos pr
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
-*   **Abstracción**:
-    *   *Definición*: Permite identificar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
-    *   *Implementación*: Oculta la lógica concreta de la validación y la manipulación de secuencias tras la interfaz `InvalidatableId`. La clase `GiftShop` y la clase `IdRange` dependen exclusivamente de esta abstracción, lo que permite desacoplar el procesamiento general de la lógica específica de cada parte del problema.
-*   **Encapsulamiento**:
-    *   *Definición*: El código esconde su complejidad interna, mostrándose al exterior mediante una interfaz más simple de operar.
-    *   *Implementación*: La lógica de detección de secuencias repetidas y conteo de dígitos reside de forma exclusiva dentro del record `Id`, impidiendo que el exterior conozca los detalles del parseo de cadenas.
-*   **Cohesión**:
-    *   *Definición*: Se refiere al grado en que los elementos de un módulo están relacionados entre sí y colaboran para cumplir una única tarea.
-    *   *Implementación*: En este diseño, `GiftShop` es responsable únicamente de la agregación final, `IdRange` gestiona la generación de la secuencia en un rango y la suma de sus IDs inválidos, mientras que la validación de un identificador individual se delega a las implementaciones de `Id`.
-*   **Bajo acoplamiento**:
-    *   *Definición*: Las dependencias entre módulos son mínimas y se basan en abstracciones.
-    *   *Implementación*: La interacción entre componentes se realiza a través de la interfaz `InvalidatableId`, lo que permite desacoplar el motor de suma de los IDs específicos.
-*   **Código expresivo**:
-    *   *Definición*: El código es claro y fácil de entender.
-    *   *Implementación*: El uso de **Records** inmutables y la programación funcional con **Java Streams** permiten que los algoritmos se lean de forma declarativa (evitando variables mutables e instrucciones anidadas), haciendo innecesarios los comentarios aclaratorios.
-*   **Inmutabilidad del modelo**:
-    *   *Definición*: Las clases del modelo se definen como Records, asegurando que sus instancias sean totalmente inmutables una vez creadas, lo que favorece la abstracción y evita errores relacionados con efectos secundarios.
-    *   *Implementación*: Las clases del modelo se definen como **Records**, asegurando que sus instancias sean totalmente inmutables una vez creadas.
+*   **Abstracción**: Se abstrae el comportamiento de validación a través de la interfaz `InvalidatableId`, que expone únicamente los métodos `id()` e `isInvalid()`. Esto permite que las clases encargadas de la computación agregada, como `GiftShop` e `IdRange`, dependan de una abstracción genérica sin acoplarse a las complejas reglas de validación específicas de las variantes A o B.
+*   **Encapsulamiento**: La lógica matemática interna del cálculo de dígitos está definida de manera privada dentro de las implementaciones del record `Id`, ocultando la complejidad del análisis numérico.
+*   **Cohesión**: Cada clase tiene una única y clara responsabilidad: `GiftShop` gestiona la agregación de múltiples rangos, `IdRange` calcula la suma de IDs inválidos dentro de un rango utilizando una factoría para su creación, y las clases concretas de `Id` se encargan de la validación matemática individual.
+*   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. Las clases del modelo de dominio no tienen dependencia de cómo se leen o deserializan los datos de entrada. El flujo de control (`Main`) utiliza el sistema de cargadores genéricos `LoaderFactory` y deserializadores de E/S, aislando la lógica del problema de la infraestructura.
+*   **Código expresivo**: El código es autoexplicativo, claro y fácil de entender sin necesidad de ser comentado.
 
 ## Principios de diseño
 
 El proyecto está diseñado siguiendo rigurosamente los principios de diseño y **SOLID**:
 
-*   **Composition Over Inheritance (COI - Composición sobre herencia)**:
-    *   *Definición*: Prefiere la composición de objetos frente a la herencia, utilizando atributos en lugar de extender clases, para mejorar la modularidad y facilitar el mantenimiento.
-    *   *Implementación*: La clase `GiftShop` se compone de una colección de `IdRange` y estos a su vez operan componiendo la abstracción `InvalidatableId`, evitando crear una jerarquía rígida de clases heredadas.
+*   **Composition Over Inheritance (COI - Composición sobre herencia)**: La clase `GiftShop` se compone de una colección de `IdRange` y estos a su vez operan componiendo la abstracción `InvalidatableId`, evitando crear una jerarquía rígida de clases heredadas.
 *   **SOLID**:
     *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
-        *   *Definición*: Cada clase o módulo debe tener una única responsabilidad o razón para cambiar, favoreciendo la cohesión y la claridad del diseño.
-        *   *Implementación*:
-            *   [Id.java:L5-L16 (Parte A)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/a/model/Id.java#L5-L16): Se limita exclusivamente a representar y validar la condición de invalidez de un ID individual para la parte A.
-            *   [IdRange.java:L8-L26](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java#L8-L26): Encapsula únicamente la lógica de generación del rango numérico y la suma de IDs inválidos dentro de dicho rango.
-            *   [GiftShop.java:L10-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L10-L17): Agrega la suma total de todas las colecciones de rangos que componen la tienda.
+        *   [Id.java: (Parte A)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/a/model/Id.java): Se limita exclusivamente a representar y validar la condición de invalidez de un ID individual para la parte A.
+        *   [IdRange.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java): Encapsula únicamente la lógica de generación del rango numérico y la suma de IDs inválidos dentro de dicho rango.
+        *   [GiftShop.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java): Agrega la suma total de todas las colecciones de rangos que componen la tienda.
     *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
-        *   *Definición*: Las clases deben estar abiertas a la extensión pero cerradas a la modificación, permitiendo añadir funcionalidad sin alterar el código existente.
-        *   *Implementación*:
-            *   [GiftShop.java:L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L10) y [IdRange.java:L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java#L10): Sus diseños son genéricos (`GiftShop<T extends InvalidatableId>`), lo que permite que el motor admita nuevas reglas de IDs (como los de la Parte B) extendiendo la clase mediante una nueva implementación sin modificar el código core del rango o de la tienda.
+        *   [GiftShop.java:L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L10) y [IdRange.java:L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java#L10): Sus diseños son genéricos (`GiftShop<T extends InvalidatableId>`), lo que permite que el motor admita nuevas reglas de IDs (como los de la Parte B) extendiendo la clase mediante una nueva implementación sin modificar el código core del rango o de la tienda.
     *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
-        *   *Definición*: Los objetos de una subclase deben poder reemplazar a los de su superclase sin alterar el funcionamiento del programa, garantizando consistencia, modularidad e interoperabilidad y la sustitución segura de componentes.
-        *   *Implementación*:
-            *   [Id.java (Parte A)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/a/model/Id.java#L5) e [Id.java (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java#L5): Ambas clases son implementaciones completamente sustituibles e intercambiables bajo la interfaz común `InvalidatableId` sin alterar la corrección de la simulación.
+        *   [Id.java (Parte A)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/a/model/Id.java#L5) e [Id.java (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java#L5): Ambas clases son implementaciones completamente sustituibles e intercambiables bajo la interfaz común `InvalidatableId` sin alterar la corrección de la simulación.
     *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:
-        *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza, reduciendo el acoplamiento y favoreciendo la especialización.
-        *   *Implementación*:
-            *   [InvalidatableId.java:L3-L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/InvalidatableId.java#L3-L6): Define una interfaz minimalista de dos métodos (`id()` e `isInvalid()`), evitando obligar a las implementaciones concretas de dominio a arrastrar código innecesario.
+        *   [InvalidatableId.java:L3-L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/InvalidatableId.java#L3-L6): Define una interfaz minimalista de dos métodos (`id()` e `isInvalid()`), evitando obligar a las implementaciones concretas de dominio a arrastrar código innecesario.
     *   **Dependency Inversion Principle (DIP - Principio de Inversión de Dependencias)**:
-        *   *Definición*: Los módulos de alto nivel no deben depender de módulos de bajo nivel, sino de abstracciones, lo que disminuye la dependencia entre componentes.
-        *   *Implementación*:
-            *   [GiftShop.java:L10-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L10-L17): Depende enteramente del contrato abstracto `InvalidatableId`, logrando desacoplar por completo el procesamiento y suma del dominio real de la lógica concreta de validación.
+        *   [GiftShop.java:L5-L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L5-L6): Depende enteramente del contrato abstracto `InvalidatableId`, logrando desacoplar por completo el procesamiento y suma del dominio real de la lógica concreta de validación.
 *   **Don’t Repeat Yourself (DRY)**:
-    *   *Definición*: Evita la duplicación de código, promoviendo la reutilización mediante funciones o componentes comunes para mejorar la mantenibilidad.
-    *   *Implementación*: La generación de rangos numéricos y la suma lógica se centralizan en la clase genérica `IdRange`, compartiéndose entre ambas partes sin duplicidad de algoritmos.
+    *   La generación de rangos numéricos y la suma lógica se centralizan en la clase genérica `IdRange`, compartiéndose entre ambas partes sin duplicidad de algoritmos.
 *   **Law of Demeter (LoD - Ley de Deméter)**:
-    *   *Definición*: Una unidad de software debe conocer solo a sus colaboradores directos, evitando el acceso profundo a objetos y reduciendo así el acoplamiento y facilitando la prueba y mantenimiento del código.
-    *   *Implementación*: La clase `IdRange` interactúa directamente con el objeto de tipo `InvalidatableId` mediante su método `isInvalid()`, sin intentar navegar por sus propiedades de caracteres o su representación interna en cadena.
+    *   La clase `IdRange` interactúa directamente con el objeto de tipo `InvalidatableId` mediante su método `isInvalid()`, sin intentar navegar por sus propiedades de caracteres o su representación interna en cadena.
 *   **Principio de mínimo compromiso**:
-    *   *Definición*: Una interfaz debe exponer sólo lo necesario para operar, ocultando detalles internos y reduciendo la dependencia entre módulos.
-    *   *Implementación*: La interfaz `InvalidatableId` expone únicamente el ID primitivo y el indicador de validez `isInvalid()`, ocultando por completo las funciones de cálculo de subcadenas o patrones internos.
+    *   La interfaz `InvalidatableId` expone únicamente el ID primitivo y el indicador de validez `isInvalid()`, ocultando por completo las funciones de cálculo de subcadenas o patrones internos.
 
 
-## Diseño por contrato
-*   **Definición**: El diseño por contrato es un enfoque de diseño que formaliza los acuerdos entre un componente y sus consumidores (por ejemplo, entre una clase y quien la utiliza), a través de interfaces claras y bien definidas. Se basa en la idea de que cada componente ofrece una serie de servicios bajo ciertas condiciones (precondiciones) y, a cambio, garantiza ciertos resultados (postcondiciones), mientras mantiene invariantes internas.
-*   **Implementación**: Se formalizan los acuerdos y expectativas mediante la interfaz `InvalidatableId`. La clase consumidora (`IdRange`) confía en que cualquier clase que implemente esta interfaz sabrá responder a `id()` y si cumple las condiciones de invalidez con `isInvalid()`.
 
 ## Técnicas de diseño aplicadas
 
 Se han utilizado diversas técnicas de ingeniería de software para asegurar la robustez y limpieza del proyecto:
-
+*   **Inmutabilidad del modelo**:
+    *   Las clases del modelo se definen como **Records**, asegurando que sus instancias sean totalmente inmutables una vez creadas.
+*   **Diseño por contrato**:
+    *   Se formalizan los acuerdos y expectativas mediante la interfaz `InvalidatableId`. La clase consumidora (`IdRange`) confía en que cualquier clase que implemente esta interfaz sabrá responder a `id()` y si cumple las condiciones de invalidez con `isInvalid()`.
 *   **Programación funcional (con Java Streams)**:
-    *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
-    *   *Implementación*:
-        *   [GiftShop.java:L12-L16](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L12-L16) (`sumAllInvalidIds()`): Usa `ranges.stream()` para recorrer todas las colecciones de rangos del GiftShop, convirtiéndolas a valores numéricos con la suma de sus correspondientes IDs inválidos (`mapToLong(IdRange::sumInvalidIDs)`) y obteniendo el total global mediante `sum()`.
-        *   [IdRange.java:L18-L24](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java#L18-L24) (`sumInvalidIDs()`): Emplea `LongStream.rangeClosed(start, end)` para generar de forma secuencial y eficiente todos los IDs del rango inclusive. Mapea cada ID al record `Id` del dominio, filtra los que son inválidos (`filter(InvalidatableId::isInvalid)`), extrae su valor primitivo y los suma (`sum()`).
-        *   [Id.java:L26-L30 (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java#L26-L30) (`hasRepeatedSequence()`): Utiliza `IntStream.rangeClosed(1, n / 2)` para probar todas las longitudes posibles de patrones. Filtra aquellas longitudes que dividen exactamente el tamaño total del ID (`validLength`) y evalúa si alguna de ellas compone un patrón repetitivo continuo con `anyMatch`.
-*   **Inyección de dependencias**: 
-    *   *Definición*: Consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código. Esto se puede hacer con constructores o mediante propiedades.
-    *   *Implementación*: La creación de instancias de `Id` se delega externamente. La clase `IdRange` recibe su factoría de creación a través de su constructor (`LongFunction<T> idFactory`).
+    *   [GiftShop.java:L6-L12](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/GiftShop.java#L6-L12) (`sumAllInvalidIds()`): Usa `ranges.stream()` para recorrer todas las colecciones de rangos del GiftShop, convirtiéndolas a valores numéricos con la suma de sus correspondientes IDs inválidos (`mapToLong(IdRange::sumInvalidIDs)`) y obteniendo el total global mediante `sum()`.
+    *   [IdRange.java:L8-L14](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java#L8-L14) (`sumInvalidIDs()`): Emplea `LongStream.rangeClosed(start, end)` para generar de forma secuencial y eficiente todos los IDs del rango inclusive. Mapea cada ID al record `Id` del dominio, filtra los que son inválidos (`filter(InvalidatableId::isInvalid)`), extrae su valor primitivo y los suma (`sum()`).
+    *   [Id.java:L31-L35 (Parte B)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java#L31-L35) (`hasRepeatedSequence()`): Utiliza `IntStream.rangeClosed(1, n / 2)` para probar todas las longitudes posibles de patrones. Filtra aquellas longitudes que dividen exactamente el tamaño total del ID (`validLength`) y evalúa si alguna de ellas compone un patrón repetitivo continuo con `anyMatch`.
+*   **Inyección de dependencias**:
+    *   Se crea una factoría para `Id` y se le pasa al constructor de `IdRange`, de esta forma el motor no sabe nada de `Id`.
 *   **Genéricos**:
-    *   *Definición*: Permiten definir estructuras de datos tipadas evitando castings.
-    *   *Implementación*: El uso de clases parametrizadas como `GiftShop<T extends InvalidatableId>` y `IdRange<T extends InvalidatableId>` garantiza que el sistema sea modular, tipado estáticamente y reutilizable.
+    *   El uso de clases parametrizadas como `GiftShop<T extends InvalidatableId>` y `IdRange<T extends InvalidatableId>` garantiza que el sistema sea modular, tipado estáticamente y reutilizable.
 *   **Good Naming**:
-    *   *Definición*: Consiste en asignar nombres claros, significativos y relacionados con su propósito a clases, variables y métodos, mejorando la claridad y expresividad del código.
-    *   *Implementación*: Semántica clara con nombres como `GiftShop`, `InvalidatableId`, `sumInvalidIDs()`, `hasRepeatedSequence()`.
-*   **Inversión del control (IoC)**:
-    *   *Definición*: Delega el flujo del programa a un contenedor externo, facilitando la modularidad y reduciendo el acoplamiento.
-    *   *Implementación*: La delegación de la creación de `Id` del rango a través del pipeline funcional es controlada por el cliente.
+    *   Semántica clara con nombres como `GiftShop`, `InvalidatableId`, `sumInvalidIDs()`, `hasRepeatedSequence()`.
 
 ## Patrones de diseño
 *   **Patrones creacionales**:
-    *   **Factory Method**:
-        *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
-        *   *Implementación*: Se utiliza la referencia al método estático `Id::create` inyectándose como factoría funcional en el flujo de ejecución principal en `Main.java`.
-    *   **Factory**:
-        *   *Definición*: Patrón creacional que encapsula la lógica de creación de objetos en una clase dedicada, llamada factoría, la cual produce instancias de una familia de clases que comparten una interfaz o clase base común. Su propósito es abstraer el proceso de creación, centralizándolo.
-        *   *Implementación*: Se utiliza la abstracción funcional [IdRange.java:L10-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/model/IdRange.java#L10-L15) mediante la interfaz genérica `LongFunction<T> idFactory`, lo que permite que el motor de rangos instancie dinámicamente subtipos del identificador sin conocer su constructor concreto.
+    *   **Factory Method (Método Fábrica)**: En las clases de dominio `Id` (tanto de la parte A como de la parte B), el constructor es privado y la creación de objetos se delega en el método estático `Id::create(long id)`.
+    *   **Factory (Inyección de Factoría)**: Las clases comunes `TxtRangeDeserializer` e `IdRange` son completamente genéricas (`<T extends InvalidatableId>`) y no pueden instanciar `new T()`. Para resolver esto, reciben en su constructor una factoría funcional (`LongFunction<T> idFactory`). Desde la clase `Main` se inyecta la referencia al método factoría específico (`Id::create`). Así, la clase `IdRange` puede generar e instanciar dinámicamente el tipo de ID correspondiente a la parte que se esté ejecutando sin acoplarse a ella.
 *   **Patrones funcionales**:
-    *   **Closure**:
-        *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
-        *   *Implementación*: Se aplica a las expresiones lambda en [Id.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java) para capturar las variables locales del contexto (`n`, `s` y `pattern`) y evaluar de forma inmutable la repetición de patrones.
+    *   **Closure**: Se aplica a las expresiones lambda en [Id.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day02/b/model/Id.java) para capturar las variables locales del contexto (`n`, `s` y `pattern`) y evaluar de forma inmutable la repetición de patrones.
 
 ---
 

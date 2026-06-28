@@ -4,9 +4,14 @@ import software.ulpgc.aoc.day02.model.InvalidatableId;
 
 import java.util.stream.IntStream;
 
-public record Id(long id) implements InvalidatableId {
+public class Id implements InvalidatableId {
+    private final long id;
 
-    public static Id create(long id){
+    private Id(long id) {
+        this.id = id;
+    }
+
+    public static Id create(long id) {
         return new Id(id);
     }
 
@@ -40,5 +45,9 @@ public record Id(long id) implements InvalidatableId {
                 .allMatch(i -> s.substring(i, i + len).equals(pattern));
     }
 
+    @Override
+    public long id() {
+        return this.id;
+    }
 
 }

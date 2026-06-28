@@ -2,27 +2,26 @@
 
 ## Descripción
 
-El desafío consiste en optimizar el control de una serie de máquinas (`Machine`) en una planta de fabricación (`Factory`). Cada máquina tiene un estado objetivo (representado por una máscara de bits `targetMask`) que indica qué componentes o luces deben encenderse (`#`). Para lograr esto, disponemos de una serie de botones, donde cada botón conmuta (invierte con una operación XOR) un conjunto específico de componentes.
-1.  **Parte Única**: Encontrar el número mínimo de pulsaciones de botón necesarias para alcanzar el estado objetivo desde un estado inicial donde todos los componentes están apagados. Se calcula la suma total de las pulsaciones mínimas de todas las máquinas de la fábrica. Si un estado no es alcanzable, se modela con un coste máximo por defecto.
+El desafío consiste en optimizar el control de una serie de máquinas (`Machine`) en una planta de fabricación (`Factory`). Cada máquina dispone de una serie de botones que afectan a sus componentes, y el objetivo es encontrar el número mínimo de pulsaciones necesarias para alcanzar un estado deseado. Se calcula la suma total de las pulsaciones mínimas de todas las máquinas de la fábrica.
+1.  **Parte A**: Encontrar el número mínimo de pulsaciones de botón necesarias para alcanzar el estado objetivo desde un estado inicial donde todos los componentes están apagados, utilizando conmutación binaria de componentes.
+2.  **Parte B**: Encontrar el número mínimo de pulsaciones necesarias para reducir a cero una serie de contadores numéricos de voltaje objetivo, donde cada botón contribuye a decrementar ciertos contadores y el estado se reduce progresivamente en cada paso.
 
 ## Diagramas UML
 
-| Parte A | Parte B |
-| :---: | :---: |
-| ![Diagrama UML Parte A](../../../../../../../UML%20diagrams/uml_day10a.png) | ![Diagrama UML Parte B](../../../../../../../UML%20diagrams/uml_day10b.png) |
+![Diagrama UML](../../../../../../../UML%20diagrams/uml_day10.png) 
 
 ## Fundamentos de diseño
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
 *   **Abstracción**:
-    *   *Definición*: Permite identificar y modelar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
+    *   *Definición*: Permite identificar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
     *   *Implementación*: Toda la manipulación de estados y resolución de caminos mediante máscara de bits XOR está encapsulada dentro del record `Machine`, aislando la lógica binaria del negocio principal.
 *   **Encapsulamiento**:
     *   *Definición*: El código esconde su complejidad interna, mostrándose al exterior mediante una interfaz más simple de operar.
     *   *Implementación*: La máscara de bits y la conmutación XOR son invisibles para la clase `Factory`, que solo conoce la interfaz pública para consultar el coste de la máquina.
 *   **Cohesión**:
-    *   *Definición*: Se refiere al grado en que los elementos de un módulo —como una clase o función— están relacionados entre sí y colaboran para cumplir una única tarea o propósito. Un módulo se considera altamente cohesivo cuando todas sus partes están directamente conectadas con la responsabilidad central que se le ha asignado, trabajando de forma coordinada hacia un objetivo común.
+    *   *Definición*: Se refiere al grado en que los elementos de un módulo están relacionados entre sí y colaboran para cumplir una única tarea.
     *   *Implementación*: `Machine` representa la lógica de resolución individual de una máquina de estados, `Factory` agrega los resultados del conjunto de máquinas, y `Fraction` proporciona soporte para operaciones algebraicas exactas.
 *   **Bajo acoplamiento**:
     *   *Definición*: Las dependencias entre módulos son mínimas y se basan en abstracciones.
@@ -69,20 +68,6 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 *   **Law of Demeter (LoD - Ley de Deméter)**:
     *   *Definición*: Una unidad de software debe conocer solo a sus colaboradores directos, evitando el acceso profundo a objetos y reduciendo así el acoplamiento y facilitando la prueba y mantenimiento del código.
     *   *Implementación*: `Factory` interactúa directamente con `Machine` sin navegar por sus máscaras o valores de botones internos.
-*   **You Aren’t Gonna Need It (YAGNI)**:
-    *   *Definición*: No se debe implementar funcionalidad hasta que realmente sea necesaria, evitando complejidad innecesaria.
-*   **Convention Over Configuration (CoC - Convención sobre configuración)**:
-    *   *Definición*: El sistema debe funcionar con una configuración mínima, asumiendo convenciones por defecto para simplificar su uso.
-*   **Principio de mínima sorpresa**:
-    *   *Definición*: El comportamiento de un componente debe ser predecible e intuitivo, sin efectos secundarios inesperados.
-*   **Principio de mínimo compromiso**:
-    *   *Definición*: Una interfaz debe exponer sólo lo necesario para operar, ocultando detalles internos y reduciendo la dependencia entre módulos.
-*   **Keep It Simple, Stupid (KISS)**:
-    *   *Definición*: El código debe ser claro, directo y fácil de entender, evitando la complejidad innecesaria.
-
-## Diseño por contrato
-*   **Definición**: El diseño por contrato es un enfoque de diseño que formaliza los acuerdos entre un componente y sus consumidores (por ejemplo, entre una clase y quien la utiliza), a través de interfaces claras y bien definidas. Se basa en la idea de que cada componente ofrece una serie de servicios bajo ciertas condiciones (precondiciones) y, a cambio, garantiza ciertos resultados (postcondiciones), mientras mantiene invariantes internas.
-*   **Implementación**: La interfaz `Deserializer<Machine>` establece el contrato formal de deserialización del dominio.
 
 ## Técnicas de diseño aplicadas
 
@@ -113,14 +98,9 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
     *   **Command**:
         *   *Definición*: Patrón de comportamiento que encapsula una petición como un objeto, permitiendo parametrizar a los clientes con diferentes operaciones o aislar la lógica de ejecución del modelo de datos.
         *   *Implementación*: La resolución algorítmica de cada máquina ha sido extraída a la interfaz `MachineCommand`. Ahora `Machine` es un objeto de datos puro sin métodos de cálculo, rompiendo la dependencia cíclica con `Solver` y mejorando la cohesión.
-    *   **Iterator**:
-        *   *Definición*: Patrón de comportamiento. Proporciona un acceso secuencial a los elementos de una colección sin exponer su estructura interna. Separa la lógica de iteración de la estructura de datos, promoviendo la modularidad y facilitando la reutilización de código.
 *   **Patrones funcionales**:
     *   **Closure**:
         *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
-
-*   **Backtracking (Búsqueda con Retroceso)**:
-    *   *Implementación*: La función recursiva privada `findMinPresses` realiza un recorrido en profundidad con poda de ramas (cuando las pulsaciones actuales superan la mejor solución encontrada) para buscar el conjunto óptimo de botones.
 
 ## Elección de diseño: Primitivos con orElse vs Optional
 

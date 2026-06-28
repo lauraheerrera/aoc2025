@@ -1,4 +1,4 @@
-package test.Day09.ATest;
+package test.Day09.IOTest;
 
 import org.junit.Test;
 import software.ulpgc.aoc.day09.io.TxtPointDeserializer;

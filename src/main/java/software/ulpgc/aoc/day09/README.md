@@ -17,13 +17,13 @@ El desafío consiste en optimizar la disposición espacial en un cine (`MovieThe
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
 *   **Abstracción**:
-    *   *Definición*: Permite identificar y modelar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
+    *   *Definición*: Permite identificar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
     *   *Implementación*: El modelo del plano geométrico está encapsulado en `Point`, `Segment` y `MovieTheater`, ocultando los algoritmos de detección de colisiones y cálculo de áreas.
 *   **Encapsulamiento**:
     *   *Definición*: El código esconde su complejidad interna, mostrándose al exterior mediante una interfaz más simple de operar.
     *   *Implementación*: Toda la lógica interna de la colisión de rayos e intersecciones de segmentos se oculta tras los records del dominio.
 *   **Cohesión**:
-    *   *Definición*: Se refiere al grado en que los elementos de un módulo —como una clase o función— están relacionados entre sí y colaboran para cumplir una única tarea o propósito. Un módulo se considera altamente cohesivo cuando todas sus partes están directamente conectadas con la responsabilidad central que se le ha asignado, trabajando de forma coordinada hacia un objetivo común.
+    *   *Definición*: Se refiere al grado en que los elementos de un módulo están relacionados entre sí y colaboran para cumplir una única tarea.
     *   *Implementación*: Las clases y registros representan conceptos atómicos bien acotados: `Point` maneja coordenadas individuales y áreas, `Segment` representa los límites físicos entre asientos, y `MovieTheater` implementa la lógica de optimización del espacio.
 *   **Bajo acoplamiento**:
     *   *Definición*: Las dependencias entre módulos son mínimas y se basan en abstracciones.
@@ -70,20 +70,6 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 *   **Law of Demeter (LoD - Ley de Deméter)**:
     *   *Definición*: Una unidad de software debe conocer solo a sus colaboradores directos, evitando el acceso profundo a objetos y reduciendo así el acoplamiento y facilitando la prueba y mantenimiento del código.
     *   *Implementación*: `MovieTheater` interactúa con `Point` y `Segment` mediante sus abstracciones sin navegar por sus variables coordinadas `x` e `y` individuales.
-*   **You Aren’t Gonna Need It (YAGNI)**:
-    *   *Definición*: No se debe implementar funcionalidad hasta que realmente sea necesaria, evitando complejidad innecesaria.
-*   **Convention Over Configuration (CoC - Convención sobre configuración)**:
-    *   *Definición*: El sistema debe funcionar con una configuración mínima, asumiendo convenciones por defecto para simplificar su uso.
-*   **Principio de mínima sorpresa**:
-    *   *Definición*: El comportamiento de un componente debe ser predecible e intuitivo, sin efectos secundarios inesperados.
-*   **Principio de mínimo compromiso**:
-    *   *Definición*: Una interfaz debe exponer sólo lo necesario para operar, ocultando detalles internos y reduciendo la dependencia entre módulos.
-*   **Keep It Simple, Stupid (KISS)**:
-    *   *Definición*: El código debe ser claro, directo y fácil de entender, evitando la complejidad innecesaria.
-
-## Diseño por contrato
-*   **Definición**: El diseño por contrato es un enfoque de diseño que formaliza los acuerdos entre un componente y sus consumidores (por ejemplo, entre una clase y quien la utiliza), a través de interfaces claras y bien definidas. Se basa en la idea de que cada componente ofrece una serie de servicios bajo ciertas condiciones (precondiciones) y, a cambio, garantiza ciertos resultados (postcondiciones), mientras mantiene invariantes internas.
-*   **Implementación**: La firma de la interfaz `Deserializer<Point>` formaliza las expectativas de entrada del dominio.
 
 ## Técnicas de diseño aplicadas
 
@@ -108,10 +94,6 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 *   **Patrones creacionales**:
     *   **Factory Method**:
         *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
-*   **Patrones de comportamiento**:
-    *   **Iterator**:
-        *   *Definición*: Patrón de comportamiento. Proporciona un acceso secuencial a los elementos de una colección sin exponer su estructura interna. Separa la lógica de iteración de la estructura de datos, promoviendo la modularidad y facilitando la reutilización de código.
-        *   *Implementación*: Uso de Java Streams (`IntStream.range().flatMapToLong()`) para evaluar de forma limpia y declarativa todas las combinaciones de pares de puntos en el cine.
 *   **Patrones funcionales**:
     *   **Closure**:
         *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).

@@ -17,13 +17,13 @@ El desafío consiste en simular la división de flujos (splits) y el recuento de
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
 *   **Abstracción**:
-    *   *Definición*: Permite identificar y modelar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
+    *   *Definición*: Permite identificar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
     *   *Implementación*: Toda la lógica matemática y de propagación de caminos está encapsulada en las clases del modelo `Manifold` y `Paths`, ocultando al exterior la forma en la que se calculan las transiciones.
 *   **Encapsulamiento**:
     *   *Definición*: El código esconde su complejidad interna, mostrándose al exterior mediante una interfaz más simple de operar.
     *   *Implementación*: La navegación interna de coordenadas y el estado mutable intermedio del flujo se encapsulan dentro de los records de dominio.
 *   **Cohesión**:
-    *   *Definición*: Se refiere al grado en que los elementos de un módulo —como una clase o función— están relacionados entre sí y colaboran para cumplir una única tarea o propósito. Un módulo se considera altamente cohesivo cuando todas sus partes están directamente conectadas con la responsabilidad central que se le ha asignado, trabajando de forma coordinada hacia un objetivo común.
+    *   *Definición*: Se refiere al grado en que los elementos de un módulo están relacionados entre sí y colaboran para cumplir una única tarea.
     *   *Implementación*: Las clases y registros representan conceptos atómicos del problema: `Column` (coordenada horizontal), `Row` (fila con celdas), `Tile` (tipo de celda), `Grid` (matriz de celdas), `Paths` (caminos acumulados) y `Manifold` (orquestador del cálculo).
 *   **Bajo acoplamiento**:
     *   *Definición*: Las dependencias entre módulos son mínimas y se basan en abstracciones.
@@ -71,19 +71,6 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 *   **Law of Demeter (LoD - Ley de Deméter)**:
     *   *Definición*: Una unidad de software debe conocer solo a sus colaboradores directos, evitando el acceso profundo a objetos y reduciendo así el acoplamiento.
     *   *Implementación*: El manifold interactúa directamente con `Grid` y `Paths`, sin requerir inspecciones profundas de las baldosas individuales de `Row`.
-*   **You Aren’t Gonna Need It (YAGNI)**:
-    *   *Definición*: No se debe implementar funcionalidad hasta que realmente sea necesaria, evitando complejidad innecesaria.
-*   **Convention Over Configuration (CoC - Convención sobre configuración)**:
-    *   *Definición*: El sistema debe funcionar con una configuración mínima, asumiendo convenciones por defecto para simplificar su uso.
-*   **Principio de mínima sorpresa**:
-    *   *Definición*: El comportamiento de un componente debe ser predecible e intuitivo, sin efectos secundarios inesperados.
-*   **Principio de mínimo compromiso**:
-    *   *Definición*: Una interfaz debe exponer sólo lo necesario para operar, ocultando detalles internos y reduciendo la dependencia entre módulos.
-*   **Keep It Simple, Stupid (KISS)**:
-    *   *Definición*: El código debe ser claro, directo y fácil de entender, evitando la complejidad innecesaria.
-
-## Diseño por contrato
-*   **Definición**: El diseño por contrato es un enfoque de diseño que formaliza los acuerdos entre un componente y sus consumidores a través de interfaces claras. Se basa en la idea de que cada componente ofrece servicios bajo precondiciones y garantiza postcondiciones e invariantes internas.
 
 ## Técnicas de diseño aplicadas
 

@@ -4,6 +4,7 @@ import software.ulpgc.aoc.common.io.LoaderFactory;
 import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.day01.io.TxtOrderDeserializer;
 import software.ulpgc.aoc.day01.model.Dial;
+import software.ulpgc.aoc.day01.model.DialCalculator;
 import software.ulpgc.aoc.day01.model.DialStatus;
 import software.ulpgc.aoc.day01.model.Order;
 
@@ -20,10 +21,10 @@ public class Main {
                 .txt(file, deserializer::deserialize)
                 .load();
 
-        Dial dial = new Dial("main-dial");
+        Dial dial = Dial.create();
         DialStatus status = DialStatus.initial(dial).execute(orders);
 
         System.out.println("Posición final: " + status.position());
-        System.out.println("Veces que pasa por 0: " + status.countTotalZeros());
+        System.out.println("Veces que pasa por 0: " + DialCalculator.of(status).countCrossingZero());
     }
 }

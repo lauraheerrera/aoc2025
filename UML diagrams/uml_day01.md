@@ -16,6 +16,11 @@ classDiagram
         <<record>>
     }
 
+    class DialCalculator {
+    }
+
     DialStatus --> Dial
     DialStatus --> Order
+    DialCalculator ..> DialStatus
+    DialCalculator --> Order
 ```

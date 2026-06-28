@@ -1,4 +1,10 @@
 package software.ulpgc.aoc.day01.model;
 
-public record Dial(String name) {
+public class Dial {
+    private Dial() {
+    }
+
+    public static Dial create() {
+        return new Dial();
+    }
 }

@@ -18,8 +18,7 @@ public class Main {
         DeviceLoader loader = () -> LoaderFactory.txt(file, deserializer::deserialize).load();
 
         List<Device> devices = loader.load();
-        Network network = new Network(devices);
 
-        System.out.println("El resultado es: " + network.countPaths("you", "out"));
+        System.out.println("El resultado es: " + Network.from(devices).countPaths("you", "out"));
     }
 }

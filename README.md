@@ -23,7 +23,6 @@ La arquitectura global se cimienta sobre pilares fundamentales:
 - **Bajo acoplamiento**: Los puntos de entrada (`Main`) no dependen de implementaciones concretas de lectura de archivos, sino de interfaces (como `Loader`), lo que facilita el intercambio de fuentes de datos.
 - **Alta cohesión**: Cada componente tiene una única responsabilidad bien definida: los modelos gestionan la lógica, los deserializadores el parseo y los cargadores el acceso a datos.
 - **Diseño por contrato**: Se formalizan los acuerdos de comportamiento entre los componentes mediante interfaces claras y acotadas (como `Deserializer` y `Loader`), lo que asegura contratos de entrada/salida limpios.
-- **Inmutabilidad del modelo**: Las clases de dominio (records de Java como `Order` e `Id`) se diseñan con inmutabilidad estructural para evitar efectos secundarios y asegurar la predictibilidad del flujo de datos.
 
 ### Principios aplicados
 
@@ -47,19 +46,23 @@ La arquitectura global se cimienta sobre pilares fundamentales:
 - **YAGNI (You Aren't Gonna Need It)**: Se han implementado las soluciones de forma sencilla, sin añadir complejidad innecesaria más allá de lo requerido por el problema.
 
 ### Técnicas de diseño aplicadas
-
+- **Inmutabilidad del modelo**: Las clases de dominio (records de Java como `Order` e `Id`) se diseñan con inmutabilidad estructural para evitar efectos secundarios y asegurar la predictibilidad del flujo de datos.
 *   **Inyección de dependencias**: 
     * *Definición*: Técnica de diseño que consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código.
     * *Implementación*: La creación y provisión de dependencias se desacopla de su uso, pasándolas dinámicamente a través de constructores (por ejemplo, inyectando la factoría de IDs o cargadores en tiempo de ejecución).
 *   **Genéricos**: La infraestructura de entrada/salida está parametrizada con tipos genéricos para promover la reutilización de código libre de castings manuales.
 *   **Good Naming**: Se priorizan nombres de clases y métodos autoexplicativos que actúan como documentación viva del código.
+*   **Inversión de Control (IoC)**: Habitualmente, el código de negocio (`Main`) dirige el flujo controlando el bucle de lectura de un archivo línea a línea. Aquí se ha invertido ese control: el `Main` no tiene bucles, sino que delega la orquestación a una clase de infraestructura genérica (`Loader`).
+El `Loader` asume el control del bucle de lectura y aplica el Principio de Hollywood (*"No nos llames, nosotros te llamamos"*), ejecutando la función lambda inyectada por el `Main` única y exclusivamente cuando necesita transformar una línea de texto en un objeto del dominio.
 
 ### Patrones de diseño
 
 *   **Patrón Factory Method**:
-    *   *Implementación*: La clase [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java) encapsula la creación compleja de cargadores, simplificando la creación de objetos desde el cliente.
-*   **Patrón Iterator**:
-    *   *Implementación*: Uso sistemático de **Java Streams** para recorrer secuencialmente las colecciones de datos abstrayendo los mecanismos de control de bucles.
+    *   *Definición*: Patrón de diseño creacional que proporciona una interfaz para la creación de objetos en una clase base, pero permite a las subclases alterar el tipo de objetos que se crearán. En implementaciones modernas orientadas a objetos, se manifiesta frequentemente en la creación de objetos a través de métodos estáticos de utilidad o factorías de clase.
+    *   *Implementación*: La clase [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java) encapsula la creación de cargadores. En lugar de que el código cliente tenga que instanciar directamente `TxtLoader` con sus parámetros internos (como rutas de archivo o funciones de parsing), simplemente consulta a `LoaderFactory` con un identificador o tipo, recibiendo a cambio el objeto `Loader` listo para ser utilizado. Esto simplifica la creación y promueve un menor acoplamiento, ya que el cliente no necesita conocer los detalles de implementación de los cargadores.
+*   **Patrón Strategy**:
+    *   *Definición*: Patrón de diseño comportamental que permite definir una familia de algoritmos, encapsularlos en clases independientes e intercambiables, e utilizarlos de forma dinámica en tiempo de ejecución sin que el código cliente dependa de sus implementaciones concretas.
+    *   *Implementación*: En el proyecto se utiliza para desacoplar la lógica de transformación de datos mediante la interfaz genérica `Deserializer<T>` y la utilización de `Function<String, T>` como estrategia funcional. De este modo, el comportamiento de parseo se inyecta en componentes como `Loader`, permitiendo intercambiar distintas implementaciones de deserialización (por ejemplo `TxtShapeDeserializer`, `TxtRegionDeserializer`, etc.) sin modificar la infraestructura de carga.
 
 ### Patrones y técnicas no aplicadas
 
@@ -67,36 +70,21 @@ Siguiendo los principios **YAGNI** (You Aren't Gonna Need It) y **KISS** (Keep I
 
 *   **Patrón Singleton**: Al ser un proyecto de resolución de algoritmos por lotes, no existe estado mutable global compartido ni servicios compartidos de red o base de datos. Toda la lógica se maneja de forma funcional o instanciando modelos inmutables, evitando el acoplamiento global innecesario y efectos secundarios.
 *   **Patrón Builder**: Los modelos de datos y records de cada día (`JunctionBox`, `Point`, `Dial`, `Machine`) son sencillos y tienen pocos atributos. Sus constructores estándar o métodos factoría son suficientes, evitando la verbosidad y el código repetitivo que introduce un Builder.
-*   **Patrón Command**: Las órdenes e instrucciones se modelan directamente como tipos del dominio (por ejemplo, `Order` en el Día 1 o `Operator` en el Día 6) y se resuelven en pipelines lineales. Al no requerir colas de ejecución dinámicas, programadores o soporte para deshacer/rehacer, este patrón no aportaba valor real.
-*   **Patrones Observer / Listener**: Las soluciones se ejecutan de manera secuencial y por lotes (procesando ficheros de entrada a salida estándar). Al carecer de interfaces de usuario (GUI) u operaciones reactivas orientadas a eventos en tiempo real, no se requiere la complejidad de suscripciones asíncronas.
+*   **Patrones Observer / Listener**: Las soluciones se ejecutan de manera secuencial y por lotes (procesando ficheros de entrada a salida estándar). Al carecer de interfaces de usuario (GUI) u operaciones reactivas orientadas a eventos en tiempo real, no se requiere la complejidad de suscripciones.
 *   **Patrón Adapter**: Debido a que todo el sistema y sus modelos se construyeron de forma nativa desde cero bajo nuestro propio diseño e interfaces comunes, no fue necesario integrar librerías externas o APIs incompatibles que requirieran adaptadores.
 *   **Patrón Decorador**: Las variaciones de comportamiento para la segunda parte de cada día se resolvieron mediante parametrización o implementando las interfaces base directamente (como en el Día 2). No se requirió añadir responsabilidades dinámicas envolviendo objetos en tiempo de ejecución.
-*   **Patrón Null Object**: Las referencias nulas o comportamientos vacíos se controlan a través del uso de colecciones vacías (`List.of()`) y del tipo `Optional` de Java (actuando como mónada), lo que hace innecesario definir objetos nulos artificiales del dominio.
-*   **Inversión de Control (IoC)**: Habitualmente, el código de negocio (`Main`) dirige el flujo controlando el bucle de lectura de un archivo línea a línea. Aquí se ha invertido ese control: el `Main` no tiene bucles, sino que delega la orquestación a una clase de infraestructura genérica (`Loader`).
-El `Loader` asume el control del bucle de lectura y aplica el Principio de Hollywood (*"No nos llames, nosotros te llamamos"*), ejecutando la función lambda inyectada por el `Main` única y exclusivamente cuando necesita transformar una línea de texto en un objeto del dominio.
-
+*   **Patrón Null Object**: Las referencias nulas o comportamientos vacíos se controlan a través del uso de colecciones vacías (`List.of()`), lo que hace innecesario definir objetos nulos artificiales del dominio.
 ---
 
 ## Arquitectura de Entrada/Salida (I/O)
 
 La capa de entrada/salida se basa en una arquitectura genérica y reutilizable, donde el comportamiento de parseo se desacopla completamente del mecanismo de lectura de ficheros. Esto permite eliminar loaders específicos por dominio y favorecer la composición frente a la herencia.
 
-### Modelo de la I/O y Patrones Aplicados
-
 El modelo se apoya en dos conceptos clave con diferentes niveles de abstracción:
 
 1.  **Interfaz de Deserialización (`Deserializer<T>`)**: Es una interfaz genérica que define el contrato `deserialize(String content)` para transformar texto plano en una entidad o colección del dominio de negocio. Todos los retos reutilizan esta abstracción genérica de `common.io`.
 2.  **Cargador y Factoría (`LoaderFactory`)**: Centraliza la lectura de ficheros delegando la deserialización a través de funciones.
 
-A continuación se detallan los patrones de diseño aplicados en esta capa para lograr un alto desacoplamiento:
-
-| Elemento | Patrón aplicado | Descripción |
-| :--- | :--- | :--- |
-| **`LoaderFactory`** | Factory Method | Encapsula la creación de `TxtLoader<T>`, simplificando su instanciación y ocultando detalles de construcción al cliente. |
-| **`Function<String, T>`** | Strategy Pattern | Define la estrategia de transformación de entrada (String → T), permitiendo intercambiar fácilmente distintos parsers. |
-| **`TxtLoader<T>`** | Template Method (implícito) | Implementa el algoritmo general de lectura (apertura, recorrido y cierre del fichero), delegando el procesamiento de cada línea. |
-| **Uso de `Function` en vez de clases** | Composition over inheritance | Sustituye jerarquías de deserializadores por composición de comportamiento, reduciendo la complejidad estructural. |
-| **Inyección de deserializador** | Dependency Injection | El comportamiento de parseo se inyecta externamente en la factoría, eliminando dependencias directas y mejorando la testabilidad. |
 
 ### Diagrama de I/O
 

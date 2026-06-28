@@ -20,9 +20,7 @@ public class Main {
         List<Shape> shapes = load(TxtShapeDeserializer.toBlocks(sections), new TxtShapeDeserializer());
         List<Region> regions = load(sections.getLast(), new TxtRegionDeserializer());
 
-        Farm farm = new Farm(regions);
-
-        System.out.println("Regiones que caben: " + farm.countRegionsThatFit(shapes));
+        System.out.println("Regiones que caben: " + Farm.of(regions).countRegionsThatFit(shapes));
     }
 
     private static <T> List<T> load(List<String> lines, Deserializer<T> deserializer) {

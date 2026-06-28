@@ -5,10 +5,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record Network(Map<String, List<String>> adjacentList) {
+public class Network {
 
-    public Network(List<Device> devices) {
-        this(toAdjMap(devices));
+    private final Map<String, List<String>> adjacentList;
+
+    private Network(Map<String, List<String>> adjacentList) {
+        this.adjacentList = adjacentList;
+    }
+
+    public static Network from(List<Device> devices) {
+        return new Network(toAdjMap(devices));
     }
 
     private static Map<String, List<String>> toAdjMap(List<Device> devices) {

@@ -3,7 +3,14 @@ package software.ulpgc.aoc.day05.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public record FreshnessValidator(List<Range> validRanges) {
+public class FreshnessValidator {
+
+    private final List<Range> validRanges;
+
+    private FreshnessValidator(List<Range> validRanges) {
+        this.validRanges = validRanges;
+    }
+
     public static FreshnessValidator fromRanges(List<Range> validRanges) {
         return new FreshnessValidator(validRanges);
     }

@@ -35,7 +35,7 @@ public class FarmTest {
                 new Region(4, 4, List.of(2, 2)),
                 new Region(10, 10, List.of(5, 5)));
 
-        Farm farm = new Farm(regions);
+        Farm farm = Farm.of(regions);
         assertThat(farm.countRegionsThatFit(shapes)).isEqualTo(2);
     }
 }

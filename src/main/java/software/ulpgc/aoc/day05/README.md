@@ -13,92 +13,49 @@ El desafío consiste en validar si una lista de identificadores numéricos (IDs)
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
-*   **Abstracción**:
-    *   *Definición*: Permite identificar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
-    *   *Implementación*: Oculta la complejidad del cálculo de frescura y la mezcla de intervalos en `FreshnessValidator`. Además, `Range` oculta la lógica de comparación y solapamiento de sus límites.
-*   **Encapsulamiento**:
-    *   *Definición*: El código esconde su complejidad interna, mostrándose al exterior mediante una interfaz más simple de operar.
-    *   *Implementación*: Toda la manipulación de límites e intersecciones de un rango se gestiona de forma interna en el record `Range`.
-*   **Cohesión**:
-    *   *Definición*: Se refiere al grado en que los elementos de un módulo están relacionados entre sí y colaboran para cumplir una única tarea.
-    *   *Implementación*: Cada componente tiene una única responsabilidad bien enfocada. El record `ID` solo representa el identificador y sus comparaciones, `Range` encapsula la lógica espacial de un intervalo individual, y `FreshnessValidator` procesa de forma exclusiva el cómputo de la validez global de una colección.
-*   **Bajo acoplamiento**:
-    *   *Definición*: Las dependencias entre módulos son mínimas y se basan en abstracciones.
-    *   *Implementación*: Los componentes interactúan a través de interfaces y firmas limpias y mínimas. `ID` y `Range` no dependen de `FreshnessValidator`, lo que minimiza el impacto ante posibles cambios.
-*   **Código expresivo**:
-    *   *Definición*: El código es claro y fácil de entender.
-    *   *Implementación*: El uso de **Records** inmutables y la programación funcional con **Java Streams** permiten que los algoritmos de mezcla y validación de rangos se leer de forma declarativa, haciendo innecesarios los comentarios aclaratorios.
-*   **Inmutabilidad del modelo**:
-    *   *Definición*: Las clases del modelo se definen como Records, asegurando que sus instancias sean totalmente inmutables una vez creadas, lo que favorece la abstracción y evita errores relacionados con efectos secundarios.
-    *   *Implementación*: Las clases de dominio `ID` y `Range` son Records inmutables. Toda la manipulación de rangos (como `merge()`) genera nuevas instancias sin alterar las existentes, garantizando la predictibilidad en la lógica de negocio.
+*   **Abstracción**: Se modelan los conceptos clave usando el objeto de valor `ID` que abstrae un valor identificador numérico con sus comparaciones y `Range` que abstrae un intervalo cerrado con límites de inicio y fin. La lógica matemática compleja de combinación de intervalos y validación de frescura se mantiene oculta para los clientes del dominio.
+*   **Encapsulamiento**: El cálculo de solapamiento de intervalos, la verificación de contenencia y la fusión de rangos (`merge`) están encapsulados dentro de los métodos del record `Range`, garantizando que ninguna clase externa manipule los límites de los rangos para realizar estas operaciones.
+*   **Cohesión**: Cada clase tiene una única y clara responsabilidad: `ID` gestiona la representación y la comparación básica de IDs, `Range` encapsula los datos y operaciones geométricas del intervalo individual, y `FreshnessValidator` se responsabiliza exclusivamente del algoritmo de reducción y mezcla de intervalos para validar la frescura de los datos.
+*   **Bajo acoplamiento**: Las clases del modelo de dominio no tienen dependencia de cómo se leen o deserializan los datos de entrada. El flujo de control (`Main`) utiliza el sistema de cargadores genéricos `LoaderFactory` y deserializadores de E/S, aislando la lógica del problema de la infraestructura.
+*   **Código expresivo**: El código es autoexplicativo, claro y fácil de entender sin necesidad de ser comentado.
 
 ## Principios de diseño
 
 El proyecto está diseñado siguiendo rigurosamente los principios de diseño y **SOLID**:
 
 *   **Composition Over Inheritance (COI - Composición sobre herencia)**:
-    *   *Definición*: Prefiere la composición de objetos frente a la herencia, utilizando atributos en lugar de extender clases, para mejorar la modularidad y facilitar el mantenimiento.
-    *   *Implementación*: `FreshnessValidator` se compone de una colección de `Range` sin necesidad de establecer jerarquías heredadas.
+    *   `FreshnessValidator` se compone de una colección de `Range` sin necesidad de establecer jerarquías heredadas.
 *   **SOLID**:
     *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
-        *   *Definición*: Cada clase o módulo debe tener una única responsabilidad o razón para cambiar, favoreciendo la cohesión y la claridad del diseño.
-        *   *Implementación*:
-            *   [Range.java:L5-L20](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/Range.java#L5-L20): Define exclusivamente las propiedades geométricas, límites y operaciones binarias de comparación de un intervalo de IDs.
-            *   [ID.java:L5-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/ID.java#L5-L15): Su responsabilidad es modelar y representar un identificador individual de la cafetería.
-            *   [FreshnessValidator.java:L10-L40](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L10-L40): Encapsula de forma única el algoritmo de validación de frescura y la fusión lineal de intervalos solapados.
+        *   [Range.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/Range.java): Define exclusivamente las propiedades geométricas, límites y operaciones binarias de comparación de un intervalo de IDs.
+        *   [ID.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/ID.java): Su responsabilidad es modelar y representar un identificador individual de la cafetería.
+        *   [FreshnessValidator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java): Encapsula de forma única el algoritmo de validación de frescura y la fusión lineal de intervalos solapados.
     *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
-        *   *Definición*: Las clases deben estar abiertas a la extensión pero cerradas a la modificación, permitiendo añadir funcionalidad sin alterar el código existente.
-        *   *Implementación*:
-            *   [Range.java:L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/Range.java#L5) e [ID.java:L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/ID.java#L5): Implementan interfaces estándar como `Comparable`, lo que permite que algoritmos de ordenación externos ordenen sus colecciones de forma genérica sin alterar la definición original de las entidades.
+        *   [Range.java:L3](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/Range.java#L3) e [ID.java:L3](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/ID.java#L3): Implementan interfaces estándar como `Comparable`, lo que permite que algoritmos de ordenación externos ordenen sus colecciones de forma genérica sin alterar la definición original de las entidades.
     *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
-        *   *Definición*: Los objetos de una subclase deben poder reemplazar a los de su superclase sin alterar el funcionamiento del programa, garantizando consistencia, modularidad e interoperabilidad y la sustitución segura de componentes (Evolución de la Ley de Deméter).
-        *   *Implementación*:
-            *   [TxtRangeDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtRangeDeserializer.java#L6) y [TxtIDDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtIDDeserializer.java#L6): Son perfectamente sustituibles bajo las firmas abstractas de `Deserializer<Range>` y `Deserializer<ID>` en cualquier cargador adaptado.
+        *   [TxtRangeDeserializer.java:L7](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtRangeDeserializer.java#L7) y [TxtIDDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtIDDeserializer.java#L6): Son perfectamente sustituibles bajo las firmas abstractas de `Deserializer<Range>` y `Deserializer<ID>` en cualquier cargador adaptado.
     *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:
-        *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza, reduciendo el acoplamiento y favoreciendo la especialización.
-        *   *Implementación*:
-            *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz genérica minimalista que expone un único método (`deserialize()`).
+        *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz genérica minimalista que expone un único método (`deserialize()`).
     *   **Dependency Inversion Principle (DIP - Principio de Inversión de Dependencias)**:
-        *   *Definición*: Los módulos de alto nivel no deben depender de módulos de bajo nivel, sino de abstracciones, lo que disminuye la dependencia entre componentes.
-        *   *Implementación*:
-            *   [TxtDatabaseLoader.java:L20-L24](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtDatabaseLoader.java#L20-L24): El cargador no depende de deserializadores de texto planos fijos, sino de las interfaces genéricas `Deserializer<Range>` y `Deserializer<ID>`, permitiendo la inyección de dependencias para cambiar de forma externa la infraestructura física de los ficheros.
-*   **Don’t Repeat Yourself (DRY)**:
-    *   *Definición*: Evita la duplicación de código, promoviendo la reutilización mediante funciones o componentes comunes para mejorar la mantenibilidad.
-*   **Law of Demeter (LoD - Ley de Deméter)**:
-    *   *Definición*: Una unidad de software debe conocer solo a sus colaboradores directos, evitando el acceso profundo a objetos y reduciendo así el acoplamiento y facilitando la prueba y mantenimiento del código.
-    *   *Implementación*: La base de datos y validador actúan sobre los límites del record `Range` sin descender a evaluar de manera manual las partes o dígitos del ID primitivo subyacente.
+        *   [TxtDatabaseLoader.java:L20-L24](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/io/TxtDatabaseLoader.java#L20-L24): El cargador no depende de deserializadores de texto planos fijos, sino de las interfaces genéricas `Deserializer<Range>` y `Deserializer<ID>`, permitiendo la inyección de dependencias para cambiar de forma externa la infraestructura física de los ficheros.
+*   **Law of Demeter (LoD - Ley de Deméter)**: La base de datos y validador actúan sobre los límites del record `Range` sin descender a evaluar de manera manual las partes o dígitos del ID primitivo subyacente.
 
 ## Técnicas de diseño aplicadas
 
 Se han utilizado diversas técnicas de ingeniería de software para asegurar la robustez y limpieza del proyecto:
-
+*   **Inmutabilidad del modelo**: Tanto `ID` como `Range` son **Records** de Java estrictamente inmutables. Operaciones como la fusión de rangos devuelven una nueva instancia inmutable de `Range`, evitando cambios de estado colaterales indeseados y garantizando la consistencia multihilo de los datos.
 *   **Programación funcional (con Java Streams)**:
-    *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
-    *   *Implementación*:
-        *   [FreshnessValidator.java:L17-L22](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L17-L22) (`countFresh()`): Utiliza `ids.stream()` para recorrer la lista de IDs de entrada y filtrarlos (`filter`) verificando si alguno de ellos está contenido en los rangos de frescura (`validRanges.stream().anyMatch(...)`). Cuenta los elementos válidos resultantes (`count()`).
-        *   [FreshnessValidator.java:L24-L28](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L24-L28) (`countTotalFresh()`): Obtiene el stream de rangos ya consolidados (disjuntos y ordenados), mapea cada rango a su tamaño en elementos (`mapToLong(Range::length)`) y devuelve la suma total (`sum()`).
-*   **Inyección de dependencias**:
-    *   *Definición*: Consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código. Esto se puede hacer con constructores o mediante propiedades.
-    *   *Implementación*: Inyección de los objetos deserializadores a través del constructor del cargador.
-*   **Genéricos**:
-    *   *Definición*: Permiten definir estructuras de datos tipadas evitando castings.
-    *   *Implementación*: Utilización de la interfaz genérica parametrizada `Deserializer<T>`.
-*   **Good Naming**:
-    *   *Definición*: Consiste en asignar nombres claros, significativos y relacionados con su propósito a clases, variables y métodos, mejorando la claridad y expresividad del código.
-    *   *Implementación*: Nombres explícitos como `contains()`, `mergeableWith()`, `merge()`, `countFresh()`, y `countTotalFresh()`.
-*   **Inversión del control (IoC)**:
-    *   *Definición*: Delega el flujo del programa a un contenedor externo, facilitando la modularidad y reduciendo el acoplamiento.
-
+    *   [FreshnessValidator.java:L11-L16](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L11-L16) (`countFresh()`): Utiliza `ids.stream()` para recorrer la lista de IDs de entrada y filtrarlos (`filter`) verificando si alguno de ellos está contenido en los rangos de frescura (`validRanges.stream().anyMatch(...)`). Cuenta los elementos válidos resultantes (`count()`).
+    *   [FreshnessValidator.java:L17-L22](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L17-L22) (`countTotalFresh()`): Obtiene el stream de rangos ya consolidados (disjuntos y ordenados), mapea cada rango a su tamaño en elementos (`mapToLong(Range::length)`) y devuelve la suma total (`sum()`).
+*   **Inyección de dependencias**: Inyección de los objetos deserializadores a través del constructor del cargador.
+*   **Genéricos**:  Utilización de la interfaz genérica parametrizada `Deserializer<T>`.
+*   **Good Naming**: Nombres explícitos como `contains()`, `mergeableWith()`, `merge()`, `countFresh()`, y `countTotalFresh()`.
+    
 ## Patrones de diseño
 *   **Patrones creacionales**:
-    *   **Factory Method**:
-        *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
-        *   *Implementación*: Se utiliza en [FreshnessValidator.java:L13-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L13-L15) con `FreshnessValidator.fromRanges()`.
+    *   **Factory Method**: Se utiliza en [FreshnessValidator.java:L13-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day05/model/FreshnessValidator.java#L13-L15) con `FreshnessValidator.fromRanges()`.
 *   **Patrones funcionales**:
-    *   **Closure**:
-        *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
-
----
+    *   **Closure**: Empleado a través de lambdas y referencias a métodos como `Range::length` y `FreshnessValidator::accumulate`.
 
 ## Pruebas realizadas
 

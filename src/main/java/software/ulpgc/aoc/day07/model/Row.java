@@ -3,7 +3,13 @@ package software.ulpgc.aoc.day07.model;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public record Row(List<Tile> tiles) {
+public class Row {
+    private final List<Tile> tiles;
+
+    private Row(List<Tile> tiles) {
+        this.tiles = tiles;
+    }
+
     public static Row from(String line) {
         return new Row(line.chars().mapToObj(c -> Tile.from((char) c)).toList());
     }

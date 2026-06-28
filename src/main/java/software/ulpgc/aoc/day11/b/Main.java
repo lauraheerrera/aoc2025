@@ -18,7 +18,7 @@ public class Main {
         DeviceLoader loader = () -> LoaderFactory.txt(file, deserializer::deserialize).load();
 
         List<Device> devices = loader.load();
-        Network network = new Network(devices);
+        Network network = Network.from(devices);
 
         long path1 = network.countPaths("svr", "dac") * network.countPaths("dac", "fft")
                 * network.countPaths("fft", "out");

@@ -14,24 +14,12 @@ El desafío consiste en optimizar el control de una serie de máquinas (`Machine
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
-*   **Abstracción**:
-    *   *Definición*: Permite identificar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
-    *   *Implementación*: Toda la manipulación de estados y resolución de caminos mediante máscara de bits XOR está encapsulada dentro del record `Machine`, aislando la lógica binaria del negocio principal.
-*   **Encapsulamiento**:
-    *   *Definición*: El código esconde su complejidad interna, mostrándose al exterior mediante una interfaz más simple de operar.
-    *   *Implementación*: La máscara de bits y la conmutación XOR son invisibles para la clase `Factory`, que solo conoce la interfaz pública para consultar el coste de la máquina.
-*   **Cohesión**:
-    *   *Definición*: Se refiere al grado en que los elementos de un módulo están relacionados entre sí y colaboran para cumplir una única tarea.
-    *   *Implementación*: `Machine` representa la lógica de resolución individual de una máquina de estados, `Factory` agrega los resultados del conjunto de máquinas, y `Fraction` proporciona soporte para operaciones algebraicas exactas.
-*   **Bajo acoplamiento**:
-    *   *Definición*: Las dependencias entre módulos son mínimas y se basan en abstracciones.
-    *   *Implementación*: El flujo principal (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io`, que recibe una `Function<String, T>` de deserialización, en lugar de una implementación concreta de parseo.
-*   **Código expresivo**:
-    *   *Definición*: El código es claro y fácil de entender.
-    *   *Implementación*: El uso de Records de Java e inmutabilidad nos permite modelar las relaciones de coste y botones sin recurrir a clases y variables mutables complejas.
-*   **Inmutabilidad del modelo**:
-    *   *Definición*: Las clases del modelo se definen como Records, asegurando que sus instancias sean totalmente inmutables una vez creadas, lo que favorece la abstracción y evita errores relacionados con efectos secundarios.
-    *   *Implementación*: Las clases de datos clave del sistema (`Machine`, `Factory` y `Fraction`) se implementan como **Records** inmutables en Java.
+*   **Abstracción**: Se modelan de forma abstracta los componentes físicos: `Button` (que representa un botón con sus índices de luces que altera), `Machine` (abstracción del hardware de luces y objetivos), e interacciones a través de `MachineCommand` y `Solver`. La manipulación a bajo nivel de máscaras y conmutación XOR se maneja abstractamente.
+*   **Encapsulamiento**: El estado de conmutación XOR (`currentLights ^ buttonMask`) y las operaciones de bits se ocultan completamente en `MachineStatus` y `Solver`. La clase agregadora `Factory` o el método principal no acceden a estos cálculos binarios; solo ejecutan `totalMinPresses()`.
+*   **Cohesión**: Cada clase tiene un único propósito: `Button` modela el pulsador físico, `Factory` agrupa las máquinas y delega su ejecución, `MachineStatus` representa el estado de conmutación de las luces de la máquina, y `Solver` (que implementa `MachineCommand`) encapsula el algoritmo recursivo de ramificación y poda para hallar la solución óptima.
+*   **Bajo acoplamiento**: Las clases del modelo de dominio no tienen dependencia de cómo se leen o deserializan los datos de entrada. El flujo de control (`Main`) utiliza el sistema de cargadores genéricos `LoaderFactory` y deserializadores de E/S, aislando la lógica del problema de la infraestructura.
+*   **Código expresivo**: El código es autoexplicativo, claro y fácil de entender sin necesidad de ser comentado.
+
 
 ## Principios de diseño
 
@@ -70,47 +58,19 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
     *   *Implementación*: `Factory` interactúa directamente con `Machine` sin navegar por sus máscaras o valores de botones internos.
 
 ## Técnicas de diseño aplicadas
-
+*   **Inmutabilidad del modelo**: Las clases principales del modelo de datos (`Button`, `Factory`, `MachineStatus`) se implementan como **Records** inmutables. El paso a un nuevo estado de máquina no altera el estado anterior, sino que genera una nueva instancia de `MachineStatus` a través de `nextStatus()`.
 *   **Programación funcional (con Java Streams)**:
-    *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
-    *   *Implementación*:
-        *   [Factory.java:L6-L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day10/model/Factory.java#L6-L10) (`totalMinPresses()`): Utiliza `machines.stream().mapToInt().sum()` para acumular de forma funcional el número total de pulsaciones mínimas de todas las máquinas en la planta.
-*   **Inyección de dependencias**:
-    *   *Definición*: Consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código. Esto se puede hacer con constructores o mediante propiedades.
-    *   *Implementación*: La factoría `LoaderFactory` recibe la función de deserialización como parámetro, inyectándola en el `TxtLoader` genérico. Además, la clase `Factory` de máquinas recibe el algoritmo de resolución (`MachineCommand`) inyectado por constructor, evitando acoplamientos internos con implementaciones concretas del `Solver`.
-*   **Genéricos**:
-    *   *Definición*: Permiten definir estructuras de datos tipadas evitando castings.
-    *   *Implementación*: Uso de la interfaz parametrizada `Deserializer<T>` para la entidad `Machine`.
-*   **Good Naming**:
-    *   *Definición*: Consiste en asignar nombres claros, significativos y relacionados con su propósito a clases, variables y métodos, mejorando la claridad y expresividad del código.
-    *   *Implementación*: Nombres autodescriptivos como `minPresses()`, `isFullyConfigured()`, `calculateButtonImpact()`, `isConfigurationFeasible()`.
-*   **Inversión del control (IoC)**:
-    *   *Definición*: Delega el flujo del programa a un contenedor externo, facilitando la modularidad y reduciendo el acoplamiento.
-*   **Resolución Matemática Optimizada (ILP con Bits)**:
-    *   *Definición*: Transformación de un problema de simulación combinatoria en un sistema de ecuaciones resoluble mediante operaciones a nivel de bits.
-    *   *Implementación*: En la **Parte B**, en lugar de simular fuerza bruta, se utiliza un algoritmo matemático de división por 2 para aislar bits. Esta complejidad matemática se encapsula en la clase `JoltageStatus` bajo métodos extremadamente descriptivos, logrando un rendimiento de milisegundos sin sacrificar la legibilidad del dominio.
+    *   [Factory.java:L6-L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day10/model/Factory.java#L6-L10) (`totalMinPresses()`): Utiliza `machines.stream().mapToInt().sum()` para acumular de forma funcional el número total de pulsaciones mínimas de todas las máquinas en la planta.
+*   **Inyección de dependencias**: La factoría `LoaderFactory` recibe la función de deserialización como parámetro, inyectándola en el `TxtLoader` genérico. Además, la clase `Factory` de máquinas recibe el algoritmo de resolución (`MachineCommand`) inyectado por constructor, evitando acoplamientos internos con implementaciones concretas del `Solver`.
+*   **Genéricos**:Uso de la interfaz parametrizada `Deserializer<T>` para la entidad `Machine`.
+*   **Good Naming**: Nombres autodescriptivos como `minPresses()`, `isFullyConfigured()`, `calculateButtonImpact()`, `isConfigurationFeasible()`.
+
 
 ## Patrones de diseño
-*   **Patrones creacionales**:
-    *   **Factory Method**:
-        *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
 *   **Patrones de comportamiento**:
-    *   **Command**:
-        *   *Definición*: Patrón de comportamiento que encapsula una petición como un objeto, permitiendo parametrizar a los clientes con diferentes operaciones o aislar la lógica de ejecución del modelo de datos.
-        *   *Implementación*: La resolución algorítmica de cada máquina ha sido extraída a la interfaz `MachineCommand`. Ahora `Machine` es un objeto de datos puro sin métodos de cálculo, rompiendo la dependencia cíclica con `Solver` y mejorando la cohesión.
+    *   **Command**: La resolución de cada máquina ha sido extraída a la interfaz `MachineCommand`. Ahora `Machine` es un objeto de datos puro sin métodos de cálculo, rompiendo la dependencia cíclica con `Solver` y mejorando la cohesión.
 *   **Patrones funcionales**:
-    *   **Closure**:
-        *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
-
-## Elección de diseño: Primitivos con orElse vs Optional
-
-En la implementación del Solver de la **Parte B**, se optó por eliminar el uso de `Optional` y `OptionalInt` en la búsqueda recursiva de programación dinámica, prefiriendo tipos primitivos (`int`) junto con el operador `orElse`:
-
-*   **Rendimiento**: La recursión con memoización evalúa miles de estados. El uso de `Optional` requería la asignación constante de envoltorios de objetos en memoria. El uso de `int` primitivos elimina por completo esta sobrecarga (evitando saturar el recolector de basura).
-*   **Simplicidad en Streams**: Trabajar con `Optional` obligaba a usar flujos complejos y mapeos como `.flatMap(Optional::stream)`. Con tipos primitivos se utiliza la API nativa `.mapToInt(...)` y `.min().orElse(999999)` de forma directa y clara.
-*   **Control de Desbordamiento con Centinelas**: Se utiliza el valor `999999` como centinela de "estado inalcanzable" (en lugar de un `Optional.empty()`), propagando el coste de manera controlada y evitando desbordamientos mediante la función pura `cost(presses, subResult)`.
-
----
+    *   **Closure**: Empleado a través de lambdas y referencias a métodos como en `totalMinPresses()`.
 
 ## Pruebas realizadas
 

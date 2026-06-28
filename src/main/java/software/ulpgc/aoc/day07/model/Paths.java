@@ -4,7 +4,17 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public record Paths(List<BigInteger> values) {
+public class Paths {
+    private final List<BigInteger> values;
+
+    private Paths(List<BigInteger> values) {
+        this.values = List.copyOf(values);
+    }
+
+    public List<BigInteger> values() {
+        return values;
+    }
+
     public static Paths initial(int size) {
         return new Paths(IntStream.range(0, size).mapToObj(i -> BigInteger.ONE).toList());
     }

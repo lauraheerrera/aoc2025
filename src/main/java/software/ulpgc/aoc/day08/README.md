@@ -14,96 +14,44 @@ El desafío consiste en modelar y conectar una red tridimensional de cajas de co
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
-*   **Abstracción**:
-    *   *Definición*: Permite identificar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
-    *   *Implementación*: El modelo matemático de distancias tridimensionales y de optimización de redes está encapsulado en `JunctionBox`, `Connection` y `Playground`, ocultando los detalles algorítmicos.
-*   **Encapsulamiento**:
-    *   *Definición*: El código esconde su complejidad interna, mostrándose al exterior mediante una interfaz más simple de operar.
-    *   *Implementación*: La lógica de búsqueda y mezcla de componentes conexos en `DisjointSet` se encapsula ocultando los arrays internos de padres y tamaños.
-*   **Cohesión**:
-    *   *Definición*: Se refiere al grado en que los elementos de un módulo están relacionados entre sí y colaboran para cumplir una única tarea.
-    *   *Implementación*: Cada componente tiene un propósito claro. `DisjointSet` se encarga exclusivamente de la estructura Union-Find (con compresión de caminos y unión por tamaño), `Connection` representa un enlace ordenable por distancia, y `JunctionBox` es un nodo en el espacio 3D.
-*   **Bajo acoplamiento**:
-    *   *Definición*: Las dependencias entre módulos son mínimas y se basan en abstracciones.
-    *   *Implementación*: El flujo principal (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io`, que recibe una `Function<String, T>` de deserialización, evitando el acoplamiento a formatos de texto concretos.
-*   **Código expresivo**:
-    *   *Definición*: El código es claro y fácil de entender.
-    *   *Implementación*: La construcción y ordenación de conexiones se formula de forma completamente declarativa y comprensible con Streams en `Playground`.
-*   **Inmutabilidad del modelo**:
-    *   *Definición*: Las clases del modelo se definen como Records, asegurando que sus instancias sean totalmente inmutables una vez creadas, lo que favorece la abstracción y evita errores relacionados con efectos secundarios.
-    *   *Implementación*: Las entidades principales del modelo (`JunctionBox` y `Connection`) se implementan como **Records** inmutables en Java.
+*   **Abstracción**: Se modelan de forma abstracta las entidades físicas y matemáticas del problema: `JunctionBox` representa una caja de conexiones en el espacio tridimensional (x, y, z), `Connection` representa el enlace y la distancia euclídea calculada entre dos cajas, y `Playground` abstrae el conjunto total de cajas y sus relaciones.
+*   **Encapsulamiento**: La estructura de datos Union-Find (`DisjointSet`) encapsula completamente la lógica de compresión de caminos, la búsqueda del representante del conjunto y la unión por tamaño mediante estructuras internas privadas (`parent`, `size`), ofreciendo una API limpia y simple (`union`, `find`, `size`).
+*   **Cohesión**: Cada clase tiene un único propósito: `JunctionBox` almacena las coordenadas espaciales, `Connection` calcula distancias euclídeas y se compara de forma única por esta propiedad, `DisjointSet` administra conjuntos disjuntos y `Playground` se encarga de aplicar los algoritmos de interconectividad (Kruskal) sobre las cajas de conexiones.
+*   **Bajo acoplamiento**: Las clases del modelo de dominio no tienen dependencia de cómo se leen o deserializan los datos de entrada. El flujo de control (`Main`) utiliza el sistema de cargadores genéricos `LoaderFactory` y deserializadores de E/S, aislando la lógica del problema de la infraestructura.
+*   **Código expresivo**: El código es autoexplicativo, claro y fácil de entender sin necesidad de ser comentado.
 
 ## Principios de diseño
 
 El proyecto está diseñado siguiendo rigurosamente los principios de diseño y **SOLID**:
 
-*   **Composition Over Inheritance (COI - Composición sobre herencia)**:
-    *   *Definición*: Prefiere la composición de objetos frente a la herencia, utilizando atributos en lugar de extender clases, para mejorar la modularidad y facilitar el mantenimiento.
-    *   *Implementación*: La clase `Connection` compone las dos instancias de `JunctionBox` correspondientes a sus extremos, en lugar de recurrir a la herencia.
+*   **Composition Over Inheritance (COI - Composición sobre herencia)**: La clase `Connection` compone las dos instancias de `JunctionBox` correspondientes a sus extremos, en lugar de recurrir a la herencia.
 *   **SOLID**:
     *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
-        *   *Definición*: Cada clase o módulo debe tener una única responsabilidad o razón para cambiar, favoreciendo la cohesión y la claridad del diseño.
-        *   *Implementación*:
-            *   [DisjointSet.java:L6-L48](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/DisjointSet.java#L6-L48): Se encarga de forma exclusiva de la lógica de la estructura de conjuntos disjuntos (Union-Find con compresión de caminos).
-            *   [Connection.java:L3-L12](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/Connection.java#L3-L12): Modela una única conexión física 3D entre dos nodos y calcula su distancia euclídea al cuadrado.
-            *   [JunctionBox.java:L3-L11](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/JunctionBox.java#L3-L11): Record inmutable que almacena únicamente las coordenadas espaciales `(x, y, z)` de un nodo.
+        *   [DisjointSet.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/DisjointSet.java): Se encarga de forma exclusiva de la lógica de la estructura de conjuntos disjuntos (Union-Find con compresión de caminos).
+        *   [Connection.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/Connection.java): Modela una única conexión física 3D entre dos nodos y calcula su distancia euclídea al cuadrado.
+        *   [JunctionBox.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/JunctionBox.java): Record inmutable que almacena únicamente las coordenadas espaciales `(x, y, z)` de un nodo.
     *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
-        *   *Definición*: Las clases deben estar abiertas a la extensión pero cerradas a la modificación, permitiendo añadir funcionalidad sin alterar el código existente.
-        *   *Implementación*:
-            *   [Playground.java:L9-L63](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/Playground.java#L9-L63): Permite implementar y ejecutar simulaciones combinatorias de red personalizadas sin necesidad de alterar la lógica nuclear de los nodos (`JunctionBox`) o de conectividad (`DisjointSet`).
+        *   [Playground.java:L9-L63](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/Playground.java#L9-L63): Permite implementar y ejecutar simulaciones combinatorias de red personalizadas sin necesidad de alterar la lógica nuclear de los nodos (`JunctionBox`) o de conectividad (`DisjointSet`).
     *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
-        *   *Definición*: Los objetos de una subclase deben poder reemplazar a los de su superclase sin alterar el funcionamiento del programa, garantizando consistencia, modularidad e interoperabilidad y la sustitución segura de componentes (Evolución de la Ley de Deméter).
-        *   *Implementación*:
-            *   La factoría `LoaderFactory` devuelve un `TxtLoader<T>` genérico que es sustituible por cualquier implementación de carga. El `TxtJunctionBoxDeserializer` implementa `Deserializer<JunctionBox>` de forma limpia, permitiéndose reemplazar por mock u otros sin romper el flujo principal.
+        *   La factoría `LoaderFactory` devuelve un `TxtLoader<T>` genérico que es sustituible por cualquier implementación de carga. El `TxtJunctionBoxDeserializer` implementa `Deserializer<JunctionBox>` de forma limpia, permitiéndose reemplazar por mock u otros sin romper el flujo principal.
     *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:
-        *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza, reduciendo el acoplamiento y favoreciendo la especialización.
-        *   *Implementación*:
-            *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`).
+        *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`).
     *   **Dependency Inversion Principle (DIP - Principio de Inversión de Dependencias)**:
-        *   *Definición*: Los módulos de alto nivel no deben depender de módulos de bajo nivel, sino de abstracciones, lo que disminuye la dependencia entre componentes.
-        *   *Implementación*:
-            *   [Main.java:L17-L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/a/Main.java#L17-L19): El cliente (`Main`) depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<JunctionBox>` en lugar de una clase cargadora concreta.
-*   **Don’t Repeat Yourself (DRY)**:
-    *   *Definición*: Evita la duplicación de código, promoviendo la reutilización mediante funciones o componentes comunes para mejorar la mantenibilidad.
-*   **Law of Demeter (LoD - Ley de Deméter)**:
-    *   *Definición*: Una unidad de software debe conocer solo a sus colaboradores directos, evitando el acceso profundo a objetos y reduciendo así el acoplamiento y facilitando la prueba y mantenimiento del código.
-    *   *Implementación*: `Playground` interactúa con `Connection` y `JunctionBox` a través de sus métodos expuestos, sin navegar hacia los componentes internos de sus coordenadas.
+        *   [Main.java:L17-L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/a/Main.java#L17-L19): El cliente (`Main`) depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<JunctionBox>` en lugar de una clase cargadora concreta.
+*   **Law of Demeter (LoD - Ley de Deméter)**: `Playground` interactúa con `Connection` y `JunctionBox` a través de sus métodos expuestos, sin navegar hacia los componentes internos de sus coordenadas.
 
 ## Técnicas de diseño aplicadas
-
+*   **Inmutabilidad del modelo**: `JunctionBox`, `Connection` y `Playground` están implementados como **Records** inmutables. A pesar de que `DisjointSet` mantiene un estado mutable temporal por rendimiento algorítmico, este se crea y encapsula de forma aislada para cada cálculo, asegurando que el modelo de datos de entrada permanezca intacto.
 *   **Programación funcional (con Java Streams)**:
-    *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
-    *   *Implementación*:
-        *   [Playground.java:L18-L25](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/Playground.java#L18-L25) (`allConnections()`): Genera de forma declarativa todas las posibles conexiones combinatorias entre las cajas usando `IntStream.range` y `flatMap()`, ordenándolas por distancia euclídea de menor a mayor.
-        *   [Playground.java:L32-L41](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/Playground.java#L32-L41) (`multiplyThreeLargestSizes()`): Procesa de forma funcional la lista de cajas de conexiones para mapear sus representantes (`map(ds::find)`), filtrar duplicados (`distinct()`), mapear a su tamaño (`map(ds::size)`), ordenar de forma descendente, y multiplicar los 3 primeros con `reduce()`.
-*   **Inyección de dependencias**:
-    *   *Definición*: Consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código. Esto se puede hacer con constructores o mediante propiedades.
-    *   *Implementación*: Inyección del deserializador en el cargador por constructor.
-*   **Genéricos**:
-    *   *Definición*: Permiten definir estructuras de datos tipadas evitando castings.
-    *   *Implementación*: `DisjointSet<T>` y `Deserializer<T>` para desacoplar el comportamiento de los tipos concretos de datos.
-*   **Good Naming**:
-    *   *Definición*: Consiste en asignar nombres claros, significativos y relacionados con su propósito a clases, variables y métodos, mejorando la claridad y expresividad del código.
-    *   *Implementación*: Nombres explícitos como `multiplyThreeLargestCircuitSizesAfterConnecting()`, `lastConnectionCoordinatesProduct()`, `squaredDistanceTo()`.
-*   **Inversión del control (IoC)**:
-    *   *Definición*: Delega el flujo del programa a un contenedor externo, facilitando la modularidad y reduciendo el acoplamiento.
+    *   [Playground.java:L18-L25](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/Playground.java#L18-L25) (`allConnections()`): Genera de forma declarativa todas las posibles conexiones combinatorias entre las cajas usando `IntStream.range` y `flatMap()`, ordenándolas por distancia euclídea de menor a mayor.
+    *   [Playground.java:L32-L41](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day08/model/Playground.java#L32-L41) (`multiplyThreeLargestSizes()`): Procesa de forma funcional la lista de cajas de conexiones para mapear sus representantes (`map(ds::find)`), filtrar duplicados (`distinct()`), mapear a su tamaño (`map(ds::size)`), ordenar de forma descendente, y multiplicar los 3 primeros con `reduce()`.
+*   **Inyección de dependencias**: La factoría `LoaderFactory` recibe una `Function<String, T>` como parámetro. A su vez, `Worksheet.parse()` recibe el `Deserializer<Problem>` como argumento.
+*   **Genéricos**: Se usan `DisjointSet<T>` y `Deserializer<T>` para desacoplar el comportamiento de los tipos concretos de datos.
+*   **Good Naming**: Nombres explícitos como `multiplyThreeLargestCircuitSizesAfterConnecting()`, `lastConnectionCoordinatesProduct()`, `squaredDistanceTo()`.
 
 ## Patrones de diseño
-*   **Patrones creacionales**:
-    *   **Factory Method**:
-        *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
 *   **Patrones funcionales**:
-    *   **Closure**:
-        *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
-
-## Elección de diseño: Primitivos con orElse vs Optional
-
-En la clase `Playground`, el método `findLastConnectionWithState` utiliza el operador `orElseThrow` para resolver la búsqueda de la última conexión de red:
-
-*   **¿Por qué es mejor `orElseThrow`?**
-    El problema garantiza matemáticamente que siempre habrá una última conexión que termine de conectar todos los nodos en una única red unificada. Al resolver el stream con `.orElseThrow()`, evitamos propagar un `Optional<Connection>` a lo largo del flujo de ejecución del Playground y simplificamos las llamadas del cliente en `Main`. Si por alguna anomalía en los datos de entrada el grafo no pudiera conectarse por completo, el sistema fallaría de inmediato (fail-fast), lo cual es el comportamiento ideal para detectar datos corruptos de entrada.
-
----
+    *   **Closure**: `findLasConnectionWithState()` hace uso de una closure `filter(c -> ds.size(c.first()) == totalBoxes)`. `totalBoxes` es una variable capturada por la closure.
 
 ## Pruebas realizadas
 

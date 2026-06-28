@@ -38,7 +38,8 @@ public class DiagramAnalyzer {
         List<Coordinate> toRemove = findAccessibleCoordinates(status);
         return toRemove.isEmpty()
                 ? accumulated
-                : clearCycle(status.withClearedCoordinates(toRemove), new RollsCount(accumulated.value() + toRemove.size()));
+                : clearCycle(status.withClearedCoordinates(toRemove),
+                        new RollsCount(accumulated.value() + toRemove.size()));
     }
 
     private boolean isAccessible(DiagramStatus status, Coordinate coordinate) {

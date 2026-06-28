@@ -16,24 +16,12 @@ El desafío consiste en optimizar la disposición espacial en un cine (`MovieThe
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
-*   **Abstracción**:
-    *   *Definición*: Permite identificar solo las características esenciales de un objeto, ocultando los detalles irrelevantes para el contexto actual.
-    *   *Implementación*: El modelo del plano geométrico está encapsulado en `Point`, `Segment` y `MovieTheater`, ocultando los algoritmos de detección de colisiones y cálculo de áreas.
-*   **Encapsulamiento**:
-    *   *Definición*: El código esconde su complejidad interna, mostrándose al exterior mediante una interfaz más simple de operar.
-    *   *Implementación*: Toda la lógica interna de la colisión de rayos e intersecciones de segmentos se oculta tras los records del dominio.
-*   **Cohesión**:
-    *   *Definición*: Se refiere al grado en que los elementos de un módulo están relacionados entre sí y colaboran para cumplir una única tarea.
-    *   *Implementación*: Las clases y registros representan conceptos atómicos bien acotados: `Point` maneja coordenadas individuales y áreas, `Segment` representa los límites físicos entre asientos, y `MovieTheater` implementa la lógica de optimización del espacio.
-*   **Bajo acoplamiento**:
-    *   *Definición*: Las dependencias entre módulos son mínimas y se basan en abstracciones.
-    *   *Implementación*: El flujo principal (`Main`) utiliza la factoría genérica `LoaderFactory` del paquete `common.io`, que recibe una `Function<String, T>` de deserialización, abstrayendo la fuente y formato de los datos de entrada.
-*   **Código expresivo**:
-    *   *Definición*: El código es claro y fácil de entender.
-    *   *Implementación*: La simulación combinatoria de áreas e intersecciones de aristas se modela declarativamente con streams, aumentando la expresividad del algoritmo geométrico.
-*   **Inmutabilidad del modelo**:
-    *   *Definición*: Las clases del modelo se definen como Records, asegurando que sus instancias sean totalmente inmutables una vez creadas, lo que favorece la abstracción y evita errores relacionados con efectos secundarios.
-    *   *Implementación*: Todas las estructuras de datos (`Point`, `Segment` y `MovieTheater`) se implementan como **Records** inmutables en Java.
+*   **Abstracción**: Se abstrae el espacio bidimensional del teatro utilizando `Tile` (que representa una coordenada y sus cálculos de área asociados) y `Segment` (que abstrae los límites físicos o divisiones entre butacas). La complejidad geométrica se maneja a través de estos tipos sin exponer detalles de matrices continuas.
+*   **Encapsulamiento**: La lógica para determinar la orientación (`isHorizontal()`, `isVertical()`) y los extremos mínimos/máximos de una división espacial se encapsula dentro del record `Segment`. Asimismo, el cálculo del área rectangular delimitada por dos coordenadas se oculta en el método `rectangleAreaWith` de `Tile`.
+*   **Cohesión**: Cada componente se centra en un único concepto: `Tile` representa una coordenada discreta y calcula áreas de forma autónoma, `Segment` representa una frontera rectilínea de celdas, y `MovieTheater` implementa exclusivamente los algoritmos globales de optimización (como calcular áreas máximas libres o contar baldosas rojas no cruzadas).
+*   **Bajo acoplamiento**: Las clases del modelo de dominio no tienen dependencia de cómo se leen o deserializan los datos de entrada. El flujo de control (`Main`) utiliza el sistema de cargadores genéricos `LoaderFactory` y deserializadores de E/S, aislando la lógica del problema de la infraestructura.
+*   **Código expresivo**: El código es autoexplicativo, claro y fácil de entender sin necesidad de ser comentado.
+
 
 ## Principios de diseño
 
@@ -72,7 +60,7 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
     *   *Implementación*: `MovieTheater` interactúa con `Point` y `Segment` mediante sus abstracciones sin navegar por sus variables coordinadas `x` e `y` individuales.
 
 ## Técnicas de diseño aplicadas
-
+*   **Inmutabilidad del modelo**: Todas las estructuras de datos del dominio (`Tile`, `Segment` y `MovieTheater`) están implementadas como **Records** inmutables en Java, garantizando que el estado espacial del teatro no pueda ser modificado de manera accidental durante los cálculos geométricos.
 *   **Programación funcional (con Java Streams)**:
     *   *Definición*: Paradigma de programación basado en la composición y aplicación de funciones, donde las operaciones se expresan de forma declarativa, describiendo qué se quiere obtener en lugar de cómo realizar cada paso. En Java, se materializa mediante expresiones lambda, referencias a métodos e interfaces funcionales, y a través de la API de Streams, que permite transformar, filtrar y agregar datos mediante operaciones encadenadas. Esto favorece un código más legible, modular y con menor dependencia de estados mutables.
     *   *Implementación*:
@@ -91,21 +79,8 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
     *   *Definición*: Delega el flujo del programa a un contenedor externo, facilitando la modularidad y reduciendo el acoplamiento.
 
 ## Patrones de diseño
-*   **Patrones creacionales**:
-    *   **Factory Method**:
-        *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
 *   **Patrones funcionales**:
-    *   **Closure**:
-        *   *Definición*: Patrón funcional. Una closure es una función o clase anónima que captura variables de su contexto de creación. Permite crear un objeto que encapsula lógica (función) y datos (estado capturado).
-
-## Elección de diseño: Primitivos con orElse vs Optional
-
-En la clase `MovieTheater`, los métodos `maxRectangleArea()` (Parte A y Parte B) utilizan el operador `orElse` sobre el stream de áreas reducidas:
-
-*   **¿Por qué es mejor `orElse`?**
-    El método de cálculo de área debe devolver un resultado numérico final directo de tipo primitivo `long` para que sea consumido y acumulado en el punto de entrada principal `Main`. Si el stream de puntos estuviera vacío o no se encontrara ningún rectángulo válido (por ejemplo, si no se cumple el contorno de exclusión de obstáculos), el valor por defecto natural de área es `0L`. Retornar un `OptionalLong` añadiría una complejidad de envoltura innecesaria para el cliente, por lo que resolverlo de inmediato con `.orElse(0L)` es la mejor opción.
-
----
+    *   **Closure**: Empleado a través de lambdas y referencias a métodos como en `maxRectangleArea()` y `maxRectangleAreaWithSegments()`.
 
 ## Pruebas realizadas
 

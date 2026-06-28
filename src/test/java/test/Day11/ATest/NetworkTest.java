@@ -32,7 +32,6 @@ public class NetworkTest {
                 .map(deserializer::deserialize)
                 .toList();
 
-        Network network = new Network(devices);
-        assertThat(network.countPaths("you", "out")).isEqualTo(5L);
+        assertThat(Network.from(devices).countPaths("you", "out")).isEqualTo(5L);
     }
 }

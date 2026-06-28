@@ -2,10 +2,10 @@ package software.ulpgc.aoc.day10.model;
 
 import java.util.List;
 
-public record Factory(List<? extends Machine> machines) {
+public record Factory<T extends Machine>(List<T> machines, MachineCommand<T> command) {
     public long totalMinPresses() {
         return machines.stream()
-            .mapToLong(Machine::minPresses)
+            .mapToLong(command::execute)
             .sum();
     }
 }

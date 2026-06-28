@@ -4,6 +4,7 @@ import org.junit.Test;
 import software.ulpgc.aoc.day10.a.io.TxtMachineDeserializer;
 import software.ulpgc.aoc.day10.model.Factory;
 import software.ulpgc.aoc.day10.a.model.Machine;
+import software.ulpgc.aoc.day10.a.model.Solver;
 import software.ulpgc.aoc.day10.model.Button;
 
 import java.util.Arrays;
@@ -22,20 +23,23 @@ public class FactoryTest {
     @Test
     public void solve_example() {
         assertThat(
-                new Factory(
+                new Factory<>(
                         Arrays.stream(EXAMPLE.split("\n"))
                                 .map(new TxtMachineDeserializer()::deserialize)
-                                .collect(Collectors.toList()))
+                                .collect(Collectors.toList()),
+                        new Solver())
                         .totalMinPresses())
                 .isEqualTo(7);
     }
 
     @Test
     public void test_machine_edge_cases() {
+        Solver solver = new Solver();
+
         Machine machine = new Machine(0L, List.of(new Button(List.of(0)), new Button(List.of(1))));
-        assertThat(machine.minPresses()).isEqualTo(0);
+        assertThat(solver.execute(machine)).isEqualTo(0);
 
         Machine unreachable = new Machine(15L, List.of(new Button(List.of(3))));
-        assertThat(unreachable.minPresses()).isEqualTo(999999);
+        assertThat(solver.execute(unreachable)).isEqualTo(999999);
     }
 }

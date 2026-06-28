@@ -1,8 +1,11 @@
 package software.ulpgc.aoc.day10.a.model;
 
-public record Solver(Machine machine) {
+import software.ulpgc.aoc.day10.model.MachineCommand;
 
-    public long solve() {
+public class Solver implements MachineCommand<Machine> {
+
+    @Override
+    public long execute(Machine machine) {
         long[] masks = machine.buttons().stream()
                 .mapToLong(b -> b.targets().stream().mapToLong(i -> 1L << i).sum())
                 .toArray();

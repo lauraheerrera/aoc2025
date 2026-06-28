@@ -92,21 +92,27 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
         *   [Factory.java:L6-L10](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day10/model/Factory.java#L6-L10) (`totalMinPresses()`): Utiliza `machines.stream().mapToInt().sum()` para acumular de forma funcional el número total de pulsaciones mínimas de todas las máquinas en la planta.
 *   **Inyección de dependencias**:
     *   *Definición*: Consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código. Esto se puede hacer con constructores o mediante propiedades.
-    *   *Implementación*: La factoría `LoaderFactory` recibe la función de deserialización como parámetro, inyectándola en el `TxtLoader` genérico.
+    *   *Implementación*: La factoría `LoaderFactory` recibe la función de deserialización como parámetro, inyectándola en el `TxtLoader` genérico. Además, la clase `Factory` de máquinas recibe el algoritmo de resolución (`MachineCommand`) inyectado por constructor, evitando acoplamientos internos con implementaciones concretas del `Solver`.
 *   **Genéricos**:
     *   *Definición*: Permiten definir estructuras de datos tipadas evitando castings.
     *   *Implementación*: Uso de la interfaz parametrizada `Deserializer<T>` para la entidad `Machine`.
 *   **Good Naming**:
     *   *Definición*: Consiste en asignar nombres claros, significativos y relacionados con su propósito a clases, variables y métodos, mejorando la claridad y expresividad del código.
-    *   *Implementación*: Nombres autodescriptivos como `minPresses()`, `totalMinPresses()`, `parseTargetMask()`, `parseButtonMask()`.
+    *   *Implementación*: Nombres autodescriptivos como `minPresses()`, `isFullyConfigured()`, `calculateButtonImpact()`, `isConfigurationFeasible()`.
 *   **Inversión del control (IoC)**:
     *   *Definición*: Delega el flujo del programa a un contenedor externo, facilitando la modularidad y reduciendo el acoplamiento.
+*   **Resolución Matemática Optimizada (ILP con Bits)**:
+    *   *Definición*: Transformación de un problema de simulación combinatoria en un sistema de ecuaciones resoluble mediante operaciones a nivel de bits.
+    *   *Implementación*: En la **Parte B**, en lugar de simular fuerza bruta, se utiliza un algoritmo matemático de división por 2 para aislar bits. Esta complejidad matemática se encapsula en la clase `JoltageStatus` bajo métodos extremadamente descriptivos, logrando un rendimiento de milisegundos sin sacrificar la legibilidad del dominio.
 
 ## Patrones de diseño
 *   **Patrones creacionales**:
     *   **Factory Method**:
         *   *Definición*: Patrón creacional que encapsula la creación de objetos mediante un método estático, en lugar de usar directamente el constructor de la clase. El constructor suele ser privado o protegido, y el método estático se encarga de controlar la instanciación.
 *   **Patrones de comportamiento**:
+    *   **Command**:
+        *   *Definición*: Patrón de comportamiento que encapsula una petición como un objeto, permitiendo parametrizar a los clientes con diferentes operaciones o aislar la lógica de ejecución del modelo de datos.
+        *   *Implementación*: La resolución algorítmica de cada máquina ha sido extraída a la interfaz `MachineCommand`. Ahora `Machine` es un objeto de datos puro sin métodos de cálculo, rompiendo la dependencia cíclica con `Solver` y mejorando la cohesión.
     *   **Iterator**:
         *   *Definición*: Patrón de comportamiento. Proporciona un acceso secuencial a los elementos de una colección sin exponer su estructura interna. Separa la lógica de iteración de la estructura de datos, promoviendo la modularidad y facilitando la reutilización de código.
 *   **Patrones funcionales**:

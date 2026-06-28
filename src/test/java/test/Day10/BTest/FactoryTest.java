@@ -2,6 +2,7 @@ package test.Day10.BTest;
 
 import org.junit.Test;
 import software.ulpgc.aoc.day10.b.io.TxtMachineDeserializer;
+import software.ulpgc.aoc.day10.b.model.Solver;
 import software.ulpgc.aoc.day10.model.Factory;
 
 import java.util.Arrays;
@@ -18,10 +19,11 @@ public class FactoryTest {
     @Test
     public void solve_example() {
         assertThat(
-            new Factory(
+            new Factory<>(
                 Arrays.stream(EXAMPLE.split("\n"))
                     .map(new TxtMachineDeserializer()::deserialize)
-                    .toList()
+                    .toList(),
+                new Solver()
             ).totalMinPresses()
         ).isEqualTo(33);
     }

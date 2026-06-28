@@ -1,11 +1,11 @@
-package software.ulpgc.aoc.day10.a;
+package software.ulpgc.aoc.day10.b;
 
 import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.common.io.LoaderFactory;
-import software.ulpgc.aoc.day10.a.io.TxtMachineDeserializer;
+import software.ulpgc.aoc.day10.b.model.Machine;
+import software.ulpgc.aoc.day10.b.io.TxtMachineDeserializer;
 import software.ulpgc.aoc.day10.model.Factory;
-import software.ulpgc.aoc.day10.a.model.Machine;
-import software.ulpgc.aoc.day10.a.model.Solver;
+import software.ulpgc.aoc.day10.b.model.Solver;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,4 +21,5 @@ public class Main {
         Factory<Machine> factory = new Factory<>(machines, new Solver());
         System.out.println("El resultado es: " + factory.totalMinPresses());
     }
+
 }

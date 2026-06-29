@@ -57,7 +57,7 @@ El `Loader` asume el control del bucle de lectura y aplica el Principio de Holly
 
 ### Patrones de diseño
 
-*   **Patrón Factory Method**:
+*   **Patrón Factory**:
     *   *Definición*: Patrón de diseño creacional que proporciona una interfaz para la creación de objetos en una clase base, pero permite a las subclases alterar el tipo de objetos que se crearán. En implementaciones modernas orientadas a objetos, se manifiesta frequentemente en la creación de objetos a través de métodos estáticos de utilidad o factorías de clase.
     *   *Implementación*: La clase [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java) encapsula la creación de cargadores. En lugar de que el código cliente tenga que instanciar directamente `TxtLoader` con sus parámetros internos (como rutas de archivo o funciones de parsing), simplemente consulta a `LoaderFactory` con un identificador o tipo, recibiendo a cambio el objeto `Loader` listo para ser utilizado. Esto simplifica la creación y promueve un menor acoplamiento, ya que el cliente no necesita conocer los detalles de implementación de los cargadores.
 *   **Patrón Strategy**:

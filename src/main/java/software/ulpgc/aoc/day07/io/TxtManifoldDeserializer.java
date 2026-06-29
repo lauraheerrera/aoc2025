@@ -11,6 +11,6 @@ public class TxtManifoldDeserializer implements Deserializer<Manifold> {
         if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Content cannot be null or empty");
         }
-        return new Manifold(Arrays.asList(content.split("\n")));
+        return Manifold.from(Arrays.asList(content.split("\n")));
     }
 }

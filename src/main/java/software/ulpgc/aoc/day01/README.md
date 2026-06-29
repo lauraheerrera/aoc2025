@@ -15,8 +15,8 @@ El desafío consiste en simular un dial de seguridad que gira en base a una seri
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
 *   **Abstracción**: Se modelan de forma abstracta los elementos del dominio: `Dial` representa el dial rotatorio, `Order` modela un movimiento individual y `DialStatus` representa la abstracción del estado físico acumulado. La complejidad de calcular las posiciones relativas y manejar el desbordamiento circular se oculta tras métodos de alto nivel.
-*   **Encapsulamiento**: La clase `DialStatus` encapsula el historial de órdenes y la posición normalizada, exponiendo únicamente métodos públicos limpios para ejecutar nuevas órdenes y obtener la posición actual. De igual forma, `DialCalculator` oculta la lógica del cálculo matemático de cruces por cero (`calculateZerosCrossed`) detrás de métodos de consulta simples.
-*   **Cohesión**: Cada clase tiene una única y clara responsabilidad: `Order` solo almacena el desplazamiento individual, `Dial` representa la identidad estática del objeto, `DialStatus` rastrea y normaliza el estado acumulativo del dial, y `DialCalculator` procesa las métricas de conteo que solucionan las dos partes del problema.
+*   **Encapsulamiento**: La clase `DialStatus` encapsula el estado del sistema y la lógica de transición del dial. En lugar de exponer la lista interna de órdenes, el modelo ofrece operaciones de alto nivel como `position()`, `next(index)` y `crossZeroAt(index)`, evitando que las clases externas dependan de la estructura interna del estado.
+*   **Cohesión**: Cada clase tiene una única y clara responsabilidad: `Order` solo almacena el desplazamiento individual, `Dial` representa la identidad estática del objeto, `DialStatus` rastrea el estado acumulativo del dial, y `DialCalculator` procesa las métricas de conteo que solucionan las dos partes del problema.
 *   **Bajo acoplamiento**: Las clases del modelo de dominio no tienen dependencia de cómo se leen o deserializan los datos de entrada. El flujo de control (`Main`) utiliza el sistema de cargadores genéricos `LoaderFactory` y deserializadores de E/S, aislando la lógica del problema de la infraestructura.
 *   **Código expresivo**: El código es autoexplicativo, claro y fácil de entender sin necesidad de ser comentado.
 
@@ -27,49 +27,44 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 *   **Composition Over Inheritance (COI)**:`DialStatus` se compone por referencia del dial `Dial` en lugar de extender su comportamiento o clase, lo que favorece el acoplamiento y reduce la complejidad.
 *   **SOLID**:
     *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
+        * [Dial.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/Dial.java): Representa la entidad física del dial, con su tamaño y posición inicial.
+        * [Order.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/Order.java): Representa una única instrucción de movimiento, encapsulando la lógica de parseo de caracteres.
         * [DialStatus.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialStatus.java): Se encarga exclusivamente de la representación del estado actual del dial y su historial de órdenes.
         * [DialCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialCalculator.java): Alberga la lógica algorítmica específica para contar las veces que el dial se sitúa o cruza por cero.
         * [TxtOrderDeserializer.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/io/TxtOrderDeserializer.java): Su única responsabilidad es deserializar una línea de texto plano a un objeto `Order`.
     *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
-        *   [DialStatus.java:L21-L26](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialStatus.java#L21-L26) (`execute()`): Acepta una `List<Order>` genérica, por lo que el diseño no requiere modificar `DialStatus` para procesar nuevas secuencias de órdenes. La ausencia de lógica condicional sobre el tipo de orden evita que añadir nuevas órdenes implique tocar el código existente.
+        *   [DialStatus.java:](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialStatus.java#L21-L26) (`execute()`): Acepta una `List<Order>` genérica, por lo que el diseño no requiere modificar `DialStatus` para procesar nuevas secuencias de órdenes. La ausencia de lógica condicional sobre el tipo de orden evita que añadir nuevas órdenes implique tocar el código existente.
     *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
         *   [TxtOrderDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/io/TxtOrderDeserializer.java#L6): Implementa la interfaz genérica `Deserializer<Order>`, pudiendo inyectarse transparentemente en cualquier cargador que precise un deserializador compatible.
     *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:
         *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista y cohesiva que expone un único método (`deserialize()`), evitando forzar la implementación de métodos innecesarios.
     *   **Dependency Inversion Principle (DIP - Principio de Inversión de Dependencias)**:
         *   [Main.java:L19-L21](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/a/Main.java#L19-L21): Depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<Order>` en lugar de acoplarse directamente a implementaciones de bajo nivel.
-*   **Don’t Repeat Yourself (DRY)**: El algoritmo matemático de conteo de cruces y desbordamiento se delega en el record `DialStatus`, siendo consumido de igual manera en ambas partes.
-*   **Law of Demeter (LoD - Ley de Deméter)**: La clase `Main` interactúa únicamente con `Dial` y `DialStatus` directamente sin navegar por las propiedades de caracteres individuales del record `Order`.
-*   **Principio de mínimo compromiso**: Los métodos públicos de `DialStatus` (`position()`, `countEndingInZero()`, `countCrossingZero()`) ocultan los algoritmos intermedios y de optimización de desbordamientos de cruces por cero.
+*   **Don’t Repeat Yourself (DRY)**: El algoritmo matemático de conteo de cruces y desbordamiento se delega en la clase `DialCalculator`, siendo consumido de igual manera en ambas partes.
+*   **Law of Demeter (LoD - Ley de Deméter)**: Las clases interactúan unicamente con las entidades directas, por ejemplo, la clase `DialCalculator`solo interactúa con métodos de alto nivel de `DialStatus`, respetando el principio de mínimo conocimiento entre objetos.
+*   **Principio de mínimo compromiso**: Los métodos públicos de `DialStatus` (`position()`, `next(index)`) y de `DialCalculator` (`countEndingInZero()`, `countCrossingZero()`) encapsulan los cálculos intermedios y la lógica de normalización del dial.
 
 ## Técnicas de diseño aplicadas
 
 Se han utilizado diversas técnicas de ingeniería de software para asegurar la robustez y limpieza del proyecto:
 *   **Inmutabilidad del modelo**:
-    *   Se establece mediante el patrón de separación entre **Entidad** y **Estado (Status)**. El record `Dial` es la entidad estática y completamente inmutable (sin estado). Las propiedades que cambian con las acciones (el historial de órdenes y la posición) se encapsulan en el record `DialStatus`. Al ejecutar nuevas órdenes con `execute()`, se devuelve un nuevo `DialStatus` que hace referencia al mismo `Dial` inicial, evitando la recreación innecesaria de la propia entidad del modelo. El record `Order` es también inmutable.
+    *   Se establece mediante el patrón de separación entre **Entidad** y **Estado (Status)**. La clase `Dial` es la entidad estática y completamente inmutable (sin estado). Las propiedades que cambian con las acciones (el historial de órdenes y la posición) se encapsulan en la clase `DialStatus`. Al ejecutar nuevas órdenes con `execute()`, se devuelve un nuevo `DialStatus` que hace referencia al mismo `Dial` inicial, evitando la recreación innecesaria de la propia entidad del modelo. El record `Order` es también inmutable.
 *   **Programación funcional (con Java Streams)**:
-    *   [DialCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialCalculator.java) (`countEndingInZero()`): Usa `IntStream.rangeClosed(1, orders.size())` en paralelo para evaluar todas las sumas parciales (`calculatePartialSum()`). Filtra las que son iguales a `0` y las cuenta, determinando de manera declarativa cuántas veces el dial termina en cero tras finalizar un movimiento.
-    *   [DialCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialCalculator.java) (`countCrossingZero()`): Utiliza `IntStream.range(0, orders.size())` para mapear de forma secuencial cada orden al número de cruces por cero intermedios (`calculateZerosCrossed()`) y sumarlos (`sum()`), resolviendo eficientemente la Parte B.
-    *   [DialStatus.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialStatus.java) (`calculateSum()`): Procesa la lista de órdenes con `orderList.stream()`, transformándola a un stream de enteros con `mapToInt(Order::step)` y sumándola con `sum()`. Esto calcula la posición total recorrida de forma declarativa e inmutable.
-*   **Inyección de dependencias**:
-    *   *Definición*: Consiste en separar la creación de objetos de su uso. En lugar de que una clase cree sus dependencias, estas son proporcionadas desde fuera, reduciendo el acoplamiento y facilitando la reutilización y prueba del código. Esto se puede hacer con constructores o mediante propiedades.
-    *   *Implementación*: Inyección del deserializador en la factoría de carga a través del flujo principal.
-*   **Genéricos**:
-    *   *Definición*: Permiten definir estructuras de datos tipadas evitando castings.
-    *   *Implementación*: Uso de interfaces parametrizadas `Deserializer<T>` para el manejo seguro de los objetos de datos.
-*   **Good Naming**:
-    *   Nombres explícitos como `INITIAL_POSITION`, `calculateZerosCrossed()`, o `countEndingInZero()` aseguran que el código sea autodocumentado.
-*   **Fluent API**:
-    *   *Definición*: Patrón que devuelve la propia instancia del objeto en cada método, permitiendo encadenar llamadas de forma legible. Mejora la expresividad del código.
-    *   *Implementación*: Empleado en `DialStatus`, cuyos métodos `initial()` y `execute(...)` permiten encadenar operaciones de forma fluida (`DialStatus.initial(dial).execute(...).execute(...)`), favoreciendo un estilo de programación más legible e inmutable.
+    *   [DialCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialCalculator.java) (`countEndingInZero()`): Usa `IntStream.range(0, status.size())` para evaluar la posición siguiente de cada paso con `status::next`, filtrar las que son `0` y contarlas de forma declarativa.
+    *   [DialCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialCalculator.java) (`countCrossingZero()`): Utiliza `IntStream.range(0, status.size())` para mapear cada orden al número de cruces por cero intermedios con `status::crossZeroAt` y sumarlos.
+    *   [DialStatus.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialStatus.java): El cálculo de la posición acumulada y de los cruces por cero se expresa con streams y operaciones de agregación sobre la lista de órdenes.
+*   **Inyección de dependencias**: Inyección del deserializador en la factoría de carga a través del flujo principal.
+*   **Genéricos**: Uso de interfaces parametrizadas `Deserializer<T>` para el manejo seguro de los objetos de datos.
+*   **Good Naming**: Nombres explícitos como `INITIAL_POSITION`, `crossZeroAt()`, `countCrossingZero()` o `countEndingInZero()` aseguran que el código sea autodocumentado.
+*   **Fluent API**: El modelo expone una Fluent API en estilo inmutable, donde las transiciones de estado devuelven nuevas instancias del objeto en lugar de mutar el estado interno. `DialStatus.initial(dial).execute(orders)` representa una composición de operaciones encadenables conceptualmente, donde cada llamada produce un nuevo `DialStatus` sin modificar el anterior. Este enfoque permite mantener la expresividad del flujo de llamadas sin introducir complejidad estructural innecesaria.
 
 ## Patrones de diseño
 *   **Patrones creacionales**:
     *   **Factory Method**:
-        *   [Dial.java:L7-L9](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/Dial.java#L7-L9) mediante el método estático `Dial.create()`. Este método encapsula la construcción del dial y ofrece un punto de entrada limpio en el punto de uso.
-        *   [DialStatus.java:L17-L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialStatus.java#L17-L19) mediante el método estático `DialStatus.initial(Dial)`. Este método encapsula la construcción del estado inicial del dial y ofrece un punto de entrada limpio en el punto de uso.
+        *   [Dial.java:L13-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/Dial.java#L13-L15) mediante el método estático `Dial.create()`. Este método encapsula la construcción del dial y ofrece un punto de entrada limpio en el punto de uso.
+        *   [DialStatus.java:L15-L17](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialStatus.java#L15-L17) mediante el método estático `DialStatus.initial(Dial)`. Este método encapsula la construcción del estado inicial del dial y ofrece un punto de entrada limpio en el punto de uso.
 *   **Patrones funcionales**:
-    *   **Closure**: Se utiliza en [DialCalculator.java:L23-L30](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialCalculator.java#L23-L30) mediante expresiones lambda que capturan el contexto (como `this::calculatePartialSum`, `s -> s == 0` y `this::calculateZerosCrossed`) para ejecutar lógica diferida e inmutable dentro de los flujos de datos.
+    *   **Closure**: Se utiliza en [DialCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialCalculator.java) mediante expresiones lambda y referencias a métodos como `status::next` y `status::crossZeroAt`, permitiendo componer la lógica de negocio de forma declarativa e inmutable.
 
 ---
 

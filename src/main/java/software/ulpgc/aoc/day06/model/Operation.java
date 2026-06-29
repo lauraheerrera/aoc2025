@@ -2,8 +2,8 @@ package software.ulpgc.aoc.day06.model;
 
 import java.util.List;
 
-public record Problem(List<Operand> operands, Operator operator) {
-    public Problem {
+public record Operation(List<Operand> operands, Operator operator) {
+    public Operation {
         operands = List.copyOf(operands);
     }
 

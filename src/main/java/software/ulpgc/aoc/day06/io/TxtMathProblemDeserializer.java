@@ -3,7 +3,7 @@ package software.ulpgc.aoc.day06.io;
 import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.day06.model.Operand;
 import software.ulpgc.aoc.day06.model.Operator;
-import software.ulpgc.aoc.day06.model.Problem;
+import software.ulpgc.aoc.day06.model.Operation;
 import software.ulpgc.aoc.day06.model.Worksheet;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class TxtMathProblemDeserializer implements Deserializer<Problem> {
+public class TxtMathProblemDeserializer implements Deserializer<Operation> {
     private final Worksheet.View view;
 
     public TxtMathProblemDeserializer(Worksheet.View view) {
@@ -19,9 +19,9 @@ public class TxtMathProblemDeserializer implements Deserializer<Problem> {
     }
 
     @Override
-    public Problem deserialize(String blockText) {
+    public Operation deserialize(String blockText) {
         List<String> lines = blockText.lines().toList();
-        return new Problem(extractOperands(lines), extractOperator(lines));
+        return new Operation(extractOperands(lines), extractOperator(lines));
     }
 
     private Operator extractOperator(List<String> lines) {

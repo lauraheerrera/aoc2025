@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.stream.IntStream;
 import software.ulpgc.aoc.day09.model.Tile;
 
-public record MovieTheater(List<Tile> redTiles) {
+public record MovieTheater(List<Tile> redTiles) implements software.ulpgc.aoc.day09.model.MovieTheaterInterface {
+
+    @Override
     public long maxRectangleArea() {
         return IntStream.range(0, redTiles.size())
                 .boxed()

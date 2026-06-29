@@ -2,25 +2,23 @@
 
 ```mermaid
 %%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
+%%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
 classDiagram
     direction TB
-    class Manifold {
-        <<record>>
-    }
-    class Grid {
-        <<record>>
-    }
-    class Row {
-        <<record>>
-    }
-    class Tile {
-        <<enumeration>>
-    }
-    class Column {
-        <<record>>
-    }
-    Manifold --> Grid
-    Grid --> Row
+
+    class Manifold
+    class Row
+    class Column <<record>>
+    class Tile <<enumeration>>
+    class State <<record>>
+
+    class SplitterCounter
+
+    Manifold --> Row
     Row --> Tile
-    Row --> Column
+    Row ..> Column
+
+    SplitterCounter --> Manifold
+    SplitterCounter ..> State 
+    State --> Column 
 ```

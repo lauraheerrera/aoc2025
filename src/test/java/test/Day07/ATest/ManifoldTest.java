@@ -1,6 +1,9 @@
 package test.Day07.ATest;
 
 import org.junit.Test;
+
+import software.ulpgc.aoc.day07.a.model.SplitterCounter;
+import software.ulpgc.aoc.day07.b.model.PathCounter;
 import software.ulpgc.aoc.day07.io.TxtManifoldDeserializer;
 import software.ulpgc.aoc.day07.model.*;
 import java.util.List;
@@ -30,8 +33,8 @@ public class ManifoldTest {
     @Test
     public void solve_example() {
         Manifold manifold = new TxtManifoldDeserializer().deserialize(example);
-        assertThat(manifold.countSplits()).isEqualTo(21L);
-        assertThat(manifold.countPaths()).isEqualTo(new java.math.BigInteger("40"));
+        assertThat(SplitterCounter.of(manifold).countSplits()).isEqualTo(21L);
+        assertThat(PathCounter.of(manifold).countPaths()).isEqualTo(new java.math.BigInteger("40"));
     }
 
     @Test
@@ -86,39 +89,40 @@ public class ManifoldTest {
 
     @Test
     public void test_grid_behavior() {
-        Grid grid = Grid.from(List.of(
+        Manifold manifold = Manifold.from(List.of(
                 "S..",
                 ".^."));
-        assertThat(grid.size()).isEqualTo(2);
-        assertThat(grid.getRow(0).tileAt(new Column(0))).isEqualTo(Tile.START);
-        assertThat(grid.getRow(1).tileAt(new Column(1))).isEqualTo(Tile.SPLITTER);
+        assertThat(manifold.size()).isEqualTo(2);
+        assertThat(manifold.getRow(0).tileAt(new Column(0))).isEqualTo(Tile.START);
+        assertThat(manifold.getRow(1).tileAt(new Column(1))).isEqualTo(Tile.SPLITTER);
     }
 
     @Test
     public void test_manifold_with_no_splitters() {
-        Manifold manifold = new Manifold(List.of(
+        Manifold manifold = Manifold.from(List.of(
                 "S..",
                 "...",
                 "..."));
-        assertThat(manifold.countSplits()).isEqualTo(0L);
+        assertThat(SplitterCounter.of(manifold).countSplits()).isEqualTo(0L);
+
     }
 
     @Test
     public void test_manifold_with_one_splitter() {
-        Manifold manifold = new Manifold(List.of(
+        Manifold manifold = Manifold.from(List.of(
                 ".S.",
                 ".^.",
                 "..."));
-        assertThat(manifold.countSplits()).isEqualTo(1L);
+        assertThat(SplitterCounter.of(manifold).countSplits()).isEqualTo(1L);
     }
 
     @Test
     public void test_manifold_with_multiple_splits() {
-        Manifold manifold = new Manifold(List.of(
+        Manifold manifold = Manifold.from(List.of(
                 "..S..",
                 "..^..",
                 ".^.^.",
                 "....."));
-        assertThat(manifold.countSplits()).isEqualTo(3L);
+        assertThat(SplitterCounter.of(manifold).countSplits()).isEqualTo(3L);
     }
 }

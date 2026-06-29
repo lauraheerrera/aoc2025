@@ -24,7 +24,8 @@ public class Main {
         Dial dial = Dial.create();
         DialStatus status = DialStatus.initial(dial).execute(orders);
 
-        System.out.println("Posición final: " + status.position());
-        System.out.println("Veces que pasa por 0: " + DialCalculator.of(status).countEndingInZero());
+        DialCalculator calculator = DialCalculator.of(status);
+
+        System.out.println("Veces que termina en 0: " + calculator.countEndingInZero());
     }
 }

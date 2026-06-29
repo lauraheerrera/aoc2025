@@ -1,6 +1,7 @@
 package software.ulpgc.aoc.day07.a;
 
 import software.ulpgc.aoc.common.io.LoaderFactory;
+import software.ulpgc.aoc.day07.a.model.SplitterCounter;
 import software.ulpgc.aoc.day07.model.Manifold;
 
 import java.io.File;
@@ -15,7 +16,7 @@ public class Main {
                 .txt(file, line -> line)
                 .load();
 
-        Manifold manifold = new Manifold(lines);
-        System.out.println("El resultado es: " + manifold.countSplits());
+        SplitterCounter splitterCounter = SplitterCounter.of(Manifold.from(lines));
+        System.out.println("El resultado es: " + splitterCounter.countSplits());
     }
-}
+}

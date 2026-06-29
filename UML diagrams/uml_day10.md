@@ -4,32 +4,34 @@
 %%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
 classDiagram
     direction TB
+
     class Factory~T~ {
         <<record>>
     }
-    class Machine {
-        <<interface>>
-    }
+
     class MachineCommand~T~ {
         <<interface>>
+        +execute(T machine) long
     }
-    class MachineImpl {
+
+    class Machine {
         <<record>>
     }
+
     class Button {
-        <<record>>
+        List~Integer~ targets
     }
+
     class Solver {
     }
+
     class MachineStatus {
         <<record>>
     }
-    Factory --> Machine
+
     Factory --> MachineCommand
     MachineCommand <|.. Solver
-    MachineImpl ..|> Machine
-    MachineImpl --> Button
     Solver ..> MachineStatus
-    Solver ..> MachineImpl
-    MachineStatus --> MachineImpl
+    MachineStatus --> Machine
+    Machine --> Button
 ```

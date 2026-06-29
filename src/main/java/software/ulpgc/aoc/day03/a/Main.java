@@ -21,10 +21,9 @@ public class Main {
         List<BatteryBank> batteryBanks = LoaderFactory
                 .txt(file, deserializer::deserialize)
                 .load();
-
-        BatteryBankMaxJoltageCalculator singleCalculator = new BatteryBankMaxJoltageCalculator();
         Length length = new Length(2);
-        TotalBatteryJoltageCalculator totalCalculator = new TotalBatteryJoltageCalculator(singleCalculator, length);
+        BatteryBankMaxJoltageCalculator singleCalculator = BatteryBankMaxJoltageCalculator.of(length);
+        TotalBatteryJoltageCalculator totalCalculator = new TotalBatteryJoltageCalculator(singleCalculator);
         System.out.println(
                 "El total de voltaje máximo es: " + totalCalculator.sumAllMaxJoltageFrom(batteryBanks));
     }

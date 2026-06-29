@@ -1,35 +1,59 @@
 package software.ulpgc.aoc.day09.b.model;
 
+import java.util.List;
+
 import software.ulpgc.aoc.day09.model.Tile;
 
-import java.util.List;
-import java.util.stream.IntStream;
+public record MovieTheater(List<Tile> redTiles) implements software.ulpgc.aoc.day09.model.MovieTheaterInterface {
 
-public record MovieTheater(List<Tile> redTiles) {
+    @Override
     public long maxRectangleArea() {
-        return maxRectangleArea(IntStream.range(0, redTiles.size())
-                .mapToObj(i -> new Segment(redTiles.get(i), redTiles.get((i + 1) % redTiles.size())))
-                .toList());
-    }
-
-    private long maxRectangleArea(List<Segment> segments) {
-        return IntStream.range(0, redTiles.size())
-                .boxed()
-                .flatMapToLong(i -> IntStream.range(i + 1, redTiles.size())
-                        .filter(j -> isValidRectangle(redTiles.get(i), redTiles.get(j), segments))
-                        .mapToLong(j -> redTiles.get(i).rectangleAreaWith(redTiles.get(j))))
+        return redTiles.stream()
+                .flatMap(t1 -> redTiles.stream()
+                        .map(t2 -> new Pair(t1, t2)))
+                .filter(p -> isValidRectangle(p.tile1(), p.tile2()))
+                .mapToLong(p -> p.tile1().rectangleAreaWith(p.tile2()))
                 .max()
-                .orElse(0L);
+                .orElse(0);
     }
 
-    private boolean isValidRectangle(Tile p1, Tile p2, List<Segment> segments) {
-        return isValidRectangle(new Segment(p1, p2), segments);
+    private boolean isValidRectangle(Tile tile1, Tile tile2) {
+        return !hasInternalCrossings(
+                Math.min(tile1.x(), tile2.x()),
+                Math.max(tile1.x(), tile2.x()),
+                Math.min(tile1.y(), tile2.y()),
+                Math.max(tile1.y(), tile2.y()));
     }
 
-    private boolean isValidRectangle(Segment r, List<Segment> segments) {
-        return segments.stream().noneMatch(s -> s.isHorizontal()
-                ? (s.minY() > r.minY() && s.minY() < r.maxY() && s.minX() < r.maxX() && s.maxX() > r.minX())
-                : (s.minX() > r.minX() && s.minX() < r.maxX() && s.minY() < r.maxY() && s.maxY() > r.minY()));
+    private boolean hasInternalCrossings(int minX, int maxX, int minY, int maxY) {
+        return redTiles.stream()
+                .map(t -> new EdgePair(t, next(t)))
+                .anyMatch(e -> crossesHorizontal(e.tile1(), e.tile2(), minX, maxX, minY, maxY) ||
+                        crossesVertical(e.tile1(), e.tile2(), minX, maxX, minY, maxY));
     }
 
+    private Tile next(Tile t) {
+        int i = redTiles.indexOf(t);
+        return redTiles.get((i + 1) % redTiles.size());
+    }
+
+    private boolean crossesHorizontal(Tile tile1, Tile tile2, int minX, int maxX, int minY, int maxY) {
+        return tile1.y() == tile2.y()
+                && tile1.y() > minY
+                && tile1.y() < maxY
+                && Math.max(Math.min(tile1.x(), tile2.x()), minX) < Math.min(Math.max(tile1.x(), tile2.x()), maxX);
+    }
+
+    private boolean crossesVertical(Tile tile1, Tile tile2, int minX, int maxX, int minY, int maxY) {
+        return tile1.x() == tile2.x()
+                && tile1.x() > minX
+                && tile1.x() < maxX
+                && Math.max(Math.min(tile1.y(), tile2.y()), minY) < Math.min(Math.max(tile1.y(), tile2.y()), maxY);
+    }
+
+    private record Pair(Tile tile1, Tile tile2) {
+    }
+
+    private record EdgePair(Tile tile1, Tile tile2) {
+    }
 }

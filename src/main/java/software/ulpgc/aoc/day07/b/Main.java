@@ -1,6 +1,7 @@
 package software.ulpgc.aoc.day07.b;
 
 import software.ulpgc.aoc.common.io.LoaderFactory;
+import software.ulpgc.aoc.day07.b.model.PathCounter;
 import software.ulpgc.aoc.day07.model.Manifold;
 
 import java.io.File;
@@ -15,7 +16,7 @@ public class Main {
                 .txt(file, line -> line)
                 .load();
 
-        Manifold manifold = new Manifold(lines);
-        System.out.println("El resultado es: " + manifold.countPaths());
+        PathCounter pathCounter = PathCounter.of(Manifold.from(lines));
+        System.out.println("El resultado es: " + pathCounter.countPaths());
     }
 }

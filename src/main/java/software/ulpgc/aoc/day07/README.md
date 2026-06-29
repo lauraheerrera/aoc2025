@@ -26,19 +26,24 @@ La solución está construida siguiendo los fundamentos de la ingeniería del so
 
 El proyecto está diseñado siguiendo rigurosamente los principios de diseño y **SOLID**:
 
-*   **Composition Over Inheritance (COI - Composición sobre herencia)**: `Manifold` se compone de una instancia de `Grid`, y a su vez `Grid` se compone de una lista de `Row`, evitando el uso de jerarquías de herencia complejas.
+*   **Composition Over Inheritance (COI - Composición sobre herencia)**: 
+    - `Manifold` se compone de `Row`
+    - `Row` se compone de `Tile`
+
 *   **SOLID**:
     *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
-        *   [Column.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Column.java): Modela de forma atómica el índice horizontal de la cuadrícula y sus movimientos laterales.
-        *   [Grid.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Grid.java): Expone la estructura de la cuadrícula.
-        *   [Manifold.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Manifold.java): Orquesta y ejecuta de forma única la simulación general sobre la rejilla.
-        *   [Row.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Row.java): Almacena las baldosas de una única fila y responde a consultas espaciales locales.
-        *   [Paths.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Paths.java): Se encarga exclusivamente del cálculo matemático y transiciones de los caminos por fila.
-        *   [Tile.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Tile.java): Define el comportamiento físico de cada baldosa.
+        *  [`Column.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Column.java): Modela el índice horizontal y movimientos.
+        *  [`Row.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Row.java): Almacena las baldosas de una fila.
+        *  [`Tile.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Tile.java): Define el comportamiento de cada celda.
+        *  [`Manifold.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Manifold.java): Orquesta la estructura global.
+        *  [`State.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/a/model/State.java): Simulación de splits.
+        *  [`Paths.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/b/model/Paths.java): Cálculo de caminos.
+        *  [`SplitterCounter.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/a/model/SplitterCounter.java): Orquesta Parte A.
+        *  [`PathCounter.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/b/model/PathCounter.java): Orquesta Parte B.
     *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
-        *   [Grid.java:L5-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Grid.java#L5-L15): Su estructura bidimensional de cuadrícula permaneció completamente cerrada a la modificación, permitiendo añadir el cálculo dinámico de la Parte B mediante la creación de la clase `Paths` y agregando el método en `Manifold` sin modificar su lógica original.
+        *   Gracias a la separación de responsabilidades, se pudo agregar la lógica de la Parte B sin modificar el código de la Parte A, simplemente creando nuevas clases que extienden la lógica existente.
     *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
-        *   [Grid.java:L5-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Grid.java#L5-L15): La carga del fichero se delega en la factoría genérica `LoaderFactory`, que devuelve un `TxtLoader<String>` y lee las líneas del fichero. El `Manifold` se construye directamente con la lista de líneas leídas.
+        *   [Manifold.java:L39-L56](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Manifold.java#L39-L56): La carga del fichero se delega en la factoría genérica `LoaderFactory`, que devuelve un `TxtLoader<String>` y lee las líneas del fichero. El `Manifold` se construye directamente con la lista de líneas leídas.
     *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:
         *   [LoaderFactory.java:L6-L7](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/io/LoaderFactory.java#L6-L7): La factoría `LoaderFactory` utiliza la interfaz funcional `Function<String, T>` de Java, que expone un único método (`apply()`). No se imponen interfaces específicas de carga a cada día.
         *   La factoría `LoaderFactory` utiliza la interfaz funcional `Function<String, T>` de Java, que expone un único método (`apply()`). No se imponen interfaces específicas de carga a cada día.
@@ -50,7 +55,7 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 
 Se han utilizado diversas técnicas de ingeniería de software para asegurar la robustez y limpieza del proyecto:
 *   **Inmutabilidad del modelo**:
-    *   Las clases principales (`Column`, `Row`, `Grid`, `Paths`, `Manifold`) se implementan como **Records** inmutables. El estado acumulado en la propagación de rayos se modela mediante el record interno `Splits` e instancias inmutables de `Paths` devueltas en cada paso recursivo, previniendo efectos secundarios no deseados.
+    *   Las clases principales (`Column`, `Row`, `Tile`, `Paths`, `Manifold`) se implementan como **Records** inmutables. El estado acumulado en la propagación de rayos se modela mediante el record interno `Splits` e instancias inmutables de `Paths` devueltas en cada paso recursivo, previniendo efectos secundarios no deseados.
 *   **Programación funcional (con Java Streams)**:
     *   Emplea en `Manifold` para realizar búsquedas, reducciones (`reduce`) y acumulaciones sobre los flujos de forma declarativa e inmutable.
 *   **Inyección de dependencias**: La factoría `LoaderFactory` recibe una `Function<String, T>` como parámetro. A su vez, `Worksheet.parse()` recibe el `Deserializer<Problem>` como argumento.
@@ -59,7 +64,7 @@ Se han utilizado diversas técnicas de ingeniería de software para asegurar la 
 
 ## Patrones de diseño
 *   **Patrones creacionales**:
-    *   **Factory Method**: Uso de métodos de creación estáticos como `Grid.from()`, `Row.from()` y `Paths.initial()`.
+    *   **Factory Method**: Uso de métodos de creación estáticos como `Manifold.from()`, `Row.from()`, `Column.from()`, `Tile.from()` y `Paths.initial()`.
 *   **Patrones funcionales**:
     *   **Closure**: Empleado a través de lambdas y referencias a métodos como `i -> nextValue(current, row, new Column(i))`.
 ---

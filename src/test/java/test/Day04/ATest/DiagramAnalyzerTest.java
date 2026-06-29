@@ -23,31 +23,28 @@ public class DiagramAnalyzerTest {
                 "...",
                 ".@.",
                 "...");
-        DiagramStatus status = DiagramStatus.initial(diagram);
         assertThat(diagram.rows()).isEqualTo(3);
         assertThat(diagram.cols()).isEqualTo(3);
-        assertThat(status.isInBounds(new Coordinate(0, 0))).isTrue();
-        assertThat(status.isInBounds(new Coordinate(3, 0))).isFalse();
-        assertThat(status.get(new Coordinate(1, 1))).isEqualTo(Tile.ROLL);
+        assertThat(diagram.isInBounds(new Coordinate(0, 0))).isTrue();
+        assertThat(diagram.isInBounds(new Coordinate(3, 0))).isFalse();
+        assertThat(diagram.get(new Coordinate(1, 1))).isEqualTo(Tile.ROLL);
 
         DiagramAnalyzer analyzer = new DiagramAnalyzer();
-        assertThat(analyzer.sumAllAccessibleRolls(status).value()).isEqualTo(1);
+        assertThat(analyzer.sumAllAccessibleRolls(diagram).value()).isEqualTo(1);
     }
 
     @Test
     public void diagram_should_throw_out_of_bounds_exception() {
         Diagram diagram = createDiagram("...");
-        DiagramStatus status = DiagramStatus.initial(diagram);
-        assertThatThrownBy(() -> status.get(new Coordinate(0, 5)))
+        assertThatThrownBy(() -> diagram.get(new Coordinate(0, 5)))
                 .isInstanceOf(IndexOutOfBoundsException.class);
     }
 
     @Test
     public void sum_rolls_two_targets_neighbors() {
         Diagram diagram = createDiagram("@@");
-        DiagramStatus status = DiagramStatus.initial(diagram);
         DiagramAnalyzer analyzer = new DiagramAnalyzer();
-        assertThat(analyzer.sumAllAccessibleRolls(status).value()).isEqualTo(2);
+        assertThat(analyzer.sumAllAccessibleRolls(diagram).value()).isEqualTo(2);
     }
 
     @Test
@@ -55,9 +52,8 @@ public class DiagramAnalyzerTest {
         Diagram diagram = createDiagram(
                 "@@",
                 "@@");
-        DiagramStatus status = DiagramStatus.initial(diagram);
         DiagramAnalyzer analyzer = new DiagramAnalyzer();
-        assertThat(analyzer.sumAllAccessibleRolls(status).value()).isEqualTo(4);
+        assertThat(analyzer.sumAllAccessibleRolls(diagram).value()).isEqualTo(4);
     }
 
     @Test
@@ -66,9 +62,8 @@ public class DiagramAnalyzerTest {
                 "@@@",
                 "@.@",
                 "@@@");
-        DiagramStatus status = DiagramStatus.initial(diagram);
         DiagramAnalyzer analyzer = new DiagramAnalyzer();
-        assertThat(analyzer.sumAllAccessibleRolls(status).value()).isEqualTo(4);
+        assertThat(analyzer.sumAllAccessibleRolls(diagram).value()).isEqualTo(4);
     }
 
     @Test
@@ -77,9 +72,8 @@ public class DiagramAnalyzerTest {
                 "@@@",
                 "@@@",
                 "@@@");
-        DiagramStatus status = DiagramStatus.initial(diagram);
         DiagramAnalyzer analyzer = new DiagramAnalyzer();
-        assertThat(analyzer.sumAllAccessibleRolls(status).value()).isEqualTo(4);
+        assertThat(analyzer.sumAllAccessibleRolls(diagram).value()).isEqualTo(4);
     }
 
     @Test
@@ -88,9 +82,8 @@ public class DiagramAnalyzerTest {
                 "@..",
                 ".@.",
                 "..@");
-        DiagramStatus status = DiagramStatus.initial(diagram);
         DiagramAnalyzer analyzer = new DiagramAnalyzer();
-        assertThat(analyzer.sumAllAccessibleRolls(status).value()).isEqualTo(3);
+        assertThat(analyzer.sumAllAccessibleRolls(diagram).value()).isEqualTo(3);
     }
 
     @Test
@@ -106,8 +99,7 @@ public class DiagramAnalyzerTest {
                 "@.@@@.@@@@",
                 ".@@@@@@@@.",
                 "@.@.@@@.@.");
-        DiagramStatus status = DiagramStatus.initial(diagram);
         DiagramAnalyzer analyzer = new DiagramAnalyzer();
-        assertThat(analyzer.sumAllAccessibleRolls(status).value()).isEqualTo(13);
+        assertThat(analyzer.sumAllAccessibleRolls(diagram).value()).isEqualTo(13);
     }
 }

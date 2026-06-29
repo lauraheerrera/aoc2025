@@ -6,7 +6,6 @@ import software.ulpgc.aoc.day04.io.DiagramLoader;
 import software.ulpgc.aoc.day04.io.TxtDiagramDeserializer;
 import software.ulpgc.aoc.day04.model.Diagram;
 import software.ulpgc.aoc.day04.model.DiagramAnalyzer;
-import software.ulpgc.aoc.day04.model.DiagramStatus;
 import software.ulpgc.aoc.day04.model.Tile;
 
 import java.io.File;
@@ -27,6 +26,6 @@ public class Main {
                 Diagram diagram = Diagram.create(tiles);
 
                 System.out.println("Número de rollos a los que se pueden acceder: " +
-                                analyzer.totalAccessibleRollsClearCycle(DiagramStatus.initial(diagram)));
+                                analyzer.totalAccessibleRollsClearCycle(diagram).value());
         }
 }

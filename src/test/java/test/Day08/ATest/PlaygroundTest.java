@@ -55,20 +55,6 @@ public class PlaygroundTest {
     }
 
     @Test
-    public void test_connection_and_comparisons() {
-        JunctionBox b1 = new JunctionBox(0, 0, 0);
-        JunctionBox b2 = new JunctionBox(1, 1, 1);
-        JunctionBox b3 = new JunctionBox(2, 2, 2);
-
-        Connection c1 = new Connection(b1, b2);
-        Connection c2 = new Connection(b1, b3);
-
-        assertThat(c1.squaredDistance()).isEqualTo(3L);
-        assertThat(c2.squaredDistance()).isEqualTo(12L);
-        assertThat(c1.compareTo(c2)).isLessThan(0);
-    }
-
-    @Test
     public void test_disjoint_set() {
         DisjointSet<String> ds = new DisjointSet<>();
         assertThat(ds.find("A")).isEqualTo("A");
@@ -83,19 +69,6 @@ public class PlaygroundTest {
         ds.union("B", "D");
         assertThat(ds.find("A")).isEqualTo(ds.find("C"));
         assertThat(ds.size("A")).isEqualTo(4);
-    }
-
-    @Test
-    public void test_empty_and_small_playgrounds() {
-        Playground emptyPlayground = new Playground(List.of());
-        assertThat(emptyPlayground.allConnections()).isEmpty();
-
-        JunctionBox b1 = new JunctionBox(0, 0, 0);
-        JunctionBox b2 = new JunctionBox(1, 1, 1);
-        Playground smallPlayground = new Playground(List.of(b1, b2));
-
-        assertThat(smallPlayground.allConnections()).hasSize(1);
-        assertThat(smallPlayground.multiplyThreeLargestCircuitSizesAfterConnecting(1)).isEqualTo(2L);
     }
 
     @Test

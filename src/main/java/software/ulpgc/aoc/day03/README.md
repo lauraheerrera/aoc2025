@@ -57,6 +57,8 @@ Se han utilizado diversas técnicas de ingeniería de software para asegurar la 
     *   **Factory Method**: Se define y consume en [BatteryBank.java:L7-L9](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/BatteryBank.java#L7-L9) mediante `BatteryBank.create()`.
 *   **Patrones funcionales**:
     *   **Closure**: Empleado a través de lambdas y referencias a métodos en `TotalBatteryJoltageCalculator` capturando el calculador y la longitud.
+*   **Patrones de comportamiento**:
+    *   **Iterator**: Se define y consume en [BatteryBankMaxJoltageCalculator.java:L13-L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/BatteryBankMaxJoltageCalculator.java#L13-L18) mediante `Stream.iterate()`. Aunque no implementa la interfaz `Iterator`, el estado del recorrido se encapsula en un `Selector`, proporcionando operaciones equivalentes a `hasNext()` y `next()`, siendo la iteración controlada por `Stream.iterate()`
 
 ---
 

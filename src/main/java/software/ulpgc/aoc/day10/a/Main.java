@@ -18,7 +18,7 @@ public class Main {
         List<Machine> machines = LoaderFactory
                 .txt(file, deserializer::deserialize)
                 .load();
-        Factory<Machine> factory = new Factory<>(machines, new Solver());
-        System.out.println("El resultado es: " + factory.totalMinPresses());
+        Factory<Machine> factory = new Factory<>(new Solver());
+        System.out.println("El resultado es: " + factory.totalMinPresses(machines));
     }
 }

@@ -7,8 +7,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RollsCountTest {
 
     @Test
-    public void should_return_correct_string_representation() {
+    public void should_return_correct_value() {
         RollsCount rollsCount = new RollsCount(42);
-        assertThat(rollsCount.toString()).isEqualTo("42");
+        assertThat(rollsCount.value()).isEqualTo(42);
     }
 }

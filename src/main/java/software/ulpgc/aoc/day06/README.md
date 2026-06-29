@@ -14,9 +14,9 @@ El desafío consiste en resolver operaciones matemáticas impresas en hojas de e
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
-*   **Abstracción**: Se definen abstracciones del dominio matemático: `Operator`  la lógica de suma y multiplicación y su aplicación, `Operand` y `Problem` que abstraen una operación compuesta por operandos y un operador. El concepto de `Worksheet` abstrae una hoja cuadriculada con problemas sin exponer la complejidad espacial.
+*   **Abstracción**: Se definen abstracciones del dominio matemático: `Operator`  la lógica de suma y multiplicación y su aplicación, `Operand` y `Operation` que abstraen una operación compuesta por operandos y un operador. El concepto de `Worksheet` abstrae una hoja cuadriculada con problemas sin exponer la complejidad espacial.
 *   **Encapsulamiento**: La detección y extracción de columnas vacías, el cálculo de anchos máximos (`maxWidth()`) y la reconstrucción espacial de los problemas a través de bloques de texto se encapsulan dentro de los métodos privados de `Worksheet` (`contentMap()`, `extractBlockLines()`, `isColumnEmpty()`). El exterior solo interactúa con el método simple `parse()`.
-*   **Cohesión**: Cada clase tiene un único propósito: `Operator` gestiona las operaciones matemáticas permitidas, `Operand` almacena el valor numérico, `Problem` evalúa si la operación matemática se cumple, `ProblemBlock` contiene el fragmento de texto de un problema y `Worksheet` se encarga de la fragmentación de la hoja de trabajo en bloques de problemas individuales.
+*   **Cohesión**: Cada clase tiene un único propósito: `Operator` gestiona las operaciones matemáticas permitidas, `Operand` almacena el valor numérico, `Operation` evalúa si la operación matemática se cumple, `ProblemBlock` contiene el fragmento de texto de un problema y `Worksheet` se encarga de la fragmentación de la hoja de trabajo en bloques de problemas individuales.
 *   **Bajo acoplamiento**: Las clases del modelo de dominio no tienen dependencia de cómo se leen o deserializan los datos de entrada. El flujo de control (`Main`) utiliza el sistema de cargadores genéricos `LoaderFactory` y deserializadores de E/S, aislando la lógica del problema de la infraestructura.
 *   **Código expresivo**: El código es autoexplicativo, claro y fácil de entender sin necesidad de ser comentado.
 
@@ -26,10 +26,10 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 
 *   **Composition Over Inheritance (COI - Composición sobre herencia)**:
     *   *Definición*: Prefiere la composición de objetos frente a la herencia, utilizando atributos en lugar de extender clases, para mejorar la modularidad y facilitar el mantenimiento.
-    *   *Implementación*: La clase `Problem` se compone de una colección de `Operand` y del operador `Operator` sin necesidad de jerarquías de herencia.
+    *   *Implementación*: La clase `Operation` se compone de una colección de `Operand` y del operador `Operator` sin necesidad de jerarquías de herencia.
 *   **SOLID**:
     *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
-        *   [Problem.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/model/Problem.java) (`solve()`): Se encarga exclusivamente de resolver la operación matemática sobre una lista de operandos.
+        *   [Operation.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/model/Operation.java) (`solve()`): Se encarga exclusivamente de resolver la operación matemática sobre una lista de operandos.
         *   [TxtMathProblemDeserializer.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/TxtMathProblemDeserializer.java) (`deserialize()`): Lee y parsea los operandos y el operador a partir de bloques de texto.
     *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
         *   [TxtMathProblemDeserializer.java:L15-L25](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/io/TxtMathProblemDeserializer.java#L15-L25): La estrategia de lectura del deserializador es configurable mediante la inyección del enum `View` (`ROWS` y `COLUMNS_R2L`), lo que permite dar soporte a la Parte A y B sin alterar el flujo básico de deserialización.
@@ -39,11 +39,11 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
         *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista y cohesiva que expone un único método (`deserialize()`), evitando forzar la implementación de métodos innecesarios.
     *   **Dependency Inversion Principle (DIP - Principio de Inversión de Dependencias)**:
         *   [Main.java (day06/a)](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day06/a/Main.java): El flujo principal depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<Problem>` en lugar de clases concretas de carga.
-*   **Law of Demeter (LoD - Ley de Deméter)**: `Worksheet` interactúa directamente con `Problem` a través de su interfaz, sin descender a evaluar los dígitos internos de `Operand`.
+*   **Law of Demeter (LoD - Ley de Deméter)**: `Worksheet` interactúa directamente con `Operation` a través de su interfaz, sin descender a evaluar los dígitos internos de `Operand`.
 
 ## Técnicas de diseño aplicadas
 
-*   **Inmutabilidad del modelo**: `Problem`, `Operand` y `ProblemBlock` son Records inmutables. El propio `Worksheet` copia inmutablemente la lista de líneas al instanciarse (`List.copyOf(lines)`), asegurando que el contenido de la hoja de cálculo sea inalterable durante el proceso de partición y análisis.
+*   **Inmutabilidad del modelo**: `Operation`, `Operand` y `ProblemBlock` son Records inmutables. El propio `Worksheet` copia inmutablemente la lista de líneas al instanciarse (`List.copyOf(lines)`), asegurando que el contenido de la hoja de cálculo sea inalterable durante el proceso de partición y análisis.
 *   **Programación funcional (con Java Streams)**: Utiliza `operands.stream().mapToLong(Operand::value).reduce(operator::apply)` para aplicar el operador de manera declarativa sobre la lista de operandos y resolver el problema de forma inmutable.
 *   **Inyección de dependencias**: La factoría `LoaderFactory` recibe una `Function<String, T>` como parámetro. A su vez, `Worksheet.parse()` recibe el `Deserializer<Problem>` como argumento.
 *   **Genéricos**: Se consume la interfaz parametrizada `Deserializer<T>` para desacoplar el deserializador.

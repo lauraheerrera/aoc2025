@@ -1,8 +1,11 @@
-package software.ulpgc.aoc.day07.model;
+package software.ulpgc.aoc.day07.b.model;
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.IntStream;
+
+import software.ulpgc.aoc.day07.model.Column;
+import software.ulpgc.aoc.day07.model.Row;
 
 public class Paths {
     private final List<BigInteger> values;
@@ -11,18 +14,18 @@ public class Paths {
         this.values = List.copyOf(values);
     }
 
-    public List<BigInteger> values() {
-        return values;
-    }
-
     public static Paths initial(int size) {
-        return new Paths(IntStream.range(0, size).mapToObj(i -> BigInteger.ONE).toList());
+        return new Paths(
+                IntStream.range(0, size)
+                        .mapToObj(i -> BigInteger.ONE)
+                        .toList());
     }
 
     public BigInteger get(Column col) {
-        return (col.index() >= 0 && col.index() < values.size())
-                ? values.get(col.index())
-                : BigInteger.ONE;
+        if (col.index() < 0 || col.index() >= values.size()) {
+            return BigInteger.ONE;
+        }
+        return values.get(col.index());
     }
 
     public static Paths next(Paths current, Row row) {

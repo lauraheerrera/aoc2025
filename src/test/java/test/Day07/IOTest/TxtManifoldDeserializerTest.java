@@ -18,10 +18,10 @@ public class TxtManifoldDeserializerTest {
                 ....
                 ....
                 """;
-        Manifold manifold = deserializer.deserialize(content);
-        assertThat(manifold).isNotNull();
-        assertThat(manifold.grid()).isNotNull();
-        assertThat(manifold.grid().size()).isEqualTo(3);
+
+        Manifold grid = new TxtManifoldDeserializer().deserialize(content);
+        assertThat(grid).isNotNull();
+        assertThat(grid.size()).isEqualTo(3);
     }
 
     @Test

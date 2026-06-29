@@ -29,6 +29,5 @@ classDiagram
     Deserializer <|.. TxtConcreteDeserializer 
     Main --> LoaderFactory
     Main --> TxtConcreteDeserializer
-    Main ..> TxtLoader
     LoaderFactory ..> TxtLoader
 ```

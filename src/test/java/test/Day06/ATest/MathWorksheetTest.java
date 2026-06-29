@@ -4,7 +4,7 @@ import org.junit.Test;
 import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.day06.io.TxtMathProblemDeserializer;
 import software.ulpgc.aoc.day06.model.Operator;
-import software.ulpgc.aoc.day06.model.Problem;
+import software.ulpgc.aoc.day06.model.Operation;
 import software.ulpgc.aoc.day06.model.Worksheet;
 
 import java.util.List;
@@ -19,8 +19,8 @@ public class MathWorksheetTest {
             *   +   *   +
             """;
 
-    Deserializer<Problem> deserializer = new TxtMathProblemDeserializer(Worksheet.View.ROWS);
-    List<Problem> problems = new Worksheet(input.lines().toList()).parse(deserializer);
+    Deserializer<Operation> deserializer = new TxtMathProblemDeserializer(Worksheet.View.ROWS);
+    List<Operation> problems = new Worksheet(input.lines().toList()).parse(deserializer);
 
     @Test
     public void solve_example_problems() {
@@ -30,7 +30,7 @@ public class MathWorksheetTest {
         assertThat(problems.get(2).solve()).isEqualTo(4243455L);
         assertThat(problems.get(3).solve()).isEqualTo(401L);
 
-        long total = problems.stream().mapToLong(Problem::solve).sum();
+        long total = problems.stream().mapToLong(Operation::solve).sum();
         assertThat(total).isEqualTo(4277556L);
     }
 
@@ -56,11 +56,11 @@ public class MathWorksheetTest {
 
     @Test
     public void solve_empty_problem_should_return_zero() {
-        Problem empty = new Problem(List.of(), Operator.ADD);
+        Operation empty = new Operation(List.of(), Operator.ADD);
         assertThat(empty.solve()).isEqualTo(0L);
     }
 
-    private List<Problem> toProblems(String input) {
+    private List<Operation> toProblems(String input) {
         return new Worksheet(input.lines().toList()).parse(deserializer);
     }
 }

@@ -55,7 +55,7 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 
 ## Patrones de diseño
 *   **Patrones creacionales**:
-    *   **Factory Method**: Se define en [Diagram.java:L12-L14](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L12-L14) con el método estático `Diagram.create()`, centralizando la instanciación e inicialización del tablero a través del clonado seguro de celdas.
+    *   **Factory Method**: Se define en [Diagram.java:L12-L14](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/Diagram.java#L12-L14) con el método estático `Diagram.create()`, centralizando la instanciación e inicialización del tablero a través del clonado seguro de celdas. Asimismo, se define en [DiagramStatus.java:L20-L22](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day04/model/DiagramStatus.java#L20-L22) con el método estático `DiagramStatus.initial()`, centralizando la instanciación e inicialización del estado del tablero a través del clonado seguro de celdas.
 *   **Patrones funcionales**:
     *   **Closure**: Se utiliza en las expresiones lambda en `DiagramAnalyzer` para encapsular estados inmutables en tiempo de ejecución.
 

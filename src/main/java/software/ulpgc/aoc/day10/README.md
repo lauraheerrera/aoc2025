@@ -69,6 +69,9 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 ## Patrones de diseño
 *   **Patrones de comportamiento**:
     *   **Command**: La resolución de cada máquina ha sido extraída a la interfaz `MachineCommand`. Ahora `Machine` es un objeto de datos puro sin métodos de cálculo, rompiendo la dependencia cíclica con `Solver` y mejorando la cohesión.
+    *   **Memoization**: Se utiliza un mapa `Map<MachineStatus, Long>` para almacenar resultados de subproblemas ya resueltos, evitando recomputación en la búsqueda recursiva y reduciendo drásticamente la complejidad temporal.
+    *   **Strategy**: La clase `MachineCommand` representa la estrategia de resolución de cada máquina.
+    *   **Divide & Conquer**: El problema se descompone recursivamente en subproblemas más pequeños (estados siguientes), combinando sus resultados para obtener la solución óptima: `findMinimumPresses()`
 *   **Patrones funcionales**:
     *   **Closure**: Empleado a través de lambdas y referencias a métodos como en `totalMinPresses()`.
 

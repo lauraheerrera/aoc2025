@@ -57,7 +57,9 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
     *   **Factory Method**: Uso de métodos de creación estáticos como `Network.fromDevices()` para construir redes sin necesidad de acceder a su constructor.
 *   **Patrones funcionales**:
     *   **Closure**: Empleado a través de lambdas y referencias a métodos como en `countPaths()`.
+*   **Patrones de comportamiento**:
     *   **Memoization**: El método privado `countPaths(String current, String end, Map<String, Long> memo)` implementa un algoritmo de **búsqueda en profundidad (DFS) con memoización** sobre el grafo dirigido, cacheando los resultados parciales en un `HashMap`.
+    * **Divide and Conquer**: El algoritmo divide el problema en subproblemas más pequeños y los resuelve de forma recursiva, almacenando los resultados parciales en un `HashMap`: `countPaths(current, end, memo)` y sumando los resultados para obtener el resultado final.
 
 ---
 

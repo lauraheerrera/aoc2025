@@ -2,12 +2,12 @@ package software.ulpgc.aoc.day01.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class DialStatus {
+
     private final Dial dial;
     private final List<Order> orders;
-    private static final int INITIAL_POSITION = 50;
-    private static final int DIAL_SIZE = 100;
 
     private DialStatus(Dial dial, List<Order> orders) {
         this.dial = dial;
@@ -19,24 +19,50 @@ public class DialStatus {
     }
 
     public DialStatus execute(List<Order> newOrders) {
-        List<Order> combined = new ArrayList<>(this.orders);
+        List<Order> combined = new ArrayList<>(orders);
         combined.addAll(newOrders);
         return new DialStatus(dial, combined);
     }
 
-    public List<Order> orders() {
-        return List.copyOf(orders);
+    public int size() {
+        return orders.size();
     }
 
     public int position() {
-        return normalize(calculateSum(orders));
+        return dial.normalize(dial.initial() + sum());
     }
 
-    private int calculateSum(List<Order> orderList) {
-        return orderList.stream().mapToInt(Order::step).sum() + INITIAL_POSITION;
+    private int sum() {
+        return orders.stream().mapToInt(Order::step).sum();
     }
 
-    private int normalize(int value) {
-        return ((value % DIAL_SIZE) + DIAL_SIZE) % DIAL_SIZE;
+    private int stepAt(int index) {
+        return orders.get(index).step();
     }
+
+    private int previous(int index) {
+        return dial.normalize(dial.initial() + sumUntil(index));
+    }
+
+    private int sumUntil(int index) {
+        return orders.subList(0, index).stream()
+                .mapToInt(Order::step)
+                .sum();
+    }
+
+    public int next(int index) {
+        return dial.normalize(previous(index) + stepAt(index));
+    }
+
+    public int crossZeroAt(int index) {
+        int position = previous(index);
+        int step = stepAt(index);
+
+        return (int) IntStream.rangeClosed(1, Math.abs(step))
+                .map(i -> step > 0 ? position + i : position - i)
+                .map(dial::normalize)
+                .filter(p -> p == 0)
+                .count();
+    }
+
 }

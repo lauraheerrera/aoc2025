@@ -5,7 +5,6 @@
 classDiagram
     direction TB
     class FreshnessValidator {
-        <<record>>
     }
     class Range {
         <<record>>

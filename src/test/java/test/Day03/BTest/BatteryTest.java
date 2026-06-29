@@ -30,15 +30,16 @@ public class BatteryTest {
     }
 
     private Joltage bank(Length length, String digits) {
-        return new BatteryBankMaxJoltageCalculator().calculate(BatteryBank.create(digits), length);
+        return BatteryBankMaxJoltageCalculator.of(length).calculate(BatteryBank.create(digits));
     }
 
     @Test
     public void calculator_sum_all_returns_correctly_sum() {
         Length length = new Length(12);
         TotalBatteryJoltageCalculator totalCalculator = new TotalBatteryJoltageCalculator(
-                new BatteryBankMaxJoltageCalculator(), length);
-        assertThat(totalCalculator.sumAllMaxJoltageFrom(parse("987654321111111"))).isEqualTo(new Joltage(987654321111L));
+                BatteryBankMaxJoltageCalculator.of(length));
+        assertThat(totalCalculator.sumAllMaxJoltageFrom(parse("987654321111111")))
+                .isEqualTo(new Joltage(987654321111L));
         assertThat(totalCalculator.sumAllMaxJoltageFrom(parseMultiline(banks))).isEqualTo(new Joltage(3121910778619L));
     }
 

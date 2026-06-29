@@ -10,7 +10,6 @@ classDiagram
     class BatteryBankMaxJoltageCalculator {
     }
     class BatteryBank {
-        <<record>>
     }
     class Joltage {
         <<record>>
@@ -18,11 +17,8 @@ classDiagram
     class Length {
         <<record>>
     }
-    TotalBatteryJoltageCalculator --> BatteryBankMaxJoltageCalculator
-    TotalBatteryJoltageCalculator --> Length
-    TotalBatteryJoltageCalculator ..> BatteryBank
-    TotalBatteryJoltageCalculator ..> Joltage
+TotalBatteryJoltageCalculator --> BatteryBankMaxJoltageCalculator
+    BatteryBankMaxJoltageCalculator --> Length 
     BatteryBankMaxJoltageCalculator ..> BatteryBank
-    BatteryBankMaxJoltageCalculator ..> Length
     BatteryBankMaxJoltageCalculator ..> Joltage
 ```

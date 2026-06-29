@@ -4,20 +4,29 @@
 %%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
 classDiagram
     direction TB
+
     class Playground {
         <<record>>
     }
+
+    class ConnectionGenerator
+
     class Connection {
         <<record>>
     }
+
     class JunctionBox {
         <<record>>
     }
+
     class DisjointSet~T~ {
         <<record>>
     }
-    Playground --> JunctionBox
-    Playground --> Connection
-    Playground --> DisjointSet
+
+    Playground --> ConnectionGenerator
+    Playground --> DisjointSet~JunctionBox~
+
+    ConnectionGenerator --> Connection
     Connection --> JunctionBox
+
 ```

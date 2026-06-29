@@ -41,20 +41,21 @@ public record Playground(List<JunctionBox> boxes) {
     }
 
     public long lastConnectionCoordinatesProduct() {
-        return productOfXCoordinates(findLastConnection(allConnections()));
-    }
+        DisjointSet<JunctionBox> ds = new DisjointSet<>();
 
-    private Connection findLastConnection(List<Connection> connections) {
-        return findLastConnectionWithState(new DisjointSet<>(), connections, boxes.size());
-    }
-
-    private Connection findLastConnectionWithState(DisjointSet<JunctionBox> ds, List<Connection> connections,
-            int totalBoxes) {
-        return connections.stream()
-                .peek(c -> ds.union(c.first(), c.second()))
-                .filter(c -> ds.size(c.first()) == totalBoxes)
+        return allConnections().stream()
+                .map(c -> {
+                    ds.union(c.first(), c.second());
+                    return c;
+                })
+                .filter(c -> isFullyConnected(ds))
                 .findFirst()
+                .map(this::productOfXCoordinates)
                 .orElseThrow();
+    }
+
+    private boolean isFullyConnected(DisjointSet<JunctionBox> ds) {
+        return ds.size(boxes.get(0)) == boxes.size();
     }
 
     private long productOfXCoordinates(Connection connection) {

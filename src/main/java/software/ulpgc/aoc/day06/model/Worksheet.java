@@ -19,7 +19,7 @@ public record Worksheet(List<String> lines) {
         lines = List.copyOf(lines);
     }
 
-    public List<Problem> parse(Deserializer<Problem> deserializer) {
+    public List<Operation> parse(Deserializer<Operation> deserializer) {
         return splitIntoBlocks().stream()
                 .map(block -> deserializer.deserialize(block.text()))
                 .toList();

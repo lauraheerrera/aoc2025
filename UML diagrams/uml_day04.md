@@ -7,10 +7,6 @@ classDiagram
     class DiagramAnalyzer {
     }
     class Diagram {
-        <<record>>
-    }
-    class DiagramStatus {
-        <<record>>
     }
     class Coordinate {
         <<record>>
@@ -21,11 +17,8 @@ classDiagram
     class RollsCount {
         <<record>>
     }
-    DiagramAnalyzer --> DiagramStatus
-    DiagramAnalyzer --> Coordinate
-    DiagramAnalyzer --> RollsCount
-    DiagramStatus --> Diagram
-    DiagramStatus --> Tile
-    DiagramStatus --> Coordinate
-    Diagram --> Tile
+    DiagramAnalyzer --> Diagram
+Diagram --> Coordinate
+Diagram --> Tile
+
 ```

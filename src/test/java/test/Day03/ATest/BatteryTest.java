@@ -36,13 +36,13 @@ public class BatteryTest {
     }
 
     private Joltage bank(Length length, String digits) {
-        return new BatteryBankMaxJoltageCalculator().calculate(BatteryBank.create(digits), length);
+        return BatteryBankMaxJoltageCalculator.of(length).calculate(BatteryBank.create(digits));
     }
 
     @Test
     public void calculator_should_add_multiple_banks_with_varargs() {
         TotalBatteryJoltageCalculator totalCalculator = new TotalBatteryJoltageCalculator(
-                new BatteryBankMaxJoltageCalculator(), new Length(2));
+                BatteryBankMaxJoltageCalculator.of(new Length(2)));
         assertThat(totalCalculator.sumAllMaxJoltageFrom(parse("987654321111111", "811111111111119")))
                 .isEqualTo(new Joltage(187));
     }
@@ -53,7 +53,7 @@ public class BatteryTest {
                 BatteryBank.create("987654321111111"),
                 BatteryBank.create("811111111111119"));
         TotalBatteryJoltageCalculator totalCalculator = new TotalBatteryJoltageCalculator(
-                new BatteryBankMaxJoltageCalculator(), new Length(2));
+                BatteryBankMaxJoltageCalculator.of(new Length(2)));
         assertThat(totalCalculator.sumAllMaxJoltageFrom(list)).isEqualTo(new Joltage(187));
     }
 
@@ -61,7 +61,7 @@ public class BatteryTest {
     public void calculator_sum_all_returns_correctly_sum() {
         Length length = new Length(2);
         TotalBatteryJoltageCalculator totalCalculator = new TotalBatteryJoltageCalculator(
-                new BatteryBankMaxJoltageCalculator(), length);
+                BatteryBankMaxJoltageCalculator.of(length));
         assertThat(totalCalculator.sumAllMaxJoltageFrom(parse("987654321111111"))).isEqualTo(new Joltage(98));
         assertThat(totalCalculator.sumAllMaxJoltageFrom(parse("987654321111111", "811111111111119")))
                 .isEqualTo(new Joltage(187));

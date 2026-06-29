@@ -14,7 +14,6 @@ classDiagram
         <<interface>>
     }
     class Id {
-        <<record>>
     }
     GiftShop --> IdRange
     IdRange --> InvalidatableId

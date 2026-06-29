@@ -4,23 +4,21 @@
 %%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
 classDiagram
     direction TB
+
     class Dial {
-        <<record>>
     }
 
     class DialStatus {
-        <<record>>
+    }
+
+    class DialCalculator {
     }
 
     class Order {
         <<record>>
     }
 
-    class DialCalculator {
-    }
-
     DialStatus --> Dial
     DialStatus --> Order
-    DialCalculator ..> DialStatus
-    DialCalculator --> Order
+    DialCalculator --> DialStatus
 ```

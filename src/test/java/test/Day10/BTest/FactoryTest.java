@@ -3,9 +3,11 @@ package test.Day10.BTest;
 import org.junit.Test;
 import software.ulpgc.aoc.day10.b.io.TxtMachineDeserializer;
 import software.ulpgc.aoc.day10.b.model.Solver;
+import software.ulpgc.aoc.day10.b.model.Machine;
 import software.ulpgc.aoc.day10.model.Factory;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,13 +20,10 @@ public class FactoryTest {
 
     @Test
     public void solve_example() {
+        List<Machine> machines = Arrays.stream(EXAMPLE.split("\n"))
+                .map(new TxtMachineDeserializer()::deserialize)
+                .toList();
         assertThat(
-            new Factory<>(
-                Arrays.stream(EXAMPLE.split("\n"))
-                    .map(new TxtMachineDeserializer()::deserialize)
-                    .toList(),
-                new Solver()
-            ).totalMinPresses()
-        ).isEqualTo(33);
+                new Factory<>(new Solver()).totalMinPresses(machines)).isEqualTo(33);
     }
 }

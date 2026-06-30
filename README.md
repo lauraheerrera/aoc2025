@@ -15,6 +15,44 @@ El proyecto está estructurado como un proyecto Maven estándar de Java 21, orga
 
 Este proyecto ha sido diseñado siguiendo estándares de ingeniería de software, priorizando la mantenibilidad, extensibilidad y claridad del código. La estructura se divide en módulos que separan la infraestructura técnica de la lógica de negocio.
 
+## Arquitectura
+
+El proyecto sigue una arquitectura modular inspirada en los principios de Clean Architecture.
+
+Cada reto se organiza como un módulo independiente (`dayXX`) que encapsula su propio dominio, modelos, lógica de resolución y mecanismos de entrada.  
+Los componentes reutilizables y transversales se agrupan en el paquete `common`, evitando dependencias entre los distintos días.
+
+La estructura lógica puede representarse mediante tres capas:
+
+- **Dominio**: modelos y reglas de negocio específicas de cada reto.
+- **Aplicación**: puntos de entrada (`Main`) y orquestación de los casos de uso.
+- **Infraestructura**: lectura de ficheros, carga de datos y deserialización.
+
+La dependencia siempre apunta hacia las abstracciones del dominio, manteniendo desacopladas las implementaciones concretas de entrada/salida.
+
+### Flujo de ejecución (Input–Process–Output)
+
+Además de la separación por capas, el sistema sigue un flujo **Input–Process–Output (IPO)** claro en la ejecución de cada solución:
+
+```text
+INPUT
+  Archivo de entrada (.txt)
+        ↓
+  Loader + Deserializer
+        ↓
+  Construcción de modelos del dominio
+
+PROCESS
+  Lógica específica del día (algoritmo)
+        ↓
+  Transformación de datos / cálculo de solución
+
+OUTPUT
+  Resultado de la parte 1 y parte 2
+        ↓
+  Impresión en consola
+```
+
 ### Fundamentos de diseño
 
 La arquitectura global se cimienta sobre pilares fundamentales:
@@ -62,7 +100,8 @@ El `Loader` asume el control del bucle de lectura y aplica el Principio de Holly
     *   *Implementación*: La clase [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java) encapsula la creación de cargadores. En lugar de que el código cliente tenga que instanciar directamente `TxtLoader` con sus parámetros internos (como rutas de archivo o funciones de parsing), simplemente consulta a `LoaderFactory` con un identificador o tipo, recibiendo a cambio el objeto `Loader` listo para ser utilizado. Esto simplifica la creación y promueve un menor acoplamiento, ya que el cliente no necesita conocer los detalles de implementación de los cargadores.
 *   **Patrón Strategy**:
     *   *Definición*: Patrón de diseño comportamental que permite definir una familia de algoritmos, encapsularlos en clases independientes e intercambiables, e utilizarlos de forma dinámica en tiempo de ejecución sin que el código cliente dependa de sus implementaciones concretas.
-    *   *Implementación*: En el proyecto se utiliza para desacoplar la lógica de transformación de datos mediante la interfaz genérica `Deserializer<T>` y la utilización de `Function<String, T>` como estrategia funcional. De este modo, el comportamiento de parseo se inyecta en componentes como `Loader`, permitiendo intercambiar distintas implementaciones de deserialización (por ejemplo `TxtShapeDeserializer`, `TxtRegionDeserializer`, etc.) sin modificar la infraestructura de carga.
+    *   *Implementación*: Se implementa mediante la abstracción `Deserializer<T>` y, especialmente, a través de la inyección de
+implementaciones concretas o expresiones lambda (`Function<String, T>`) que encapsulan distintas estrategias de transformación de texto.
 
 ### Patrones y técnicas no aplicadas
 

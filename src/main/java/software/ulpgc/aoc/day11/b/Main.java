@@ -14,9 +14,17 @@ public class Main {
     public static void main(String[] args) throws IOException {
         File file = new File("src/main/resources/day11/input.txt");
         Deserializer<Device> deserializer = new TxtDeviceDeserializer();
-        List<Device> devices = LoaderFactory
-                .txt(file, deserializer::deserialize)
-                .load();
-        System.out.println("El resultado es: " + Network.from(devices).countPaths("you", "out"));
+
+        List<Device> devices = LoaderFactory.txt(file, deserializer::deserialize).load();
+
+        Network network = Network.from(devices);
+
+        long path1 = network.countPaths("svr", "dac") * network.countPaths("dac", "fft")
+                * network.countPaths("fft", "out");
+        long path2 = network.countPaths("svr", "fft") * network.countPaths("fft", "dac")
+                * network.countPaths("dac", "out");
+
+        System.out.println("El resultado es: " + (path1 + path2));
+
     }
 }

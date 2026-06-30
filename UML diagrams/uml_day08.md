@@ -5,28 +5,26 @@
 classDiagram
     direction TB
 
-    class Playground {
+    class JunctionBox {
         <<record>>
     }
-
-    class ConnectionGenerator
 
     class Connection {
         <<record>>
     }
 
-    class JunctionBox {
-        <<record>>
+    class ConnectionGenerator {
+    }
+
+    class Playground {
     }
 
     class DisjointSet~T~ {
-        <<record>>
     }
-
-    Playground --> ConnectionGenerator
-    Playground --> DisjointSet~JunctionBox~
 
     ConnectionGenerator --> Connection
     Connection --> JunctionBox
 
+    Playground --> Connection
+    Playground --> DisjointSet~JunctionBox~
 ```

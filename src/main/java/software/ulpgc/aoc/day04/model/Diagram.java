@@ -1,16 +1,16 @@
 package software.ulpgc.aoc.day04.model;
 
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 public class Diagram {
     private final Tile[][] grid;
     private final int rows;
     private final int cols;
 
-    private enum Direction {
+    public enum Direction {
         NORTH_WEST(-1, -1), NORTH(-1, 0), NORTH_EAST(-1, 1),
         WEST(0, -1), EAST(0, 1),
         SOUTH_WEST(1, -1), SOUTH(1, 0), SOUTH_EAST(1, 1);

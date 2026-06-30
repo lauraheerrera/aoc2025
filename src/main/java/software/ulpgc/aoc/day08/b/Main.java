@@ -3,6 +3,8 @@ package software.ulpgc.aoc.day08.b;
 import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.common.io.LoaderFactory;
 import software.ulpgc.aoc.day08.io.TxtJunctionBoxDeserializer;
+import software.ulpgc.aoc.day08.model.Connection;
+import software.ulpgc.aoc.day08.model.ConnectionGenerator;
 import software.ulpgc.aoc.day08.model.JunctionBox;
 import software.ulpgc.aoc.day08.model.Playground;
 
@@ -18,7 +20,9 @@ public class Main {
         List<JunctionBox> junctionBoxes = LoaderFactory
                 .txt(file, deserializer::deserialize)
                 .load();
-        Playground playground = Playground.from(junctionBoxes);
+
+        List<Connection> connections = ConnectionGenerator.from(junctionBoxes);
+        Playground playground = Playground.from(connections);
         System.out.println("El resultado es: " + playground.lastConnectionCoordinatesProduct());
     }
 }

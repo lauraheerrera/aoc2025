@@ -3,6 +3,7 @@ package software.ulpgc.aoc.day04.model;
 import java.util.List;
 
 public class DiagramAnalyzer {
+
     private static final int MAX_ADJACENT = 4;
 
     public static DiagramAnalyzer create() {
@@ -14,8 +15,7 @@ public class DiagramAnalyzer {
     }
 
     public List<Coordinate> findAccessibleCoordinates(Diagram diagram) {
-        List<Coordinate> coords = diagram.coordinates();
-        return coords.stream()
+        return diagram.coordinates().stream()
                 .filter(c -> isAccessible(diagram, c))
                 .toList();
     }
@@ -34,12 +34,7 @@ public class DiagramAnalyzer {
 
     private boolean isAccessible(Diagram diagram, Coordinate coordinate) {
         return diagram.isInBounds(coordinate)
-                && isTarget(diagram, coordinate)
+                && diagram.get(coordinate) == Tile.ROLL
                 && diagram.countAdjacent(coordinate, Tile.ROLL) < MAX_ADJACENT;
     }
-
-    private boolean isTarget(Diagram diagram, Coordinate coordinate) {
-        return diagram.get(coordinate) == Tile.ROLL;
-    }
-
 }

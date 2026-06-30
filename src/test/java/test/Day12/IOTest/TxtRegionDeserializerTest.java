@@ -16,7 +16,7 @@ public class TxtRegionDeserializerTest {
         assertThat(region.width()).isEqualTo(49);
         assertThat(region.height()).isEqualTo(36);
         assertThat(region.area()).isEqualTo(49 * 36);
-        assertThat(region.presentQuantities()).containsExactly(50, 58, 46, 32, 38, 51);
+        assertThat(region.quantities()).containsExactly(50, 58, 46, 32, 38, 51);
     }
 
     @Test
@@ -26,6 +26,6 @@ public class TxtRegionDeserializerTest {
         Region region = regionDeserializer.deserialize("  12x5: \t 1   0 \t 1  0   2   2   ");
         assertThat(region.width()).isEqualTo(12);
         assertThat(region.height()).isEqualTo(5);
-        assertThat(region.presentQuantities()).containsExactly(1, 0, 1, 0, 2, 2);
+        assertThat(region.quantities()).containsExactly(1, 0, 1, 0, 2, 2);
     }
 }

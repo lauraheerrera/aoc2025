@@ -17,13 +17,13 @@ public class Main {
         File file = new File("src/main/resources/day05/input.txt");
         List<List<String>> sections = LoaderFactory.sections(file);
 
-        List<Range> ranges = load(sections.getFirst(), new TxtRangeDeserializer());
-        List<ID> ids = load(sections.get(1), new TxtIDDeserializer());
+        Deserializer<Range> rangeDeserializer = new TxtRangeDeserializer();
+        Deserializer<ID> idDeserializer = new TxtIDDeserializer();
+
+        List<Range> ranges = LoaderFactory.load(sections.getFirst(), rangeDeserializer);
+        List<ID> ids = LoaderFactory.load(sections.getLast(), idDeserializer);
 
         System.out.println("Hay " + FreshnessValidator.fromRanges(ranges).countFresh(ids) + " IDs frescos");
     }
 
-    private static <T> List<T> load(List<String> lines, Deserializer<T> deserializer) {
-        return lines.stream().map(deserializer::deserialize).toList();
-    }
 }

@@ -10,24 +10,31 @@ public class TxtShapeDeserializerTest {
 
     @Test
     public void should_deserialize_shape_block_correctly() {
-        TxtShapeDeserializer shapeDeserializer = new TxtShapeDeserializer();
 
-        Shape shape0 = shapeDeserializer.deserialize("""
+        TxtShapeDeserializer deserializer = new TxtShapeDeserializer();
+
+        Shape shape0 = deserializer.deserialize("""
                 0:
                 ##.
                 .##
                 ..#
                 """);
-        assertThat(shape0.index()).isEqualTo(0);
-        assertThat(shape0.area()).isEqualTo(5);
 
-        Shape shape1 = shapeDeserializer.deserialize("""
+        assertThat(shape0.size()).isEqualTo(5);
+    }
+
+    @Test
+    public void should_deserialize_second_shape_correctly() {
+
+        TxtShapeDeserializer deserializer = new TxtShapeDeserializer();
+
+        Shape shape1 = deserializer.deserialize("""
                 1:
                 ###
                 ##.
                 #..
                 """);
-        assertThat(shape1.index()).isEqualTo(1);
-        assertThat(shape1.area()).isEqualTo(6);
+
+        assertThat(shape1.size()).isEqualTo(6);
     }
 }

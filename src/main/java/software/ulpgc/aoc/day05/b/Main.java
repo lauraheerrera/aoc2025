@@ -15,12 +15,12 @@ public class Main {
         File file = new File("src/main/resources/day05/input.txt");
         List<List<String>> sections = LoaderFactory.sections(file);
 
-        List<Range> ranges = load(sections.getFirst(), new TxtRangeDeserializer());
+        Deserializer<Range> rangeDeserializer = new TxtRangeDeserializer();
 
-        System.out.println("Hay un total de " + FreshnessValidator.fromRanges(ranges).countTotalFresh() + " IDs frescos");
+        List<Range> ranges = LoaderFactory.load(sections.getFirst(), rangeDeserializer);
+
+        System.out
+                .println("Hay un total de " + FreshnessValidator.fromRanges(ranges).countTotalFresh() + " IDs frescos");
     }
 
-    private static <T> List<T> load(List<String> lines, Deserializer<T> deserializer) {
-        return lines.stream().map(deserializer::deserialize).toList();
-    }
 }

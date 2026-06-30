@@ -3,44 +3,51 @@ package software.ulpgc.aoc.day08.model;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Playground {
-    private final List<JunctionBox> boxes;
 
-    private Playground(List<JunctionBox> boxes) {
-        this.boxes = boxes;
+    private final List<Connection> connections;
+
+    private Playground(List<Connection> connections) {
+        this.connections = connections;
     }
 
-    public static Playground from(List<JunctionBox> boxes) {
-        return new Playground(boxes);
+    public static Playground from(List<Connection> connections) {
+        return new Playground(connections);
     }
 
     public long multiplyThreeLargestCircuitSizesAfterConnecting(int limit) {
-        return multiplyThreeLargestSizes(
-                applyConnections(
-                        new DisjointSet<>(),
-                        allConnections().stream().limit(limit)));
-    }
 
-    public List<Connection> allConnections() {
-        return IntStream.range(0, boxes.size())
-                .boxed()
-                .flatMap(i -> IntStream.range(i + 1, boxes.size())
-                        .mapToObj(j -> new Connection(boxes.get(i), boxes.get(j))))
+        DisjointSet<JunctionBox> ds = new DisjointSet<>();
+
+        connections.stream()
                 .sorted()
-                .collect(Collectors.toList());
+                .limit(limit)
+                .forEach(c -> ds.union(c.first(), c.second()));
+
+        return dsSizes(ds);
     }
 
-    private DisjointSet<JunctionBox> applyConnections(DisjointSet<JunctionBox> ds, Stream<Connection> connections) {
-        connections.forEach(c -> ds.union(c.first(), c.second()));
-        return ds;
+    public long lastConnectionCoordinatesProduct() {
+
+        DisjointSet<JunctionBox> ds = new DisjointSet<>();
+
+        return connections.stream()
+                .sorted()
+                .map(c -> {
+                    ds.union(c.first(), c.second());
+                    return c;
+                })
+                .filter(c -> ds.size(c.first()) == sizeOfAllNodes())
+                .findFirst()
+                .map(this::productOfXCoordinates)
+                .orElseThrow();
     }
 
-    private long multiplyThreeLargestSizes(DisjointSet<JunctionBox> ds) {
-        return boxes.stream()
-                .map(ds::find)
+    private long dsSizes(DisjointSet<JunctionBox> ds) {
+        return connections.stream()
+                .map(c -> ds.find(c.first()))
                 .distinct()
                 .map(ds::size)
                 .sorted(Comparator.reverseOrder())
@@ -49,22 +56,11 @@ public class Playground {
                 .reduce(1, (a, b) -> a * b);
     }
 
-    public long lastConnectionCoordinatesProduct() {
-        DisjointSet<JunctionBox> ds = new DisjointSet<>();
-
-        return allConnections().stream()
-                .map(c -> {
-                    ds.union(c.first(), c.second());
-                    return c;
-                })
-                .filter(c -> isFullyConnected(ds))
-                .findFirst()
-                .map(this::productOfXCoordinates)
-                .orElseThrow();
-    }
-
-    private boolean isFullyConnected(DisjointSet<JunctionBox> ds) {
-        return ds.size(boxes.get(0)) == boxes.size();
+    private int sizeOfAllNodes() {
+        return connections.stream()
+                .flatMap(c -> Stream.of(c.first(), c.second()))
+                .collect(Collectors.toSet())
+                .size();
     }
 
     private long productOfXCoordinates(Connection connection) {

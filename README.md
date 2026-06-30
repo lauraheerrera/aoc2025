@@ -87,6 +87,8 @@ La arquitectura global se cimienta sobre pilares fundamentales:
 *   **Good Naming**: Se priorizan nombres de clases y métodos autoexplicativos que actúan como documentación viva del código.
 *   **Inversión de Control (IoC)**: Habitualmente, el `Main` controla el flujo de lectura de un archivo, iterando línea a línea y aplicando la lógica de transformación. En este diseño, se invierte ese control: el `Main` deja de orquestar el procesamiento y delega esa responsabilidad a un componente reutilizable (`TxtLoader`).
 El `TxtLoader` asume el control del flujo de lectura del fichero, aplicando el Principio de Hollywood (“No nos llames, nosotros te llamamos”), y ejecuta la función `String -> T` inyectada desde el `Main` cada vez que necesita transformar una línea de texto en un objeto del dominio.
+* **Fluent API**: Se hace uso intensivo de la Fluent API proporcionada por la API de Streams de Java para expresar transformaciones de datos de forma declarativa y legible. Sin embargo, no se ha diseñado una Fluent API específica para el dominio ya que los modelos son sencillos y no requieren construcción mediante encadenamiento de métodos. Implementarla habría introducido una capa adicional de abstracción sin aportar beneficios reales en términos de expresividad, mantenibilidad o reutilización, incumpliendo los principios KISS y YAGNI.
+
 ### Patrones de diseño
 
 *   **Patrón Factory**:

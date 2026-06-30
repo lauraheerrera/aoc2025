@@ -2,6 +2,8 @@ package test.Day08.BTest;
 
 import org.junit.Test;
 import software.ulpgc.aoc.day08.io.TxtJunctionBoxDeserializer;
+import software.ulpgc.aoc.day08.model.Connection;
+import software.ulpgc.aoc.day08.model.ConnectionGenerator;
 import software.ulpgc.aoc.day08.model.JunctionBox;
 import software.ulpgc.aoc.day08.model.Playground;
 
@@ -42,7 +44,9 @@ public class PlaygroundTest {
                 .map(deserializer::deserialize)
                 .collect(Collectors.toList());
 
-        long result = Playground.from(boxes).lastConnectionCoordinatesProduct();
+        List<Connection> connections = ConnectionGenerator.from(boxes);
+        Playground playground = Playground.from(connections);
+        long result = playground.lastConnectionCoordinatesProduct();
         assertThat(result).isEqualTo(25272L);
     }
 }

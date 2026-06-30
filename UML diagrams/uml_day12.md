@@ -3,16 +3,26 @@
 ```mermaid
 %%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
 classDiagram
-    direction TB
-    class Farm {
-        <<record>>
-    }
-    class Region {
-        <<record>>
-    }
-    class Shape {
-        <<record>>
-    }
-    Farm --> Region
-    Region --> Shape
+
+class Farm {
+}
+
+class Region {
+}
+
+class Shape {
+}
+
+class Point {
+
+}
+
+class RegionFitter {
+}
+
+Farm --> Region
+Farm --> RegionFitter
+Shape --> Point
+RegionFitter ..> Shape
+RegionFitter ..> Region
 ```

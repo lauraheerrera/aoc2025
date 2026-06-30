@@ -22,4 +22,8 @@ public class LoaderFactory {
                 .filter(list -> !list.isEmpty())
                 .toList();
     }
+
+    public static <T> List<T> load(List<String> lines, Deserializer<T> deserializer) {
+        return lines.stream().map(deserializer::deserialize).toList();
+    }
 }

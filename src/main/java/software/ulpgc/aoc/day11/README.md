@@ -54,7 +54,7 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 
 ## Patrones de diseño
 *   **Patrones creacionales**:
-    *   **Factory Method**: Uso de métodos de creación estáticos como `Network.fromDevices()` para construir redes sin necesidad de acceder a su constructor.
+    *   **Factory Method**: Uso de métodos de creación estáticos como `Network.from()` para construir redes sin necesidad de acceder a su constructor. Además, al usar este patrón, se oculta la creación de la lista de adyacencias.
 *   **Patrones funcionales**:
     *   **Closure**: Empleado a través de lambdas y referencias a métodos como en `countPaths()`.
 *   **Patrones de comportamiento**:

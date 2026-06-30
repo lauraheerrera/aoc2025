@@ -39,10 +39,10 @@ public class PlaygroundTest {
     public void solve_example() {
         TxtJunctionBoxDeserializer deserializer = new TxtJunctionBoxDeserializer();
         List<JunctionBox> boxes = Arrays.stream(example.split("\n"))
-            .map(deserializer::deserialize)
-            .collect(Collectors.toList());
+                .map(deserializer::deserialize)
+                .collect(Collectors.toList());
 
-        long result = new Playground(boxes).lastConnectionCoordinatesProduct();
+        long result = Playground.from(boxes).lastConnectionCoordinatesProduct();
         assertThat(result).isEqualTo(25272L);
     }
 }

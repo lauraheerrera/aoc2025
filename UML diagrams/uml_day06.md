@@ -4,28 +4,20 @@
 %%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
 classDiagram
     direction TB
-    class Worksheet {
-        <<record>>
+
+    class Operation {
     }
-    class View {
-        <<enumeration>>
-    }
-    class ProblemBlock {
-        <<record>>
-    }
-    class Problem {
-        <<record>>
-    }
+
     class Operand {
         <<record>>
     }
+
     class Operator {
         <<enumeration>>
+        ADD(+)
+        MULTIPLY(*)
     }
 
-    Worksheet *-- View
-    Worksheet ..> ProblemBlock 
-    Worksheet ..> Problem
-    Problem --> "*" Operand
-    Problem --> "1" Operator
+    Operation --> "*" Operand
+    Operation --> "1" Operator
 ```

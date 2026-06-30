@@ -41,7 +41,7 @@ public class PlaygroundTest {
                 .map(deserializer::deserialize)
                 .collect(Collectors.toList());
 
-        long result = new Playground(boxes).multiplyThreeLargestCircuitSizesAfterConnecting(10);
+        long result = Playground.from(boxes).multiplyThreeLargestCircuitSizesAfterConnecting(10);
         assertThat(result).isEqualTo(40L);
     }
 
@@ -76,7 +76,7 @@ public class PlaygroundTest {
         JunctionBox b1 = new JunctionBox(0, 0, 0);
         JunctionBox b2 = new JunctionBox(1, 1, 1);
         JunctionBox b3 = new JunctionBox(2, 2, 2);
-        Playground playground = new Playground(List.of(b1, b2, b3));
+        Playground playground = Playground.from(List.of(b1, b2, b3));
 
         assertThat(playground.multiplyThreeLargestCircuitSizesAfterConnecting(0)).isEqualTo(1L);
     }
@@ -86,7 +86,7 @@ public class PlaygroundTest {
         JunctionBox b1 = new JunctionBox(0, 0, 0);
         JunctionBox b2 = new JunctionBox(1, 1, 1);
         JunctionBox b3 = new JunctionBox(5, 5, 5);
-        Playground playground = new Playground(List.of(b1, b2, b3));
+        Playground playground = Playground.from(List.of(b1, b2, b3));
 
         assertThat(playground.multiplyThreeLargestCircuitSizesAfterConnecting(1)).isEqualTo(2L);
     }

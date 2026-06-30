@@ -18,7 +18,7 @@ public class Main {
         List<JunctionBox> junctionBoxes = LoaderFactory
                 .txt(file, deserializer::deserialize)
                 .load();
-        Playground playground = new Playground(junctionBoxes);
+        Playground playground = Playground.from(junctionBoxes);
         System.out.println("El resultado es: " + playground.lastConnectionCoordinatesProduct());
     }
 }

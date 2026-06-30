@@ -6,7 +6,16 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public record Playground(List<JunctionBox> boxes) {
+public class Playground {
+    private final List<JunctionBox> boxes;
+
+    private Playground(List<JunctionBox> boxes) {
+        this.boxes = boxes;
+    }
+
+    public static Playground from(List<JunctionBox> boxes) {
+        return new Playground(boxes);
+    }
 
     public long multiplyThreeLargestCircuitSizesAfterConnecting(int limit) {
         return multiplyThreeLargestSizes(

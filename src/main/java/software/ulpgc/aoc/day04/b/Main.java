@@ -20,7 +20,7 @@ public class Main {
                                 .txt(file, deserializer::deserialize)
                                 .load();
                 List<Tile[]> diagramLines = loader.load();
-                DiagramAnalyzer analyzer = new DiagramAnalyzer();
+                DiagramAnalyzer analyzer = DiagramAnalyzer.create();
                 Tile[][] tiles = diagramLines.stream()
                                 .toArray(Tile[][]::new);
                 Diagram diagram = Diagram.create(tiles);

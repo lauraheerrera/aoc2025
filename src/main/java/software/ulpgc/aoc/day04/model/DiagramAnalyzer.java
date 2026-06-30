@@ -5,6 +5,10 @@ import java.util.List;
 public class DiagramAnalyzer {
     private static final int MAX_ADJACENT = 4;
 
+    public static DiagramAnalyzer create() {
+        return new DiagramAnalyzer();
+    }
+
     public RollsCount sumAllAccessibleRolls(Diagram diagram) {
         return new RollsCount(findAccessibleCoordinates(diagram).size());
     }

@@ -15,12 +15,7 @@ El proyecto está estructurado como un proyecto Maven estándar de Java 21, orga
 
 Este proyecto ha sido diseñado siguiendo estándares de ingeniería de software, priorizando la mantenibilidad, extensibilidad y claridad del código. La estructura se divide en módulos que separan la infraestructura técnica de la lógica de negocio.
 
-## Arquitectura
-
-El proyecto sigue una arquitectura modular inspirada en los principios de Clean Architecture.
-
-Cada reto se organiza como un módulo independiente (`dayXX`) que encapsula su propio dominio, modelos, lógica de resolución y mecanismos de entrada.  
-Los componentes reutilizables y transversales se agrupan en el paquete `common`, evitando dependencias entre los distintos días.
+### Arquitectura
 
 La estructura lógica puede representarse mediante tres capas:
 

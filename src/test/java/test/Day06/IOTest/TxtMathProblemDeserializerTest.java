@@ -1,10 +1,11 @@
 package test.Day06.IOTest;
 
 import org.junit.Test;
-import software.ulpgc.aoc.day06.io.TxtMathProblemDeserializer;
+import software.ulpgc.aoc.common.io.Deserializer;
+import software.ulpgc.aoc.day06.io.ColumnR2LOperationDeserializer;
+import software.ulpgc.aoc.day06.io.RowOperationDeserializer;
+import software.ulpgc.aoc.day06.io.WorksheetSplitter;
 import software.ulpgc.aoc.day06.model.Operation;
-import software.ulpgc.aoc.day06.model.ProblemBlock;
-import software.ulpgc.aoc.day06.model.Worksheet;
 
 import java.util.List;
 
@@ -19,9 +20,9 @@ public class TxtMathProblemDeserializerTest {
                 10 20
                 +
                 """;
-        ProblemBlock block = new ProblemBlock(List.of(input.split("\n")));
-        TxtMathProblemDeserializer deserializer = new TxtMathProblemDeserializer(Worksheet.View.ROWS);
-        Operation problem = deserializer.deserialize(block.text());
+
+        Deserializer<Operation> deserializer = new RowOperationDeserializer();
+        Operation problem = deserializer.deserialize(input);
 
         assertThat(problem).isNotNull();
         assertThat(problem.operands()).extracting("value").containsExactly(10L, 20L);
@@ -35,9 +36,9 @@ public class TxtMathProblemDeserializerTest {
                 00
                 +
                 """;
-        ProblemBlock block = new ProblemBlock(List.of(input.split("\n")));
-        TxtMathProblemDeserializer deserializer = new TxtMathProblemDeserializer(Worksheet.View.COLUMNS_R2L);
-        Operation problem = deserializer.deserialize(block.text());
+
+        Deserializer<Operation> deserializer = new ColumnR2LOperationDeserializer();
+        Operation problem = deserializer.deserialize(input);
 
         assertThat(problem).isNotNull();
         assertThat(problem.operator().symbol()).isEqualTo('+');
@@ -45,20 +46,20 @@ public class TxtMathProblemDeserializerTest {
     }
 
     @Test
-    public void should_throw_exception_when_block_is_null() {
-        assertThatThrownBy(() -> new ProblemBlock(null))
+    public void should_throw_exception_when_worksheet_is_null() {
+        assertThatThrownBy(() -> WorksheetSplitter.splitIntoBlocks(null))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Block cannot be null or empty");
+                .hasMessageContaining("Worksheet lines cannot be null, empty or blank");
     }
 
     @Test
-    public void should_throw_exception_when_block_is_empty() {
-        assertThatThrownBy(() -> new ProblemBlock(List.of()))
+    public void should_throw_exception_when_worksheet_is_empty() {
+        assertThatThrownBy(() -> WorksheetSplitter.splitIntoBlocks(List.of()))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Block cannot be null or empty");
+                .hasMessageContaining("Worksheet lines cannot be null, empty or blank");
 
-        assertThatThrownBy(() -> new ProblemBlock(List.of("   ", "")))
+        assertThatThrownBy(() -> WorksheetSplitter.splitIntoBlocks(List.of("   ", "")))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Block cannot be null or empty");
+                .hasMessageContaining("Worksheet lines cannot be null, empty or blank");
     }
 }

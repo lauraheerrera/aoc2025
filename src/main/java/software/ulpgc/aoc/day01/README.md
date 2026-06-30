@@ -29,11 +29,11 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
     *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
         * [Dial.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/Dial.java): Representa la entidad física del dial, con su tamaño y posición inicial.
         * [Order.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/Order.java): Representa una única instrucción de movimiento, encapsulando la lógica de parseo de caracteres.
-        * [DialStatus.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialStatus.java): Se encarga exclusivamente de la representación del estado actual del dial y su historial de órdenes.
+        * [DialStatus.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialStatus.java): representa el estado del dial en un momento concreto y permite transiciones a nuevos estados mediante órdenes individuales.
         * [DialCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialCalculator.java): Alberga la lógica algorítmica específica para contar las veces que el dial se sitúa o cruza por cero.
         * [TxtOrderDeserializer.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/io/TxtOrderDeserializer.java): Su única responsabilidad es deserializar una línea de texto plano a un objeto `Order`.
     *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
-        *   [DialStatus.java:](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialStatus.java#L21-L26) (`execute()`): Acepta una `List<Order>` genérica, por lo que el diseño no requiere modificar `DialStatus` para procesar nuevas secuencias de órdenes. La ausencia de lógica condicional sobre el tipo de orden evita que añadir nuevas órdenes implique tocar el código existente.
+        *   El modelo del dial y de su estado permanece estable: su semántica básica no cambia aunque cambie la forma de analizarlo. Las variantes del problema, como nuevas formas de contar posiciones o cruces por cero, se incorporan como extensiones del diseño sin tener que modificar el núcleo del dominio.
     *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
         *   [TxtOrderDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/io/TxtOrderDeserializer.java#L6): Implementa la interfaz genérica `Deserializer<Order>`, pudiendo inyectarse transparentemente en cualquier cargador que precise un deserializador compatible.
     *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:
@@ -48,15 +48,16 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 
 Se han utilizado diversas técnicas de ingeniería de software para asegurar la robustez y limpieza del proyecto:
 *   **Inmutabilidad del modelo**:
-    *   Se establece mediante el patrón de separación entre **Entidad** y **Estado (Status)**. La clase `Dial` es la entidad estática y completamente inmutable (sin estado). Las propiedades que cambian con las acciones (el historial de órdenes y la posición) se encapsulan en la clase `DialStatus`. Al ejecutar nuevas órdenes con `execute()`, se devuelve un nuevo `DialStatus` que hace referencia al mismo `Dial` inicial, evitando la recreación innecesaria de la propia entidad del modelo. El record `Order` es también inmutable.
+    *   Se establece mediante el patrón de separación entre **Entidad** y **Estado (Status)**. La clase `Dial` es la entidad estática y completamente inmutable (sin estado). Las propiedades que cambian con las acciones (el historial de órdenes y la posición) se encapsulan en la clase `DialStatus`. Al ejecutar nuevas órdenes con `execute()`, se devuelve un nuevo `DialStatus` que hace referencia al mismo `Dial`, evitando la recreación innecesaria de la propia entidad del modelo. El record `Order` es también inmutable.
 *   **Programación funcional (con Java Streams)**:
+    *   El modelo no consume listas directamente; la composición funcional se realiza sobre la secuencia de estados generados por `execute(Order)`.
     *   [DialCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialCalculator.java) (`countEndingInZero()`): Usa `IntStream.range(0, status.size())` para evaluar la posición siguiente de cada paso con `status::next`, filtrar las que son `0` y contarlas de forma declarativa.
     *   [DialCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialCalculator.java) (`countCrossingZero()`): Utiliza `IntStream.range(0, status.size())` para mapear cada orden al número de cruces por cero intermedios con `status::crossZeroAt` y sumarlos.
     *   [DialStatus.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day01/model/DialStatus.java): El cálculo de la posición acumulada y de los cruces por cero se expresa con streams y operaciones de agregación sobre la lista de órdenes.
 *   **Inyección de dependencias**: Inyección del deserializador en la factoría de carga a través del flujo principal.
 *   **Genéricos**: Uso de interfaces parametrizadas `Deserializer<T>` para el manejo seguro de los objetos de datos.
 *   **Good Naming**: Nombres explícitos como `INITIAL_POSITION`, `crossZeroAt()`, `countCrossingZero()` o `countEndingInZero()` aseguran que el código sea autodocumentado.
-*   **Fluent API**: El modelo expone una Fluent API en estilo inmutable, donde las transiciones de estado devuelven nuevas instancias del objeto en lugar de mutar el estado interno. `DialStatus.initial(dial).execute(orders)` representa una composición de operaciones encadenables conceptualmente, donde cada llamada produce un nuevo `DialStatus` sin modificar el anterior. Este enfoque permite mantener la expresividad del flujo de llamadas sin introducir complejidad estructural innecesaria.
+*   **Fluent API**: El modelo expone una API inmutable donde las transiciones de estado devuelven nuevas instancias del objeto en lugar de mutar el estado interno. Cada llamada a `execute(Order)` produce un nuevo `DialStatus`, preservando el estado anterior. La composición de múltiples órdenes se realiza de forma externa mediante iteración o reducción funcional, lo que permite mantener la simplicidad del modelo sin introducir estructuras de control dentro del dominio. Este enfoque conserva la expresividad del flujo de transformación del estado sin acoplar el modelo a cómo se agregan las operaciones.
 
 ## Patrones de diseño
 *   **Patrones creacionales**:
@@ -81,7 +82,7 @@ Se han desarrollado tests unitarios automatizados utilizando **JUnit** y **Asser
 
 #### Parte A (`ATest/DialTest`)
 *   **Posición inicial**: Comprobación de que el dial se inicializa correctamente en la posición 50 (`initial_position_should_be_50_using_create`).
-*   **Cálculo de la posición final**: Verificación de que el dial calcula su posición correcta tras múltiples giros a la izquierda (L) y derecha (R), incluyendo desbordamientos cíclicos (ej. por encima de 99 o por debajo de 0).
+*   **Cálculo de la posición final**: Verificación de que el dial calcula su posición correcta tras múltiples llamadas secuenciales a execute(Order), incluyendo rotaciones a la izquierda (L) y derecha (R), y desbordamientos cíclicos (ej. por encima de 99 o por debajo de 0).
 *   **Veces en posición cero al finalizar movimientos**: Validación del conteo de cuántas veces el dial termina exactamente en la posición 0 al final de cada orden de rotación.
 *   **Casos de borde / límite**: 
     *   Lista de órdenes vacía (`given_empty_orders_should_remain_at_50_and_count_zero_zeros`).

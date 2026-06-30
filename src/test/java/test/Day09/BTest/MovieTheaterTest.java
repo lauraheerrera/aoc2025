@@ -30,7 +30,7 @@ public class MovieTheaterTest {
                 .map(deserializer::deserialize)
                 .collect(Collectors.toList());
 
-        long result = new MovieTheater(points).maxRectangleArea();
+        long result = MovieTheater.from(points).maxRectangleArea();
         assertThat(result).isEqualTo(24L);
     }
 }

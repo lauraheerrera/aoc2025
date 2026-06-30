@@ -30,7 +30,7 @@ public class MovieTheaterTest {
                 .map(deserializer::deserialize)
                 .collect(Collectors.toList());
 
-        long result = new MovieTheater(points).maxRectangleArea();
+        long result = MovieTheater.from(points).maxRectangleArea();
         assertThat(result).isEqualTo(50L);
     }
 
@@ -53,13 +53,13 @@ public class MovieTheaterTest {
 
     @Test
     public void test_single_point_area() {
-        MovieTheater theater = new MovieTheater(List.of(new Tile(0, 0)));
+        MovieTheater theater = MovieTheater.from(List.of(new Tile(0, 0)));
         assertThat(theater.maxRectangleArea()).isEqualTo(0L);
     }
 
     @Test
     public void test_two_points_same_coordinates() {
-        MovieTheater theater = new MovieTheater(List.of(new Tile(1, 1), new Tile(1, 1)));
+        MovieTheater theater = MovieTheater.from(List.of(new Tile(1, 1), new Tile(1, 1)));
         assertThat(theater.maxRectangleArea()).isEqualTo(1L);
     }
 }

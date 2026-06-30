@@ -30,32 +30,21 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
     *   *Implementación*: La clase `Factory` se compone de una colección de `Machine`, en lugar de heredar de una clase base abstracta de maquinaria o planta.
 *   **SOLID**:
     *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
-        *   *Definición*: Cada clase o módulo debe tener una única responsabilidad o razón para cambiar, favoreciendo la cohesión y la claridad del diseño.
         *   *Implementación*:
             *   [Machine.java:L5-L16](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day10/model/Machine.java#L5-L16): Se limita de manera única e inmutable a modelar los botones de conmutación XOR y a buscar el mínimo de pulsaciones para una máquina individual.
             *   [Factory.java:L5-L22](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day10/model/Factory.java#L5-L22): Únicamente se responsabiliza de la agregación y coordinación total del coste de las máquinas que componen la fábrica.
             *   [Fraction.java:L5-L15](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day10/model/Fraction.java#L5-L15): Concentra exclusivamente el soporte de aritmética racional exacta.
     *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
-        *   *Definición*: Las clases deben estar abiertas a la extensión pero cerradas a la modificación, permitiendo añadir funcionalidad sin alterar el código existente.
-        *   *Implementación*:
-            *   [Machine.java:L5-L16](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day10/model/Machine.java#L5-L16): La lógica interna de búsqueda recursiva de pulsaciones óptimas (backtracking con poda de profundidad) puede optimizarse o modificarse internamente sin alterar la interfaz expuesta hacia `Factory` o los tests existentes.
+            *   La máquina y la fábrica modelan un contrato estable del problema. La variación real está en la estrategia de resolución del estado, de modo que añadir un nuevo algoritmo o una nueva regla de pulsación no exige cambiar el modelo central.
     *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
-        *   *Definición*: Los objetos de una subclase deben poder reemplazar a los de su superclase sin alterar el funcionamiento del programa, garantizando consistencia, modularidad e interoperabilidad y la sustitución segura de componentes (Evolución de la Ley de Deméter).
-        *   *Implementación*:
             *   La factoría `LoaderFactory` devuelve un `TxtLoader<T>` genérico que es sustituible por cualquier implementación de carga. El `TxtMachineDeserializer` implementa `Deserializer<Machine>` de forma limpia, lo que permite reemplazarlo por mock u otros sin romper el flujo principal.
     *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:
-        *   *Definición*: No se debe obligar a una clase a implementar interfaces que no utiliza, reduciendo el acoplamiento y favoreciendo la especialización.
-        *   *Implementación*:
             *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`).
     *   **Dependency Inversion Principle (DIP - Principio de Inversión de Dependencias)**:
-        *   *Definición*: Los módulos de alto nivel no deben depender de módulos de bajo nivel, sino de abstracciones, lo que disminuye la dependencia entre componentes.
-        *   *Implementación*:
-            *   [Main.java:L17-L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day10/a/Main.java#L17-L19): El flujo principal depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<Machine>` en lugar de una implementación deserializadora concreta.
+        *   [Main.java:L17-L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day10/a/Main.java#L17-L19): El flujo principal depende de la factoría genérica `LoaderFactory` y de la interfaz `Deserializer<Machine>` en lugar de una implementación deserializadora concreta.
 *   **Don’t Repeat Yourself (DRY)**:
-    *   *Definición*: Evita la duplicación de código, promoviendo la reutilización mediante funciones o componentes comunes para mejorar la mantenibilidad.
-*   **Law of Demeter (LoD - Ley de Deméter)**:
-    *   *Definición*: Una unidad de software debe conocer solo a sus colaboradores directos, evitando el acceso profundo a objetos y reduciendo así el acoplamiento y facilitando la prueba y mantenimiento del código.
-    *   *Implementación*: `Factory` interactúa directamente con `Machine` sin navegar por sus máscaras o valores de botones internos.
+    *   Evita la duplicación de código, promoviendo la reutilización mediante funciones o componentes comunes para mejorar la mantenibilidad.
+*   **Law of Demeter (LoD - Ley de Deméter)**:`Factory` interactúa directamente con `Machine` sin navegar por sus máscaras o valores de botones internos.
 
 ## Técnicas de diseño aplicadas
 *   **Inmutabilidad del modelo**: Las clases principales del modelo de datos (`Button`, `Factory`, `MachineStatus`) se implementan como **Records** inmutables. El paso a un nuevo estado de máquina no altera el estado anterior, sino que genera una nueva instancia de `MachineStatus` a través de `nextStatus()`.

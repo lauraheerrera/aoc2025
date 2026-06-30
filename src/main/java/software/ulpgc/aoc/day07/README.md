@@ -41,7 +41,7 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
         *  [`SplitterCounter.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/a/model/SplitterCounter.java): Orquesta Parte A.
         *  [`PathCounter.java`](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/b/model/PathCounter.java): Orquesta Parte B.
     *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
-        *   Gracias a la separación de responsabilidades, se pudo agregar la lógica de la Parte B sin modificar el código de la Parte A, simplemente creando nuevas clases que extienden la lógica existente.
+        *   Gracias a la separación de responsabilidades, se pudo agregar la lógica de la Parte B sin modificar el código de la Parte A, simplemente creando nuevas clases que implementan la lógica existente.
     *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
         *   [Manifold.java:L39-L56](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day07/model/Manifold.java#L39-L56): La carga del fichero se delega en la factoría genérica `LoaderFactory`, que devuelve un `TxtLoader<String>` y lee las líneas del fichero. El `Manifold` se construye directamente con la lista de líneas leídas.
     *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:

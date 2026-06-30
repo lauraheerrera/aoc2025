@@ -1,3 +1,4 @@
 package software.ulpgc.aoc.day01.model;
 
-public record Order(int step) { }
+public record Order(int step) {
+}

@@ -4,7 +4,17 @@ import java.util.List;
 import java.util.stream.IntStream;
 import software.ulpgc.aoc.day09.model.Tile;
 
-public record MovieTheater(List<Tile> redTiles) implements software.ulpgc.aoc.day09.model.MovieTheaterInterface {
+public class MovieTheater implements software.ulpgc.aoc.day09.model.MovieTheaterInterface {
+
+    private final List<Tile> redTiles;
+
+    private MovieTheater(List<Tile> redTiles) {
+        this.redTiles = redTiles;
+    }
+
+    public static MovieTheater from(List<Tile> redTiles) {
+        return new MovieTheater(redTiles);
+    }
 
     @Override
     public long maxRectangleArea() {

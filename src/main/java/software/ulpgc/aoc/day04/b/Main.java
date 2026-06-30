@@ -2,7 +2,6 @@ package software.ulpgc.aoc.day04.b;
 
 import software.ulpgc.aoc.common.io.Deserializer;
 import software.ulpgc.aoc.common.io.LoaderFactory;
-import software.ulpgc.aoc.day04.io.DiagramLoader;
 import software.ulpgc.aoc.day04.io.TxtDiagramDeserializer;
 import software.ulpgc.aoc.day04.model.Diagram;
 import software.ulpgc.aoc.day04.model.DiagramAnalyzer;
@@ -16,11 +15,10 @@ public class Main {
         public static void main(String[] args) throws IOException {
                 File file = new File("src/main/resources/day04/input.txt");
                 Deserializer<Tile[]> deserializer = new TxtDiagramDeserializer();
-                DiagramLoader loader = () -> LoaderFactory
+                List<Tile[]> diagramLines = LoaderFactory
                                 .txt(file, deserializer::deserialize)
                                 .load();
-                List<Tile[]> diagramLines = loader.load();
-                DiagramAnalyzer analyzer = new DiagramAnalyzer();
+                DiagramAnalyzer analyzer = DiagramAnalyzer.create();
                 Tile[][] tiles = diagramLines.stream()
                                 .toArray(Tile[][]::new);
                 Diagram diagram = Diagram.create(tiles);

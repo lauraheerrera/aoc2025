@@ -16,7 +16,7 @@ El objetivo final es sumar los voltajes máximos encontrados en todos los bancos
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
 *   **Abstracción**: Se modelan conceptos del dominio mediante objetos de valor semánticos como `Joltage` y `Length` en lugar de usar tipos primitivos básicos, abstrayendo la complejidad de las operaciones y las reglas de validación asociadas.
-*   **Encapsulamiento**: La lógica del algoritmo y las operaciones de manipulación de cadenas se ocultan en métodos privados (`buildMaxNumber`, `selectDigitAndRecurse`, `findMaxIndex`) de `BatteryBankMaxJoltageCalculator`. El exterior solo interactúa con el método público `calculate()`.
+*   **Encapsulamiento**: El proceso de selección de los dígitos óptimos se encapsula en `BatteryBankMaxJoltageCalculator` mediante el tipo interno `Selector`, que mantiene el estado del recorrido y oculta los detalles del algoritmo. Los clientes únicamente interactúan con el método público `calculate()`, sin conocer cómo se realiza la selección de los dígitos.
 *   **Cohesión**: Cada clase tiene una única y clara responsabilidad: `BatteryBank` representa la entidad, `Joltage` y `Length` encapsulan los valores numéricos del dominio con sus reglas, `BatteryBankMaxJoltageCalculator` implementa el algoritmo para un banco individual, y `TotalBatteryJoltageCalculator` realiza la agregación final.
 *   **Bajo acoplamiento**: Las dependencias entre módulos son mínimas y se basan en abstracciones. Las clases del modelo de dominio no tienen dependencia de cómo se leen o deserializan los datos de entrada. El flujo de control (`Main`) utiliza el sistema de cargadores genéricos `LoaderFactory` y deserializadores de E/S, aislando la lógica del problema de la infraestructura.
 *   **Código expresivo**: El código es autoexplicativo, claro y fácil de entender sin necesidad de ser comentado.
@@ -26,22 +26,22 @@ La solución está construida siguiendo los fundamentos de la ingeniería del so
 El proyecto está diseñado siguiendo rigurosamente los principios de diseño y **SOLID**:
 
 *   **Composition Over Inheritance (COI - Composición sobre herencia)**:
-    *   `TotalBatteryJoltageCalculator` se compone de una referencia a `BatteryBankMaxJoltageCalculator` y al objeto de valor `Length`, evitando crear jerarquías de herencia rígidas para evaluar las distintas longitudes de la Parte A y B.
+    *   [TotalBatteryJoltageCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java): reutiliza un `BatteryBankMaxJoltageCalculator` mediante composición, delegando el cálculo del voltaje máximo de cada banco en lugar de extender su comportamiento mediante herencia. Esto favorece la reutilización y mantiene separadas las responsabilidades de cálculo individual y agregación.
 *   **SOLID**:
     *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
         *   [BatteryBank.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/BatteryBank.java): Representa exclusivamente el modelo de datos de una batería individual.
         *   [BatteryBankMaxJoltageCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/BatteryBankMaxJoltageCalculator.java): Encapsula en exclusiva la lógica del algoritmo Greedy para calcular el voltaje máximo de un banco individual.
         *   [TotalBatteryJoltageCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java): Responsable único de realizar la agregación de voltajes máximos de una lista de bancos.
     *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
-        *   [TotalBatteryJoltageCalculator.java:L10-L19](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java#L10-L19): Está parametrizada mediante su constructor usando la abstracción de valor `Length`, permitiendo realizar la Parte A (longitud 2) y Parte B (longitud 12) sin modificar su código interno.
+        *   El modelo del banco y del voltaje sigue siendo el mismo aunque cambie la longitud de selección o la estrategia de cálculo. La variación del problema se introduce mediante nuevas instancias de `Length` o nuevos calculadores, sin tener que reescribir la lógica central del acumulador.
     *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
         *   [TxtBatteryBankDeserializer.java:L6](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/io/TxtBatteryBankDeserializer.java#L6): Implementa la interfaz genérica `Deserializer<BatteryBank>`, pudiendo ser utilizada indistintamente por cualquier cargador de ficheros de texto.
     *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:
         *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz minimalista que expone un único método (`deserialize()`).
     *   **Dependency Inversion Principle (DIP - Principio de Inversión de Dependencias)**:
-        *   [TotalBatteryJoltageCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java): Recibe sus dependencias (`BatteryBankMaxJoltageCalculator` y `Length`) desde el constructor (Inyección de Dependencias).
+        *   [TotalBatteryJoltageCalculator.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day03/model/TotalBatteryJoltageCalculator.java): no crea las dependencias que necesita, sino que las recibe desde el exterior. Esta decisión desacopla el proceso de agregación de la construcción de los componentes utilizados y facilita su reutilización y prueba.
 *   **Don’t Repeat Yourself (DRY)**:
-    *   El acumulador `TotalBatteryJoltageCalculator` interactúa de forma directa con `BatteryBankMaxJoltageCalculator` y `Length`, sin requerir inspecciones profundas de la cadena de dígitos del banco de baterías.
+    *   El algoritmo para calcular el voltaje máximo de un banco se implementa una única vez en `BatteryBankMaxJoltageCalculator` y es reutilizado por `TotalBatteryJoltageCalculator` para todos los bancos, evitando duplicar la lógica entre las distintas partes del problema.
 
 ## Técnicas de diseño aplicadas
 

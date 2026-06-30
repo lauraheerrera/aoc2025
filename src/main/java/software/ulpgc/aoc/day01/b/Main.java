@@ -22,7 +22,11 @@ public class Main {
                 .load();
 
         Dial dial = Dial.create();
-        DialStatus status = DialStatus.initial(dial).execute(orders);
+        DialStatus status = orders.stream()
+                .reduce(
+                        DialStatus.initial(dial),
+                        DialStatus::execute,
+                        (a, b) -> b);
 
         DialCalculator calculator = DialCalculator.of(status);
 

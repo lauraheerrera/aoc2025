@@ -18,10 +18,10 @@ public class DialStatus {
         return new DialStatus(dial, List.of());
     }
 
-    public DialStatus execute(List<Order> newOrders) {
-        List<Order> combined = new ArrayList<>(orders);
-        combined.addAll(newOrders);
-        return new DialStatus(dial, combined);
+    public DialStatus execute(Order order) {
+        List<Order> updated = new ArrayList<>(orders);
+        updated.add(order);
+        return new DialStatus(dial, updated);
     }
 
     public int size() {

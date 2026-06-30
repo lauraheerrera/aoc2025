@@ -17,7 +17,7 @@ public class Main {
         List<Tile> tiles = LoaderFactory
                 .txt(file, deserializer::deserialize)
                 .load();
-        MovieTheater theater = new MovieTheater(tiles);
+        MovieTheater theater = MovieTheater.from(tiles);
         System.out.println("Area máxima: " + theater.maxRectangleArea());
     }
 }

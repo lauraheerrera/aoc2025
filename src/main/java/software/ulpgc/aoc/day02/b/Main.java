@@ -26,7 +26,6 @@ public class Main {
                 .map(deserializer::deserialize)
                 .toList();
 
-        GiftShop<Id> giftShop = new GiftShop<>(ranges);
-        System.out.println("Suma IDs invalidos: " + giftShop.sumAllInvalidIds());
+        System.out.println("Suma IDs invalidos: " + GiftShop.of(ranges).sumAllInvalidIds());
     }
 }

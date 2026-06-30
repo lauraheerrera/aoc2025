@@ -85,30 +85,17 @@ La arquitectura global se cimienta sobre pilares fundamentales:
     * *Implementación*: La creación y provisión de dependencias se desacopla de su uso, pasándolas dinámicamente a través de constructores (por ejemplo, inyectando la factoría de IDs o cargadores en tiempo de ejecución).
 *   **Genéricos**: La infraestructura de entrada/salida está parametrizada con tipos genéricos para promover la reutilización de código libre de castings manuales.
 *   **Good Naming**: Se priorizan nombres de clases y métodos autoexplicativos que actúan como documentación viva del código.
-*   **Inversión de Control (IoC)**: Habitualmente, el código de negocio (`Main`) dirige el flujo controlando el bucle de lectura de un archivo línea a línea. Aquí se ha invertido ese control: el `Main` no tiene bucles, sino que delega la orquestación a una clase de infraestructura genérica (`Loader`).
-El `Loader` asume el control del bucle de lectura y aplica el Principio de Hollywood (*"No nos llames, nosotros te llamamos"*), ejecutando la función lambda inyectada por el `Main` única y exclusivamente cuando necesita transformar una línea de texto en un objeto del dominio.
-
+*   **Inversión de Control (IoC)**: Habitualmente, el `Main` controla el flujo de lectura de un archivo, iterando línea a línea y aplicando la lógica de transformación. En este diseño, se invierte ese control: el `Main` deja de orquestar el procesamiento y delega esa responsabilidad a un componente reutilizable (`TxtLoader`).
+El `TxtLoader` asume el control del flujo de lectura del fichero, aplicando el Principio de Hollywood (“No nos llames, nosotros te llamamos”), y ejecuta la función `String -> T` inyectada desde el `Main` cada vez que necesita transformar una línea de texto en un objeto del dominio.
 ### Patrones de diseño
 
 *   **Patrón Factory**:
-    *   *Definición*: Patrón de diseño creacional que proporciona una interfaz para la creación de objetos en una clase base, pero permite a las subclases alterar el tipo de objetos que se crearán. En implementaciones modernas orientadas a objetos, se manifiesta frequentemente en la creación de objetos a través de métodos estáticos de utilidad o factorías de clase.
+    * *Definición*: Patrón de diseño creacional que proporciona una interfaz para la creación de objetos en una clase base, pero permite a las subclases alterar el tipo de objetos que se crearán. En implementaciones modernas orientadas a objetos, se manifiesta frequentemente en la creación de objetos a través de métodos estáticos de utilidad o factorías de clase.
     *   *Implementación*: La clase [LoaderFactory.java](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/LoaderFactory.java) encapsula la creación de cargadores. En lugar de que el código cliente tenga que instanciar directamente `TxtLoader` con sus parámetros internos (como rutas de archivo o funciones de parsing), simplemente consulta a `LoaderFactory` con un identificador o tipo, recibiendo a cambio el objeto `Loader` listo para ser utilizado. Esto simplifica la creación y promueve un menor acoplamiento, ya que el cliente no necesita conocer los detalles de implementación de los cargadores.
 *   **Patrón Strategy**:
     *   *Definición*: Patrón de diseño comportamental que permite definir una familia de algoritmos, encapsularlos en clases independientes e intercambiables, e utilizarlos de forma dinámica en tiempo de ejecución sin que el código cliente dependa de sus implementaciones concretas.
     *   *Implementación*: Se implementa mediante la abstracción `Deserializer<T>` y, especialmente, a través de la inyección de
 implementaciones concretas o expresiones lambda (`Function<String, T>`) que encapsulan distintas estrategias de transformación de texto.
-
-### Patrones y técnicas no aplicadas
-
-Siguiendo los principios **YAGNI** (You Aren't Gonna Need It) y **KISS** (Keep It Simple, Stupid), se descartó intencionadamente el uso de ciertos patrones y técnicas comunes para evitar sobreingeniería y complejidad innecesaria en las soluciones:
-
-*   **Patrón Singleton**: Al ser un proyecto de resolución de algoritmos por lotes, no existe estado mutable global compartido ni servicios compartidos de red o base de datos. Toda la lógica se maneja de forma funcional o instanciando modelos inmutables, evitando el acoplamiento global innecesario y efectos secundarios.
-*   **Patrón Builder**: Los modelos de datos y records de cada día (`JunctionBox`, `Point`, `Dial`, `Machine`) son sencillos y tienen pocos atributos. Sus constructores estándar o métodos factoría son suficientes, evitando la verbosidad y el código repetitivo que introduce un Builder.
-*   **Patrones Observer / Listener**: Las soluciones se ejecutan de manera secuencial y por lotes (procesando ficheros de entrada a salida estándar). Al carecer de interfaces de usuario (GUI) u operaciones reactivas orientadas a eventos en tiempo real, no se requiere la complejidad de suscripciones.
-*   **Patrón Adapter**: Debido a que todo el sistema y sus modelos se construyeron de forma nativa desde cero bajo nuestro propio diseño e interfaces comunes, no fue necesario integrar librerías externas o APIs incompatibles que requirieran adaptadores.
-*   **Patrón Decorador**: Las variaciones de comportamiento para la segunda parte de cada día se resolvieron mediante parametrización o implementando las interfaces base directamente (como en el Día 2). No se requirió añadir responsabilidades dinámicas envolviendo objetos en tiempo de ejecución.
-*   **Patrón Null Object**: Las referencias nulas o comportamientos vacíos se controlan a través del uso de colecciones vacías (`List.of()`), lo que hace innecesario definir objetos nulos artificiales del dominio.
----
 
 ## Arquitectura de Entrada/Salida (I/O)
 

@@ -18,7 +18,8 @@ classDiagram
         <<record>>
     }
     DiagramAnalyzer --> Diagram
-Diagram --> Coordinate
+Diagram ..> Coordinate
+DiagramAnalyzer ..> RollsCount
 Diagram --> Tile
 
 ```

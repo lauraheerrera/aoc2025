@@ -1,0 +1,20 @@
+%%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
+%%{init: { 'themeVariables': { 'lineColor': '#FFFFFF' } } }%%
+classDiagram
+    direction TB
+
+    class Manifold
+    class Row
+    class Column <<record>>
+    class Tile <<enumeration>>
+    class State <<record>>
+
+    class SplitterCounter
+
+    Manifold --> Row
+    Row --> Tile
+    Row ..> Column
+
+    SplitterCounter --> Manifold
+    SplitterCounter ..> State 
+    State --> Column

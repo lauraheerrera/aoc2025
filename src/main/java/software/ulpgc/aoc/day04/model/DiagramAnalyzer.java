@@ -35,6 +35,6 @@ public class DiagramAnalyzer {
     private boolean isAccessible(Diagram diagram, Coordinate coordinate) {
         return diagram.isInBounds(coordinate)
                 && diagram.get(coordinate) == Tile.ROLL
-                && diagram.countAdjacent(coordinate, Tile.ROLL) < MAX_ADJACENT;
+                && diagram.countAdjacentsRoll(coordinate) < MAX_ADJACENT;
     }
 }

@@ -72,11 +72,11 @@ public class Diagram {
         return new Diagram(cloned);
     }
 
-    public int countAdjacent(Coordinate coordinate, Tile target) {
+    public int countAdjacentsRoll(Coordinate coordinate) {
         return (int) Arrays.stream(Direction.values())
                 .filter(dir -> {
                     Coordinate neighbor = coordinate.offset(dir.rowOffset, dir.colOffset);
-                    return isInBounds(neighbor) && get(neighbor) == target;
+                    return isInBounds(neighbor) && get(neighbor) == Tile.ROLL;
                 })
                 .count();
     }

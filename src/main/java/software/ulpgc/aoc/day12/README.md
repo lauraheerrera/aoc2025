@@ -3,7 +3,7 @@
 ## Descripción
 
 El desafío consiste en validar si un conjunto de regalos navideños con formas irregulares bidimensionales (polyominoes) caben en diferentes regiones rectangulares debajo de árboles de Navidad, sin solaparse.
-1.  **Parte 1 / Parte 2**: Calcular cuántas de las regiones especificadas pueden acomodar con éxito las cantidades de regalos solicitadas de cada forma. Dado que la entrada física del problema permite un atajo heurístico garantizado por sus límites, basta con verificar si el área acumulada de los regalos requeridos es menor o igual al área rectangular de la región del árbol.
+1.  **Parte 1**: Calcular cuántas de las regiones especificadas pueden acomodar con éxito las cantidades de regalos solicitadas de cada forma. Dado que la entrada física del problema permite un atajo heurístico garantizado por sus límites, basta con verificar si el área acumulada de los regalos requeridos es menor o igual al área rectangular de la región del árbol.
 
 ## Diagramas UML
 
@@ -14,12 +14,15 @@ Modelo
 
 La solución está construida siguiendo los fundamentos de la ingeniería del software:
 
-*   **Abstracción**: Se modela el problema mediante conceptos de alto nivel: `Shape` (abstrae una figura física y su área), `Region` (abstrae un sector bidimensional del terreno y las cantidades de elementos presentes) y `Farm` (que abstrae todo el conjunto de terrenos a evaluar).
-*   **Encapsulamiento**: La lógica matemática que determina si una lista de figuras cabe o no dentro de una zona específica (`fits(shapes)`) está encapsulada dentro del record `Region`. Ninguna clase externa conoce cómo se calcula el área requerida o el cruce con las cantidades de elementos.
-*   **Cohesión**: Cada componente tiene un único rol definido: `Shape` únicamente expone el área de las figuras, `Region` representa los límites y el contenido local del terreno, y `Farm` actúa exclusivamente como el agregador encargado de filtrar y contabilizar las regiones válidas.
-*   **Bajo acoplamiento**: Las clases del modelo geométrico (`Shape`, `Region`, `Farm`) están totalmente desacopladas de la infraestructura de carga de archivos e interpretación de texto de entrada.
-*   **Código expresivo**: El cálculo acumulado del área necesaria en `Region` se realiza declarativamente usando la API funcional de Java (`IntStream.range().map().sum()`), lo que permite que el algoritmo sea directo, legible y libre de variables mutables temporales.
-*   **Inmutabilidad del modelo**: `Shape`, `Region` y `Farm` son **Records** inmutables. La consulta de disponibilidad y las operaciones matemáticas devuelven valores inmutables sin realizar modificaciones de estado colaterales.
+* **Abstracción**: El problema se modela mediante los conceptos de `Shape` (figuras geométricas), `Region` (espacio rectangular con restricciones de capacidad) y `Farm` (agregador de regiones a evaluar).
+* **Encapsulamiento**: La lógica de decisión sobre si un conjunto de formas cabe en una región no reside en `Region`, sino en una abstracción independiente `RegionFitter`, que encapsula los distintos algoritmos de resolución (greedy o backtracking).
+* **Cohesión**: Cada componente tiene una responsabilidad clara:
+    - `Shape`: representación geométrica e invariantes de la figura.
+    - `Region`: modelo de espacio disponible y requerimientos.
+    - `Farm`: agregación y conteo de regiones.
+    - `RegionFitter`: estrategia de resolución del problema de encaje.
+* **Bajo acoplamiento**: El modelo de dominio (`Shape`, `Region`, `Farm`) no depende de la implementación concreta del algoritmo de ajuste, sino de la abstracción `RegionFitter`.
+* **Código expresivo**: Las operaciones de expansión de figuras y cálculo de áreas se realizan mediante Streams de Java, favoreciendo expresividad y reducción de estado mutable.
 
 ## Principios de diseño
 
@@ -28,17 +31,20 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
 *   **Composition Over Inheritance (COI - Composición sobre herencia)**: `Farm` se compone de una colección de `Region`, evitando herencias o acoplamientos rígidos entre granjas y sus sectores.
 *   **SOLID**:
     *   **Single Responsibility Principle (SRP - Principio de Responsabilidad Única)**:
-        *   [Shape.java:L3](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day12/model/Shape.java#L3): Define exclusivamente las propiedades de una figura de regalo individual.
-        *   [Region.java:L6-L18](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day12/model/Region.java#L6-L18): Su responsabilidad es modelar una región de árbol y determinar individualmente si caben los regalos.
-        *   [Farm.java:L5-L11](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day12/model/Farm.java#L5-L11): Encapsula de forma única el recuento global de regiones válidas en la granja.
+        *   **Shape**: representa una figura geométrica inmutable.
+        *   **Region**: modela el espacio disponible y las restricciones de demanda.
+        *   **Farm**: orquesta el conteo de regiones válidas.
+        *   **RegionFitter**: encapsula el algoritmo de resolución del problema de encaje.
+        *   **GreedyRegionFitter**: implementaciones concretas del algoritmo.
     *   **Open/Closed Principle (OCP - Principio de Abierto/Cerrado)**:
-        *   El modelo de dominio formado por `Shape`, `Region` y `Farm` define una estructura basada en la representación de áreas y regiones. La lógica de decisión (`fits`) está encapsulada dentro de `Region`, mientras que `Farm` únicamente orquesta la agregación de resultados sin conocer los detalles de cálculo. Esto permite que nuevas formas de calcular el ajuste o nuevas restricciones geométricas puedan incorporarse extendiendo el modelo mediante variaciones del cálculo, sin modificar las clases existentes del dominio.
+        *   El modelo de dominio formado por `Shape`, `Region` y `Farm` define una estructura basada en la representación de áreas y regiones. La lógica de decisión (`canFit`) está encapsulada dentro de `RegionFitter`, mientras que `Farm` únicamente orquesta la agregación de resultados sin conocer los detalles de cálculo. Esto permite que nuevas formas de calcular el ajuste puedan incorporarse con nuevas implementaciones, sin modificar las clases existentes del dominio.
     *   **Liskov Substitution Principle (LSP - Principio de Sustitución de Liskov)**:
         *   [TxtShapeDeserializer.java:L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day12/io/TxtShapeDeserializer.java#L5) y [TxtRegionDeserializer.java:L8](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/day12/io/TxtRegionDeserializer.java#L8): Son perfectamente sustituibles bajo la firma abstracta de `Deserializer<T>`.
     *   **Interface Segregation Principle (ISP - Principio de Segregación de Interfaces)**:
         *   [Deserializer.java:L3-L5](https://github.com/lauraheerrera/aoc2025/blob/master/src/main/java/software/ulpgc/aoc/common/io/Deserializer.java#L3-L5): Interfaz genérica minimalista que expone un único método (`deserialize()`). Los deserializadores del Día 12 solo implementan este método específico.
     *   **Dependency Inversion Principle (DIP - Principio de Inversión de Dependencias)**:
         *   La carga de datos en el Main no depende de deserializadores acoplados físicamente, sino de la interfaz abstracta `Deserializer<T>` inyectada en el método `load()`.
+        Asimismo, `Farm` depende de la abstracción `RegionFitter`, no de implementaciones concretas. Esto permite sustituir algoritmos sin modificar la lógica de agregación.
 *   **Law of Demeter (LoD - Ley de Deméter)**:
     *   `Farm` interactúa directamente con `Region` para consultar si encaja la forma, sin examinar las dimensiones o límites específicos de la misma.
 
@@ -56,6 +62,8 @@ El proyecto está diseñado siguiendo rigurosamente los principios de diseño y 
     *   **Factory Method**: Uso de métodos de creación estáticos como `Farm.of()` para construir granjas con un número de regiones.
 *   **Patrones funcionales**:
     *   **Closure**: Empleado a través de lambdas y referencias a métodos como en `countRegionsThatFit()`.
+*   **Patrones estratégicos**:
+    *   **Strategy**: `Farm` utiliza una `RegionFitter` inyectada (Strategy Pattern) para decidir cómo evaluar las regiones. Esto desacopla la lógica de agregación (`Farm`) del algoritmo de encaje (`RegionFitter`), permitiendo intercambiar estrategias (greedy, backtracking, etc.) sin modificar el cliente.
 
 ---
 

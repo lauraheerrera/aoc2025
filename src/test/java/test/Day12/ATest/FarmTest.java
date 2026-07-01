@@ -13,7 +13,7 @@ public class FarmTest {
         return new Shape(points);
     }
 
-    RegionFitter fitter = RegionFitter.create();
+    RegionFitter fitter = new GreedyRegionFitter();
 
     @Test
     public void empty_farm_returns_zero() {

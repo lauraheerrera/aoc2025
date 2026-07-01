@@ -5,6 +5,7 @@ import software.ulpgc.aoc.common.io.LoaderFactory;
 import software.ulpgc.aoc.day12.io.TxtRegionDeserializer;
 import software.ulpgc.aoc.day12.io.TxtShapeDeserializer;
 import software.ulpgc.aoc.day12.model.Shape;
+import software.ulpgc.aoc.day12.model.GreedyRegionFitter;
 import software.ulpgc.aoc.day12.model.Farm;
 import software.ulpgc.aoc.day12.model.Region;
 import software.ulpgc.aoc.day12.model.RegionFitter;
@@ -33,7 +34,7 @@ public class Main {
                                 sections.getLast(),
                                 regionDeserializer);
 
-                RegionFitter fitter = RegionFitter.create();
+                RegionFitter fitter = new GreedyRegionFitter();
 
                 long result = new Farm(regions, fitter).count(shapes);
 

@@ -18,10 +18,14 @@ class Point {
 }
 
 class RegionFitter {
+    <<interface>>
 }
+
+class BackTrackingRegionFitter{}
 
 Farm --> Region
 Farm --> RegionFitter
+BackTrackingRegionFitter ..|> RegionFitter
 Shape --> Point
 RegionFitter ..> Shape
 RegionFitter ..> Region

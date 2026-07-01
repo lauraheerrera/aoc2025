@@ -19,8 +19,7 @@ public class Main {
                                 .txt(file, deserializer::deserialize)
                                 .load();
                 DiagramAnalyzer analyzer = DiagramAnalyzer.create();
-                Tile[][] tiles = diagramLines.stream()
-                                .toArray(Tile[][]::new);
+                Tile[][] tiles = diagramLines.toArray(Tile[][]::new);
                 Diagram diagram = Diagram.create(tiles);
 
                 System.out.println("Número de rollos a los que se pueden acceder: " +

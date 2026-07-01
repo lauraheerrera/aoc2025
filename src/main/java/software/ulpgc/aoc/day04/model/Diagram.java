@@ -7,8 +7,8 @@ import java.util.stream.IntStream;
 
 public class Diagram {
     private final Tile[][] grid;
-    private final int rows;
-    private final int cols;
+    private final int numRows;
+    private final int numColumns;
 
     public enum Direction {
         NORTH_WEST(-1, -1), NORTH(-1, 0), NORTH_EAST(-1, 1),
@@ -26,8 +26,8 @@ public class Diagram {
 
     private Diagram(Tile[][] grid) {
         this.grid = grid;
-        this.rows = grid.length;
-        this.cols = grid.length > 0 ? grid[0].length : 0;
+        this.numRows = grid.length;
+        this.numColumns = grid.length > 0 ? grid[0].length : 0;
     }
 
     public static Diagram create(Tile[][] tiles) {
@@ -44,24 +44,24 @@ public class Diagram {
 
     public boolean isInBounds(Coordinate coordinate) {
         return coordinate.row() >= 0
-                && coordinate.row() < rows
+                && coordinate.row() < numRows
                 && coordinate.col() >= 0
-                && coordinate.col() < cols;
+                && coordinate.col() < numColumns;
     }
 
     public List<Coordinate> coordinates() {
-        return IntStream.range(0, rows)
+        return IntStream.range(0, numRows)
                 .boxed()
-                .flatMap(r -> IntStream.range(0, cols).mapToObj(c -> new Coordinate(r, c)))
+                .flatMap(r -> IntStream.range(0, numColumns).mapToObj(c -> new Coordinate(r, c)))
                 .toList();
     }
 
     public int rows() {
-        return rows;
+        return numRows;
     }
 
     public int cols() {
-        return cols;
+        return numColumns;
     }
 
     public Diagram withClearedCoordinates(List<Coordinate> coordinates) {

@@ -19,29 +19,39 @@ public class MathWorksheetTest {
             *   +   *   +
             """;
 
-    private final Deserializer<Operation> deserializer = new ColumnR2LOperationDeserializer();
+    private final Deserializer<Operation> deserializer =
+            new ColumnR2LOperationDeserializer();
 
     private List<Operation> toProblems(String input) {
+
+        // Given raw worksheet input
         List<String> lines = input.lines().toList();
+
+        // When splitting into logical blocks
         List<String> blocks = WorksheetSplitter.splitIntoBlocks(lines);
 
+        // And deserializing each block into an operation
         return blocks.stream()
                 .map(deserializer::deserialize)
                 .toList();
     }
 
     @Test
-    public void solve_example_problems() {
+    public void should_solve_full_worksheet_example() {
 
+        // Given a full worksheet with multiple operations
         List<Operation> problems = toProblems(input);
 
+        // Then all operations should be parsed correctly
         assertThat(problems).hasSize(4);
 
+        // And each operation should produce correct results
         assertThat(problems.get(0).solve()).isEqualTo(8544L);
         assertThat(problems.get(1).solve()).isEqualTo(625L);
         assertThat(problems.get(2).solve()).isEqualTo(3253600L);
         assertThat(problems.get(3).solve()).isEqualTo(1058L);
 
+        // And total aggregation should be correct
         long total = problems.stream()
                 .mapToLong(Operation::solve)
                 .sum();
@@ -50,24 +60,34 @@ public class MathWorksheetTest {
     }
 
     @Test
-    public void solve_simple_addition() {
+    public void should_solve_simple_addition_operation() {
+
+        // Given a simple addition worksheet block
         String customInput = """
                 12
                 00
                 +
                 """;
+
         List<Operation> ops = toProblems(customInput);
-        assertThat(ops.get(0).solve()).isEqualTo(30L);
+
+        // Then result should match expected sum
+        assertThat(ops.getFirst().solve()).isEqualTo(30L);
     }
 
     @Test
-    public void solve_simple_multiplication() {
+    public void should_solve_simple_multiplication_operation() {
+
+        // Given a simple multiplication worksheet block
         String customInput = """
                 12
                 00
                 *
                 """;
+
         List<Operation> ops = toProblems(customInput);
-        assertThat(ops.get(0).solve()).isEqualTo(200L);
+
+        // Then result should match expected product
+        assertThat(ops.getFirst().solve()).isEqualTo(200L);
     }
 }

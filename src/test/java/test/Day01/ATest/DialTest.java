@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DialTest {
+
     private static final String orders = """
             L68
             L30
@@ -48,65 +49,109 @@ public class DialTest {
     }
 
     @Test
-    public void initial_position_should_be_50_using_create() {
-        Dial dial = Dial.create();
-        assertThat(DialStatus.initial(dial).position()).isEqualTo(50);
-    }
+    public void should_start_at_position_50() {
 
-    @Test
-    public void given_orders_should_account_the_final_position() {
+        // Given a new dial
         Dial dial = Dial.create();
 
-        assertThat(execute(dial, "L1").position()).isEqualTo(49);
-        assertThat(execute(dial, "L1", "R1", "R50").position()).isEqualTo(0);
-        assertThat(execute(dial, "L68").position()).isEqualTo(82);
-        assertThat(execute(dial, "R68", "L68").position()).isEqualTo(50);
-        assertThat(execute(dial, "L51", "L500").position()).isEqualTo(99);
-        assertThat(execute(dial, orders.split("\n")).position()).isEqualTo(32);
-    }
+        // When creating the initial dial status
+        DialStatus status = DialStatus.initial(dial);
 
-    @Test
-    public void given_orders_should_account_the_times_that_position_is_zero() {
-        Dial dial = Dial.create();
-        assertThat(
-                DialCalculator.of(execute(dial, orders.split("\n"))).countEndingInZero())
-                .isEqualTo(3);
-        assertThat(DialCalculator.of(execute(dial, "L1")).countEndingInZero())
-                .isEqualTo(0);
-        assertThat(DialCalculator.of(execute(dial, "L1", "R1", "R50")).countEndingInZero())
-                .isEqualTo(1);
-        assertThat(DialCalculator.of(execute(dial, "L51", "L500")).countEndingInZero())
-                .isEqualTo(0);
-    }
-
-    @Test
-    public void given_empty_orders_should_remain_at_50_and_count_zero_zeros() {
-        Dial dial = Dial.create();
-        DialStatus status = execute(dial);
+        // Then the starting position should be 50
         assertThat(status.position()).isEqualTo(50);
+    }
+
+    @Test
+    public void should_update_position_correctly_after_orders() {
+
+        // Given a dial
+        Dial dial = Dial.create();
+
+        // When executing different sequences of orders
+        DialStatus s1 = execute(dial, "L1");
+        DialStatus s2 = execute(dial, "L1", "R1", "R50");
+        DialStatus s3 = execute(dial, "L68");
+        DialStatus s4 = execute(dial, "R68", "L68");
+        DialStatus s5 = execute(dial, "L51", "L500");
+        DialStatus s6 = execute(dial, orders.split("\n"));
+
+        // Then the final positions should match expected values
+        assertThat(s1.position()).isEqualTo(49);
+        assertThat(s2.position()).isEqualTo(0);
+        assertThat(s3.position()).isEqualTo(82);
+        assertThat(s4.position()).isEqualTo(50);
+        assertThat(s5.position()).isEqualTo(99);
+        assertThat(s6.position()).isEqualTo(32);
+    }
+
+    @Test
+    public void should_count_times_position_ends_in_zero() {
+
+        // Given a dial
+        Dial dial = Dial.create();
+
+        // When calculating dial statistics
+        DialCalculator calc1 = DialCalculator.of(execute(dial, orders.split("\n")));
+        DialCalculator calc2 = DialCalculator.of(execute(dial, "L1"));
+        DialCalculator calc3 = DialCalculator.of(execute(dial, "L1", "R1", "R50"));
+        DialCalculator calc4 = DialCalculator.of(execute(dial, "L51", "L500"));
+
+        // Then the number of zero-ending positions should match expectations
+        assertThat(calc1.countEndingInZero()).isEqualTo(3);
+        assertThat(calc2.countEndingInZero()).isEqualTo(0);
+        assertThat(calc3.countEndingInZero()).isEqualTo(1);
+        assertThat(calc4.countEndingInZero()).isEqualTo(0);
+    }
+
+    @Test
+    public void should_remain_at_50_when_no_orders() {
+
+        // Given a dial with no orders
+        Dial dial = Dial.create();
+
+        // When executing empty input
+        DialStatus status = execute(dial);
+
+        // Then position should remain initial
+        assertThat(status.position()).isEqualTo(50);
+
+        // And zero counter should be 0
         assertThat(DialCalculator.of(status).countEndingInZero()).isEqualTo(0);
     }
 
     @Test
-    public void given_exact_rotations_should_work_on_boundaries() {
-        Dial dial = Dial.create();
-        DialStatus dialToZero = execute(dial, "L50");
-        assertThat(dialToZero.position()).isEqualTo(0);
-        assertThat(DialCalculator.of(dialToZero).countEndingInZero()).isEqualTo(1);
+    public void should_handle_boundary_rotations_correctly() {
 
-        DialStatus dialWrapToZero = execute(dial, "L150");
-        assertThat(dialWrapToZero.position()).isEqualTo(0);
-        assertThat(DialCalculator.of(dialWrapToZero).countEndingInZero()).isEqualTo(1);
+        // Given a dial
+
+        Dial dial = Dial.create();
+
+        // When rotating exactly to boundaries
+        DialStatus zero1 = execute(dial, "L50");
+        DialStatus zero2 = execute(dial, "L150");
+
+        // Then position should wrap correctly
+        assertThat(zero1.position()).isEqualTo(0);
+        assertThat(zero2.position()).isEqualTo(0);
+
+        // And each should count as ending in zero
+        assertThat(DialCalculator.of(zero1).countEndingInZero()).isEqualTo(1);
+        assertThat(DialCalculator.of(zero2).countEndingInZero()).isEqualTo(1);
     }
 
     @Test
-    public void given_exact_full_turnaround_should_return_to_50() {
+    public void should_return_to_50_after_full_rotation() {
+
+        // Given a dial
+
         Dial dial = Dial.create();
-        DialStatus dialFullRight = execute(dial, "R100");
-        assertThat(dialFullRight.position()).isEqualTo(50);
 
-        DialStatus dialFullLeft = execute(dial, "L100");
-        assertThat(dialFullLeft.position()).isEqualTo(50);
+        // When rotating full cycles
+        DialStatus right = execute(dial, "R100");
+        DialStatus left = execute(dial, "L100");
+
+        // Then both should return to initial position
+        assertThat(right.position()).isEqualTo(50);
+        assertThat(left.position()).isEqualTo(50);
     }
-
 }

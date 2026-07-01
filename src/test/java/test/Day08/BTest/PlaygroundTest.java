@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PlaygroundTest {
+
     private static final String example = """
             162,817,812
             57,618,57
@@ -38,15 +39,24 @@ public class PlaygroundTest {
             """;
 
     @Test
-    public void solve_example() {
+    public void should_compute_last_connection_coordinates_product() {
+
+        // Given a set of junction boxes
         TxtJunctionBoxDeserializer deserializer = new TxtJunctionBoxDeserializer();
+
         List<JunctionBox> boxes = Arrays.stream(example.split("\n"))
                 .map(deserializer::deserialize)
                 .collect(Collectors.toList());
 
+        // When generating connections
         List<Connection> connections = ConnectionGenerator.from(boxes);
+
+        // And building the playground graph
         Playground playground = Playground.from(connections);
+
         long result = playground.lastConnectionCoordinatesProduct();
+
+        // Then the final metric should match expected value
         assertThat(result).isEqualTo(25272L);
     }
 }

@@ -22,25 +22,46 @@ public class BatteryTest {
 
     @Test
     public void battery_bank_max_joltage_should_be_correctly() {
+        // Given a window length of 12 digits
         Length length = new Length(12);
-        assertThat(bank(length, "987654321111111")).isEqualTo(new Joltage(987654321111L));
-        assertThat(bank(length, "811111111111119")).isEqualTo(new Joltage(811111111119L));
-        assertThat(bank(length, "234234234234278")).isEqualTo(new Joltage(434234234278L));
-        assertThat(bank(length, "818181911112111")).isEqualTo(new Joltage(888911112111L));
+
+        // When computing max joltage from each battery bank
+        // Then the extracted maximum 12-digit segment should match expected values
+        assertThat(bank(length, "987654321111111"))
+                .isEqualTo(new Joltage(987654321111L));
+
+        assertThat(bank(length, "811111111111119"))
+                .isEqualTo(new Joltage(811111111119L));
+
+        assertThat(bank(length, "234234234234278"))
+                .isEqualTo(new Joltage(434234234278L));
+
+        assertThat(bank(length, "818181911112111"))
+                .isEqualTo(new Joltage(888911112111L));
     }
 
     private Joltage bank(Length length, String digits) {
-        return BatteryBankMaxJoltageCalculator.of(length).calculate(BatteryBank.create(digits));
+        return BatteryBankMaxJoltageCalculator.of(length)
+                .calculate(BatteryBank.create(digits));
     }
 
     @Test
     public void calculator_sum_all_returns_correctly_sum() {
+        // Given a max-joltage calculator with window size 12
         Length length = new Length(12);
-        TotalBatteryJoltageCalculator totalCalculator = new TotalBatteryJoltageCalculator(
-                BatteryBankMaxJoltageCalculator.of(length));
+        TotalBatteryJoltageCalculator totalCalculator =
+                new TotalBatteryJoltageCalculator(
+                        BatteryBankMaxJoltageCalculator.of(length));
+
+        // When summing one battery bank
+        // Then the result equals its max joltage
         assertThat(totalCalculator.sumAllMaxJoltageFrom(parse("987654321111111")))
                 .isEqualTo(new Joltage(987654321111L));
-        assertThat(totalCalculator.sumAllMaxJoltageFrom(parseMultiline(banks))).isEqualTo(new Joltage(3121910778619L));
+
+        // When summing multiple battery banks
+        // Then the total equals the sum of each individual max joltage
+        assertThat(totalCalculator.sumAllMaxJoltageFrom(parseMultiline(banks)))
+                .isEqualTo(new Joltage(3121910778619L));
     }
 
     private List<BatteryBank> parse(String... batteryBanks) {

@@ -11,6 +11,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class NetworkTest {
+
     private static final String EXAMPLE = """
             aaa: you hhh
             you: bbb ccc
@@ -26,12 +27,26 @@ public class NetworkTest {
 
     @Test
     public void should_calculate_example_paths_correctly() {
+
+        // Given a textual definition of a network
+        String input = EXAMPLE;
+
+        // And a deserializer that converts text into domain devices
         TxtDeviceDeserializer deserializer = new TxtDeviceDeserializer();
-        List<Device> devices = Arrays.stream(EXAMPLE.split("\n"))
-                .filter(s -> !s.isBlank())
+
+        // And a list of devices built from the input
+        List<Device> devices = Arrays.stream(input.split("\n"))
+                .filter(line -> !line.isBlank())
                 .map(deserializer::deserialize)
                 .toList();
 
-        assertThat(Network.from(devices).countPaths("you", "out")).isEqualTo(5L);
+        // And a network built from those devices
+        Network network = Network.from(devices);
+
+        // When calculating the number of paths from "you" to "out"
+        long result = network.countPaths("you", "out");
+
+        // Then the number of paths should match the expected value
+        assertThat(result).isEqualTo(5L);
     }
 }

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DialTest {
+
     private static final String orders = """
             L68
             L30
@@ -48,55 +49,95 @@ public class DialTest {
     }
 
     @Test
-    public void initial_position_should_be_50_using_create() {
+    public void should_start_at_position_50() {
+
+        // Given a new dial
         Dial dial = Dial.create();
-        assertThat(DialStatus.initial(dial).position()).isEqualTo(50);
+
+        // When initializing the dial
+        DialStatus status = DialStatus.initial(dial);
+
+        // Then position should be 50
+        assertThat(status.position()).isEqualTo(50);
     }
 
     @Test
-    public void given_orders_should_account_the_times_that_position_is_zero() {
+    public void should_count_zero_crossings_and_ending_conditions() {
+
+        // Given a dial
         Dial dial = Dial.create();
-        assertThat(
-                DialCalculator.of(execute(dial, orders.split("\n"))).countEndingInZero())
+
+        // When executing a full set of orders
+        DialStatus full = execute(dial, orders.split("\n"));
+
+        // Then ending-in-zero count should match expected value
+        assertThat(DialCalculator.of(full).countEndingInZero())
                 .isEqualTo(3);
+
+        // And crossing-zero count should match expected value
         assertThat(DialCalculator.of(execute(dial, "R1000")).countCrossingZero())
                 .isEqualTo(10);
-        assertThat(DialCalculator.of(execute(dial, "L68", "L30", "R48", "L5")).countCrossingZero()).isEqualTo(2);
-        assertThat(
-                DialCalculator.of(execute(dial, orders.split("\n"))).countCrossingZero())
+
+        assertThat(DialCalculator.of(execute(dial, "L68", "L30", "R48", "L5")).countCrossingZero())
+                .isEqualTo(2);
+
+        assertThat(DialCalculator.of(full).countCrossingZero())
                 .isEqualTo(6);
     }
 
     @Test
-    public void given_empty_orders_should_remain_at_50_and_count_zero_total_zeros() {
+    public void should_remain_stable_with_no_orders() {
+
+        // Given a dial with no operations
         Dial dial = Dial.create();
-        DialStatus dialStatus = execute(dial);
-        assertThat(dialStatus.position()).isEqualTo(50);
-        assertThat(DialCalculator.of(dialStatus).countCrossingZero()).isEqualTo(0);
+
+        // When executing empty input
+        DialStatus status = execute(dial);
+
+        // Then position should remain initial
+        assertThat(status.position()).isEqualTo(50);
+
+        // And no zero crossings should be recorded
+        assertThat(DialCalculator.of(status).countCrossingZero()).isEqualTo(0);
     }
 
     @Test
-    public void given_exact_rotations_should_work_on_boundaries_crossing_zero() {
-        Dial dial = Dial.create();
-        DialStatus dialToZero = execute(dial, "L50");
-        assertThat(dialToZero.position()).isEqualTo(0);
-        assertThat(DialCalculator.of(dialToZero).countCrossingZero()).isEqualTo(1);
+    public void should_handle_boundary_rotations() {
 
-        DialStatus dialWrapToZero = execute(dial, "L150");
-        assertThat(dialWrapToZero.position()).isEqualTo(0);
-        assertThat(DialCalculator.of(dialWrapToZero).countCrossingZero()).isEqualTo(2);
+        // Given a dial
+
+        Dial dial = Dial.create();
+
+        // When rotating exactly to zero
+        DialStatus zero1 = execute(dial, "L50");
+        DialStatus zero2 = execute(dial, "L150");
+
+        // Then position should wrap correctly
+        assertThat(zero1.position()).isEqualTo(0);
+        assertThat(zero2.position()).isEqualTo(0);
+
+        // And crossings should be counted correctly
+        assertThat(DialCalculator.of(zero1).countCrossingZero()).isEqualTo(1);
+        assertThat(DialCalculator.of(zero2).countCrossingZero()).isEqualTo(2);
     }
 
     @Test
-    public void given_exact_full_turnaround_should_return_to_50_and_cross_zero_correctly() {
+    public void should_return_to_50_and_count_crossings_on_full_rotation() {
+
+        // Given a dial
+
         Dial dial = Dial.create();
-        DialStatus dialFullRight = execute(dial, "R100");
-        assertThat(dialFullRight.position()).isEqualTo(50);
-        assertThat(DialCalculator.of(dialFullRight).countCrossingZero()).isEqualTo(1);
 
-        DialStatus dialFullLeft = execute(dial, "L100");
-        assertThat(dialFullLeft.position()).isEqualTo(50);
-        assertThat(DialCalculator.of(dialFullLeft).countCrossingZero()).isEqualTo(1);
+        // When rotating full cycles
+        DialStatus right = execute(dial, "R100");
+        DialStatus left = execute(dial, "L100");
+
+        // Then position returns to initial
+        assertThat(right.position()).isEqualTo(50);
+        assertThat(left.position()).isEqualTo(50);
+
+        // And crossings are still counted
+        assertThat(DialCalculator.of(right).countCrossingZero()).isEqualTo(1);
+        assertThat(DialCalculator.of(left).countCrossingZero()).isEqualTo(1);
     }
-
 }

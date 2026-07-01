@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MovieTheaterTest {
+
     private static final String example = """
             7,1
             11,1
@@ -24,13 +25,23 @@ public class MovieTheaterTest {
             """;
 
     @Test
-    public void solve_example() {
+    public void should_solve_movie_theater_example() {
+
+        // Given a textual representation of points
+        String input = example;
+
+        // And a deserializer that converts text into tiles
         TxtPointDeserializer deserializer = new TxtPointDeserializer();
-        List<Tile> points = Arrays.stream(example.split("\n"))
+
+        // And a list of tiles parsed from input
+        List<Tile> points = Arrays.stream(input.split("\n"))
                 .map(deserializer::deserialize)
                 .collect(Collectors.toList());
 
+        // When computing the maximum rectangle area
         long result = MovieTheater.from(points).maxRectangleArea();
+
+        // Then the result should match expected value
         assertThat(result).isEqualTo(24L);
     }
 }
